@@ -683,6 +683,43 @@ final class HookHandlerTests: XCTestCase {
 
     // MARK: - PermissionRequest transitions to waiting_permission
 
+    func testCodexAutomaticPermissionDoesNotPostNotification() throws {
+        let transcriptPath = sessionsDir + "/rollout.jsonl"
+        try ("""
+        {"type":"session_meta","payload":{"id":"codex-review-session"}}
+        {"type":"turn_context","payload":{"turn_id":"review-turn","approvals_reviewer":"auto_review"}}
+        """ + "\n").write(toFile: transcriptPath, atomically: true, encoding: .utf8)
+        try handleHook("""
+        {"session_id":"codex-review-session","cwd":"/tmp/project","hook_event_name":"PermissionRequest",
+         "harness_name":"codex","turn_id":"review-turn","transcript_path":\(try jsonString(transcriptPath))}
+        """, hookName: "PermissionRequest")
+
+        let session = try loadSession("codex-codex-review-session.json")
+        XCTAssertEqual(session.status, .waitingPermission)
+        XCTAssertFalse(session.shouldPostAttentionNotification)
+    }
+
+    func testCodexPermissionReviewerIsReplacedAndCleared() throws {
+        let payload = """
+        {"session_id":"review-lifecycle","cwd":"/tmp/project","hook_event_name":"PermissionRequest","harness_name":"codex"}
+        """
+        var deps = makeDeps()
+        for reviewer in [.autoReview, .user, nil] as [CodexPermissionReviewer?] {
+            deps.codexPermissionReviewer = { _ in reviewer }
+            try handleHook(payload, hookName: "PermissionRequest", deps: deps)
+            let session = try loadSession("codex-review-lifecycle.json")
+            XCTAssertEqual(session.codexPermissionReviewer, reviewer)
+            XCTAssertEqual(session.shouldPostAttentionNotification, reviewer != .autoReview)
+        }
+        for event in ["PostToolUse", "Stop", "UserPromptSubmit"] {
+            deps.codexPermissionReviewer = { _ in .autoReview }
+            try handleHook(payload, hookName: "PermissionRequest", deps: deps)
+            XCTAssertEqual(try loadSession("codex-review-lifecycle.json").codexPermissionReviewer, .autoReview)
+            try handleHook(payload, hookName: event, deps: deps)
+            XCTAssertNil(try loadSession("codex-review-lifecycle.json").codexPermissionReviewer)
+        }
+    }
+
     func testPermissionRequestSetsWaitingPermission() throws {
         try handleFixture("SessionStart")
         try handleFixture("PermissionRequest")

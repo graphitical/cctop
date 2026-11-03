@@ -63,6 +63,7 @@ struct HookDependencies {
     var currentBranch: (String) -> String
     var process: any ProcessProbing
     var names: any SessionNameResolving
+    var codexPermissionReviewer: (HookInput) -> CodexPermissionReviewer? = CodexPermissionReviewerLookup.reviewer(for:)
     var logger: HookLogger
 
     /// Computed (not stored) so each hook invocation re-reads the environment,

@@ -11,6 +11,7 @@ extension SessionData {
 
     var shouldPostAttentionNotification: Bool {
         guard status.needsAttention else { return false }
+        if isCodex, status == .waitingPermission, codexPermissionReviewer == .autoReview { return false }
         guard usesCodexPromptFallbackPolicy, status == .waitingInput else { return true }
         guard Self.cleanOptionalNotificationBodyText(notificationMessage) == nil else { return true }
         guard let lastPrompt else { return true }

@@ -6,6 +6,7 @@ struct HookInput: Codable {
     private static let codexSuggestionPromptFragmentOffset = 12
 
     let sessionId: String
+    let turnId: String?
     let cwd: String
     let transcriptPath: String?
     private let transcriptPathFieldPresent: Bool
@@ -31,6 +32,7 @@ struct HookInput: Codable {
 
     enum CodingKeys: String, CodingKey {
         case sessionId = "session_id"
+        case turnId = "turn_id"
         case cwd
         case transcriptPath = "transcript_path"
         case permissionMode = "permission_mode"
@@ -52,6 +54,7 @@ struct HookInput: Codable {
     init(from decoder: Decoder) throws {
         let container = try decoder.container(keyedBy: CodingKeys.self)
         sessionId = try container.decode(String.self, forKey: .sessionId)
+        turnId = try? container.decodeIfPresent(String.self, forKey: .turnId)
         cwd = try container.decode(String.self, forKey: .cwd)
         transcriptPathFieldPresent = container.contains(.transcriptPath)
         transcriptPath = try container.decodeIfPresent(String.self, forKey: .transcriptPath)

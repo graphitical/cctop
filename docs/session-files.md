@@ -4,6 +4,19 @@ cctop stores live session state as JSON files in `~/.cctop/sessions/`. The menub
 
 Session files are intentionally local and inspectable. Missing optional fields must be treated as their default values so older files continue to load.
 
+## Codex permission notifications
+
+The optional `codex_permission_reviewer` field records `user` or `auto_review` for the permission request currently represented by `waiting_permission`.
+It is absent when the reviewer cannot be confirmed, and is cleared when the session leaves that status.
+Only a Codex permission request with confirmed automatic review suppresses a macOS notification; the visible waiting status is unchanged.
+Other attention notifications retain their existing behavior.
+
+The hook reads this value from the latest `turn_context` in the supplied transcript, requiring the transcript session ID and turn ID to match the hook request.
+It recognizes `guardian_subagent` as Codex's legacy name for `auto_review`.
+The lookup reads in chunks, scanning at most 4 MiB backward, before acquiring the session lock.
+Missing, partial, malformed, changing, unsupported, or out-of-range evidence leaves permission notifications enabled.
+Codex's transcript format is not a stable API, so the hook never substitutes global configuration or an earlier turn's setting.
+
 ## Identity
 
 ### `cctop_session_id`

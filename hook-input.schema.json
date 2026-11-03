@@ -32,6 +32,7 @@
       "type": ["string", "null"],
       "description": "Transcript path when available. Explicit null is distinct from omission."
     },
+    "turn_id":          { "type": ["string", "null"], "description": "Active Codex turn ID when available" },
     "permission_mode":  { "type": "string" },
     "prompt":           { "type": "string" },
     "tool_name":        { "type": "string" },

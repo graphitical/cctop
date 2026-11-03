@@ -7,6 +7,9 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		64F792CC2DCB4801AFFE7BA7 /* CodexPermissionReviewerLookup.swift in Sources */ = {isa = PBXBuildFile; fileRef = BD7461F318054EFF856CB7C0 /* CodexPermissionReviewerLookup.swift */; };
+		2337BC35178D4B6BB9387DDE /* CodexPermissionReviewerLookup.swift in Sources */ = {isa = PBXBuildFile; fileRef = BD7461F318054EFF856CB7C0 /* CodexPermissionReviewerLookup.swift */; };
+		A0F5BD6011374EB59A0F8A8D /* CodexPermissionReviewerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 843467937ACB4ACCB484BBFE /* CodexPermissionReviewerTests.swift */; };
 		F3E2942A590F45E88162D217 /* AppDelegate+URLCommands.swift in Sources */ = {isa = PBXBuildFile; fileRef = D6674CA488EE4C65B28AE4B3 /* AppDelegate+URLCommands.swift */; };
 		F7FD2797EBCC4E29B60CAA8E /* AppDelegate+PanelEvents.swift in Sources */ = {isa = PBXBuildFile; fileRef = C6FC4F60BBCB4F0486A3A3CB /* AppDelegate+PanelEvents.swift */; };
 		E635A5CC52AD4500BC598EEF /* AppDelegate+PanelGeometry.swift in Sources */ = {isa = PBXBuildFile; fileRef = 32C0340D28BC497986926D02 /* AppDelegate+PanelGeometry.swift */; };
@@ -201,6 +204,8 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		BD7461F318054EFF856CB7C0 /* CodexPermissionReviewerLookup.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CodexPermissionReviewerLookup.swift; sourceTree = "<group>"; };
+		843467937ACB4ACCB484BBFE /* CodexPermissionReviewerTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CodexPermissionReviewerTests.swift; sourceTree = "<group>"; };
 		D6674CA488EE4C65B28AE4B3 /* AppDelegate+URLCommands.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "AppDelegate+URLCommands.swift"; sourceTree = "<group>"; };
 		C6FC4F60BBCB4F0486A3A3CB /* AppDelegate+PanelEvents.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "AppDelegate+PanelEvents.swift"; sourceTree = "<group>"; };
 		32C0340D28BC497986926D02 /* AppDelegate+PanelGeometry.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "AppDelegate+PanelGeometry.swift"; sourceTree = "<group>"; };
@@ -556,6 +561,7 @@
 		P1000000F000000000000001 /* Hook */ = {
 			isa = PBXGroup;
 			children = (
+				BD7461F318054EFF856CB7C0 /* CodexPermissionReviewerLookup.swift */,
 				P10000020000000000000001 /* HookMain.swift */,
 				P10000040000000000000001 /* HookInput.swift */,
 				P10000060000000000000001 /* HookHandler.swift */,
@@ -571,6 +577,7 @@
 		T10000080000000000000001 /* CctopMenubarTests */ = {
 			isa = PBXGroup;
 			children = (
+				843467937ACB4ACCB484BBFE /* CodexPermissionReviewerTests.swift */,
 				T10000020000000000000001 /* SessionTests.swift */,
 				SFF000020000000000000001 /* SessionFileFormatTests.swift */,
 				STS000020000000000000001 /* SessionTestSupport.swift */,
@@ -802,6 +809,7 @@
 				N10000010000000000000001 /* SessionStatus+UI.swift in Sources */,
 				N10000030000000000000001 /* HookEvent.swift in Sources */,
 				FX0000030000000000000001 /* HookInput.swift in Sources */,
+				64F792CC2DCB4801AFFE7BA7 /* CodexPermissionReviewerLookup.swift in Sources */,
 				HH0000030000000000000001 /* HookHandler.swift in Sources */,
 				HD0000010000000000000001 /* HookDependencies.swift in Sources */,
 				HH0000050000000000000001 /* HookLogger.swift in Sources */,
@@ -859,6 +867,7 @@
 			files = (
 				P10000010000000000000001 /* HookMain.swift in Sources */,
 				P10000030000000000000001 /* HookInput.swift in Sources */,
+				2337BC35178D4B6BB9387DDE /* CodexPermissionReviewerLookup.swift in Sources */,
 				P10000050000000000000001 /* HookHandler.swift in Sources */,
 				CSI000020000000000000001 /* CctopSessionIdentityStore.swift in Sources */,
 				HD0000020000000000000001 /* HookDependencies.swift in Sources */,
@@ -897,6 +906,7 @@
 				T10000070000000000000002 /* AppSettingsTests.swift in Sources */,
 				HT0000010000000000000001 /* HookEventTests.swift in Sources */,
 				FX0000010000000000000001 /* HookInputTests.swift in Sources */,
+				A0F5BD6011374EB59A0F8A8D /* CodexPermissionReviewerTests.swift in Sources */,
 				CPT000010000000000000001 /* CodexPluginInstallerTests.swift in Sources */,
 				CIMT00010000000000000001 /* CodexIntegrationManagerTests.swift in Sources */,
 				CPTOML010000000000000001 /* CodexPluginTomlTests.swift in Sources */,

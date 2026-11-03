@@ -118,6 +118,7 @@ struct SessionData: Codable, Identifiable, Equatable {
     var lastTool: String?
     var lastToolDetail: String?
     var notificationMessage: String?
+    var codexPermissionReviewer: CodexPermissionReviewer?
     var sessionName: String?
     var desktopProjectName: String?
     var workspaceFile: String?
@@ -189,6 +190,7 @@ struct SessionData: Codable, Identifiable, Equatable {
         case lastTool = "last_tool"
         case lastToolDetail = "last_tool_detail"
         case notificationMessage = "notification_message"
+        case codexPermissionReviewer = "codex_permission_reviewer"
         case sessionName = "session_name"
         case desktopProjectName = "desktop_project_name"
         case workspaceFile = "workspace_file"
@@ -222,6 +224,7 @@ struct SessionData: Codable, Identifiable, Equatable {
         lastTool = try container.decodeIfPresent(String.self, forKey: .lastTool)
         lastToolDetail = try container.decodeIfPresent(String.self, forKey: .lastToolDetail)
         notificationMessage = try container.decodeIfPresent(String.self, forKey: .notificationMessage)
+        codexPermissionReviewer = try? container.decodeIfPresent(CodexPermissionReviewer.self, forKey: .codexPermissionReviewer)
         sessionName = try container.decodeIfPresent(String.self, forKey: .sessionName)
         desktopProjectName = try container.decodeIfPresent(String.self, forKey: .desktopProjectName)
         workspaceFile = try container.decodeIfPresent(String.self, forKey: .workspaceFile)
@@ -253,6 +256,7 @@ struct SessionData: Codable, Identifiable, Equatable {
         lastTool: String?,
         lastToolDetail: String?,
         notificationMessage: String?,
+        codexPermissionReviewer: CodexPermissionReviewer? = nil,
         sessionName: String? = nil,
         desktopProjectName: String? = nil,
         workspaceFile: String? = nil,
@@ -281,6 +285,7 @@ struct SessionData: Codable, Identifiable, Equatable {
         self.lastTool = lastTool
         self.lastToolDetail = lastToolDetail
         self.notificationMessage = notificationMessage
+        self.codexPermissionReviewer = codexPermissionReviewer
         self.sessionName = sessionName
         self.desktopProjectName = desktopProjectName
         self.workspaceFile = workspaceFile

@@ -27,6 +27,8 @@ enum HookHandler {
             return
         }
 
+        let permissionReviewer = source == SessionData.codexSource && event == .permissionRequest
+            ? deps.codexPermissionReviewer(input) : nil
         let branch = deps.currentBranch(input.cwd)
         let terminal = captureTerminalInfo(env: deps.environment(), process: deps.process)
         let startTime = deps.process.startTime(pid: pid)
@@ -67,6 +69,11 @@ enum HookHandler {
             )
 
             let (oldStatus, newStatus) = applyTransition(&data, event: event, input: input, branch: branch, terminal: terminal)
+            if event == .permissionRequest {
+                data.codexPermissionReviewer = permissionReviewer
+            } else if data.status != .waitingPermission {
+                data.codexPermissionReviewer = nil
+            }
             applySessionName(&data, event: event, input: input, names: deps.names)
             if event != .sessionStart, isNewSessionFile, source == SessionData.codexSource {
                 data.workspaceFile = SessionData.findWorkspaceFile(in: input.cwd)
