@@ -84,7 +84,7 @@ Choose runtime checks that exercise the affected behavior.
 For a local restart, install the worktree's hook before relaunching the app and verify both identities afterward.
 
 - For app, hook, and integration source changes, use `make all`.
-- For documentation-only changes, run focused documentation verification. Do not run app or test-host work without a relevant risk.
+- For documentation-only changes, run focused documentation verification; the required end-of-task rebuild and restart below still apply.
 - For hook-contract changes, run `make contract`. The schema, fixtures, validators, and sources own hook-event inventories.
 - If feasible, add a failing regression test before you correct a bug.
 - If a test replaces a persisted input, isolate every writable companion store that can react to that input.
@@ -92,15 +92,18 @@ For a local restart, install the worktree's hook before relaunching the app and 
 - A test must not prune, migrate, or rewrite real developer state.
 - For an affected public UI image, run `make snapshots` and inspect the output.
 
-Before reporting runtime readiness:
+Before marking any task complete, including documentation tasks:
 
-1. Build and restart from the active driver's exact worktree.
-2. Install that worktree's `cctop-hook`.
+1. Read `.local/README.md` and `.local/build-and-install.command` in the main repository checkout to confirm the intended source worktree.
+2. Run that `.local/build-and-install.command` helper to rebuild, reinstall, and restart cctop, passing the intended source worktree as its first argument when needed.
+   The helper handles stopping the running app.
 3. Verify the running app path.
-4. Verify the installed hook version and binary hash against the worktree build.
+4. Verify the installed hook version and binary hash against the source worktree's bundled build.
 5. Report the app path, hook version, and identity evidence.
 
-If the work starts or stops the development app, leave the verified debug app running. Stop it only after a developer request or blocked relaunch.
+Leave the verified app running when the task is finished.
+If the rebuild or restart is blocked, report the blocker instead of claiming the task is complete.
+Stop the app only after a developer request or blocked relaunch.
 
 ## Architecture and Agent Integration Map
 
