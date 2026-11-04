@@ -7,6 +7,9 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		D27A920CE5204C9C8E7D8E01 /* CodexRuntimeStatusReader.swift in Sources */ = {isa = PBXBuildFile; fileRef = D27A920CE5204C9C8E7D8E11 /* CodexRuntimeStatusReader.swift */; };
+		D27A920CE5204C9C8E7D8E02 /* CodexRuntimeSocket.swift in Sources */ = {isa = PBXBuildFile; fileRef = D27A920CE5204C9C8E7D8E12 /* CodexRuntimeSocket.swift */; };
+		D27A920CE5204C9C8E7D8E03 /* CodexRuntimeStatusReaderTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D27A920CE5204C9C8E7D8E13 /* CodexRuntimeStatusReaderTests.swift */; };
 		64F792CC2DCB4801AFFE7BA7 /* CodexPermissionReviewerLookup.swift in Sources */ = {isa = PBXBuildFile; fileRef = BD7461F318054EFF856CB7C0 /* CodexPermissionReviewerLookup.swift */; };
 		2337BC35178D4B6BB9387DDE /* CodexPermissionReviewerLookup.swift in Sources */ = {isa = PBXBuildFile; fileRef = BD7461F318054EFF856CB7C0 /* CodexPermissionReviewerLookup.swift */; };
 		A0F5BD6011374EB59A0F8A8D /* CodexPermissionReviewerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 843467937ACB4ACCB484BBFE /* CodexPermissionReviewerTests.swift */; };
@@ -204,6 +207,9 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		D27A920CE5204C9C8E7D8E11 /* CodexRuntimeStatusReader.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CodexRuntimeStatusReader.swift; sourceTree = "<group>"; };
+		D27A920CE5204C9C8E7D8E12 /* CodexRuntimeSocket.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CodexRuntimeSocket.swift; sourceTree = "<group>"; };
+		D27A920CE5204C9C8E7D8E13 /* CodexRuntimeStatusReaderTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CodexRuntimeStatusReaderTests.swift; sourceTree = "<group>"; };
 		BD7461F318054EFF856CB7C0 /* CodexPermissionReviewerLookup.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CodexPermissionReviewerLookup.swift; sourceTree = "<group>"; };
 		843467937ACB4ACCB484BBFE /* CodexPermissionReviewerTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CodexPermissionReviewerTests.swift; sourceTree = "<group>"; };
 		D6674CA488EE4C65B28AE4B3 /* AppDelegate+URLCommands.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "AppDelegate+URLCommands.swift"; sourceTree = "<group>"; };
@@ -406,6 +412,8 @@
 		A1000000A000000000000001 /* Services */ = {
 			isa = PBXGroup;
 			children = (
+				D27A920CE5204C9C8E7D8E11 /* CodexRuntimeStatusReader.swift */,
+				D27A920CE5204C9C8E7D8E12 /* CodexRuntimeSocket.swift */,
 				C10000020000000000000001 /* SessionManager.swift */,
 				SLP000020000000000000001 /* SessionLifecyclePolicy.swift */,
 				SIP000020000000000000001 /* SessionIdentityPolicy.swift */,
@@ -577,6 +585,7 @@
 		T10000080000000000000001 /* CctopMenubarTests */ = {
 			isa = PBXGroup;
 			children = (
+				D27A920CE5204C9C8E7D8E13 /* CodexRuntimeStatusReaderTests.swift */,
 				843467937ACB4ACCB484BBFE /* CodexPermissionReviewerTests.swift */,
 				T10000020000000000000001 /* SessionTests.swift */,
 				SFF000020000000000000001 /* SessionFileFormatTests.swift */,
@@ -753,6 +762,8 @@
 				SNC000010000000000000001 /* SessionData+NotificationContent.swift in Sources */,
 				B10000030000000000000001 /* SessionStatus.swift in Sources */,
 				C10000010000000000000001 /* SessionManager.swift in Sources */,
+				D27A920CE5204C9C8E7D8E01 /* CodexRuntimeStatusReader.swift in Sources */,
+				D27A920CE5204C9C8E7D8E02 /* CodexRuntimeSocket.swift in Sources */,
 				SLP000010000000000000001 /* SessionLifecyclePolicy.swift in Sources */,
 				SIP000010000000000000001 /* SessionIdentityPolicy.swift in Sources */,
 				LGS000010000000000000001 /* UserSession.swift in Sources */,
@@ -889,6 +900,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				D27A920CE5204C9C8E7D8E03 /* CodexRuntimeStatusReaderTests.swift in Sources */,
 				T10000010000000000000001 /* SessionTests.swift in Sources */,
 				SFF000010000000000000001 /* SessionFileFormatTests.swift in Sources */,
 				STS000010000000000000001 /* SessionTestSupport.swift in Sources */,
