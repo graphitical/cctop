@@ -7,6 +7,9 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		D27A920CE5204C9C8E7D8E21 /* CodexLocalSocket.swift in Sources */ = {isa = PBXBuildFile; fileRef = D27A920CE5204C9C8E7D8E31 /* CodexLocalSocket.swift */; };
+		D27A920CE5204C9C8E7D8E22 /* CodexDesktopStatusReader.swift in Sources */ = {isa = PBXBuildFile; fileRef = D27A920CE5204C9C8E7D8E32 /* CodexDesktopStatusReader.swift */; };
+		D27A920CE5204C9C8E7D8E23 /* CodexDesktopStatusReaderTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D27A920CE5204C9C8E7D8E33 /* CodexDesktopStatusReaderTests.swift */; };
 		D27A920CE5204C9C8E7D8E01 /* CodexRuntimeStatusReader.swift in Sources */ = {isa = PBXBuildFile; fileRef = D27A920CE5204C9C8E7D8E11 /* CodexRuntimeStatusReader.swift */; };
 		D27A920CE5204C9C8E7D8E02 /* CodexRuntimeSocket.swift in Sources */ = {isa = PBXBuildFile; fileRef = D27A920CE5204C9C8E7D8E12 /* CodexRuntimeSocket.swift */; };
 		D27A920CE5204C9C8E7D8E03 /* CodexRuntimeStatusReaderTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D27A920CE5204C9C8E7D8E13 /* CodexRuntimeStatusReaderTests.swift */; };
@@ -207,6 +210,9 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		D27A920CE5204C9C8E7D8E31 /* CodexLocalSocket.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CodexLocalSocket.swift; sourceTree = "<group>"; };
+		D27A920CE5204C9C8E7D8E32 /* CodexDesktopStatusReader.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CodexDesktopStatusReader.swift; sourceTree = "<group>"; };
+		D27A920CE5204C9C8E7D8E33 /* CodexDesktopStatusReaderTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CodexDesktopStatusReaderTests.swift; sourceTree = "<group>"; };
 		D27A920CE5204C9C8E7D8E11 /* CodexRuntimeStatusReader.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CodexRuntimeStatusReader.swift; sourceTree = "<group>"; };
 		D27A920CE5204C9C8E7D8E12 /* CodexRuntimeSocket.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CodexRuntimeSocket.swift; sourceTree = "<group>"; };
 		D27A920CE5204C9C8E7D8E13 /* CodexRuntimeStatusReaderTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CodexRuntimeStatusReaderTests.swift; sourceTree = "<group>"; };
@@ -413,6 +419,8 @@
 			isa = PBXGroup;
 			children = (
 				D27A920CE5204C9C8E7D8E11 /* CodexRuntimeStatusReader.swift */,
+				D27A920CE5204C9C8E7D8E31 /* CodexLocalSocket.swift */,
+				D27A920CE5204C9C8E7D8E32 /* CodexDesktopStatusReader.swift */,
 				D27A920CE5204C9C8E7D8E12 /* CodexRuntimeSocket.swift */,
 				C10000020000000000000001 /* SessionManager.swift */,
 				SLP000020000000000000001 /* SessionLifecyclePolicy.swift */,
@@ -586,6 +594,7 @@
 			isa = PBXGroup;
 			children = (
 				D27A920CE5204C9C8E7D8E13 /* CodexRuntimeStatusReaderTests.swift */,
+				D27A920CE5204C9C8E7D8E33 /* CodexDesktopStatusReaderTests.swift */,
 				843467937ACB4ACCB484BBFE /* CodexPermissionReviewerTests.swift */,
 				T10000020000000000000001 /* SessionTests.swift */,
 				SFF000020000000000000001 /* SessionFileFormatTests.swift */,
@@ -763,6 +772,8 @@
 				B10000030000000000000001 /* SessionStatus.swift in Sources */,
 				C10000010000000000000001 /* SessionManager.swift in Sources */,
 				D27A920CE5204C9C8E7D8E01 /* CodexRuntimeStatusReader.swift in Sources */,
+				D27A920CE5204C9C8E7D8E21 /* CodexLocalSocket.swift in Sources */,
+				D27A920CE5204C9C8E7D8E22 /* CodexDesktopStatusReader.swift in Sources */,
 				D27A920CE5204C9C8E7D8E02 /* CodexRuntimeSocket.swift in Sources */,
 				SLP000010000000000000001 /* SessionLifecyclePolicy.swift in Sources */,
 				SIP000010000000000000001 /* SessionIdentityPolicy.swift in Sources */,
@@ -901,6 +912,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				D27A920CE5204C9C8E7D8E03 /* CodexRuntimeStatusReaderTests.swift in Sources */,
+				D27A920CE5204C9C8E7D8E23 /* CodexDesktopStatusReaderTests.swift in Sources */,
 				T10000010000000000000001 /* SessionTests.swift in Sources */,
 				SFF000010000000000000001 /* SessionFileFormatTests.swift in Sources */,
 				STS000010000000000000001 /* SessionTestSupport.swift in Sources */,
