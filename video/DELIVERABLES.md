@@ -1,8 +1,8 @@
 # Video deliverables
 
-Rendered mp4s are **gitignored** (they live in each project's `.video-build/`, regenerable with
-`./build.sh <project>`). The *source* is what's versioned. Approved cctop video assets are published
-to the non-latest `media-assets` GitHub Release through the repo-local `$video-assets` workflow.
+Rendered mp4s are **gitignored** (they live in each project's `.video-build/`, regenerable with `./build.sh <project>`).
+The *source* is what's versioned.
+Approved cctop video assets are published to the non-latest `media-assets` GitHub Release using the helpers below.
 
 | project | published assets | source commit | notes |
 |---------|------------------|---------------|-------|
@@ -33,7 +33,7 @@ The build log prints the resolved boundaries (`cut 'clip': t=[...] -> frames ...
 sanity-check them after any substantial beat or copy change, e.g. by sampling the
 boundary frames with `render.mjs --times`.
 
-Upload with the `$video-assets` one-off helper, keeping the stable asset names:
+Upload with the one-off helper, keeping the stable asset names:
 
 ```bash
 .agents/skills/video-assets/scripts/upload-video-asset.sh \
@@ -48,7 +48,8 @@ and republished, re-cut the clip from the same checkout and re-upload it too.
 ## Publishing a cut
 
 1. `./build.sh <project>` and get explicit approval on the rendered preview.
-2. Use `$video-assets`, not ad hoc `gh release create` commands. For the launch cut, dry-run first:
+2. Use the publishing helper to preserve the release tag and stable asset names.
+   For the launch cut, dry-run first:
 
    ```bash
    .agents/skills/video-assets/scripts/publish-launch-assets.sh --clobber --dry-run

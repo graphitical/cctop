@@ -1,8 +1,7 @@
 # cctop Video Framework
 
 A small, reproducible system for making cctop's videos — and the hard-won findings behind it.
-Pairs with the **video-storyboard skill** (the narrative half), the **video-assets skill**
-(release publishing), and the video-pipeline memory.
+The narrative process is documented below, and [DELIVERABLES.md](DELIVERABLES.md) covers release publishing.
 
 The split it's built around: **story → engine → theme → video**. You change one layer without
 touching the others. Recolour the app? Edit `theme.css`. New 15s "for teams" cut? Add a project
@@ -61,9 +60,9 @@ headlessly at 2× (supersampled), encodes, then runs `engine/check.sh` on the re
 
 ## Publish
 
-Publishing is intentionally separate from rendering. First render and get explicit approval on the
-preview. Then use the repo-local **video-assets skill** so the README preview and full videos stay in
-sync.
+Publishing is intentionally separate from rendering.
+First render and get explicit approval on the preview.
+Then use the publishing helper below so the README preview and full videos stay in sync.
 
 From the repo root, dry-run the standard launch asset set:
 
@@ -104,15 +103,15 @@ multiple palettes, copy `theme.css` to `themes/<name>.css` and point a video's `
 
 ## Recipe 2 — a new video for a different angle
 
-1. **Story first.** Run the video-storyboard skill (DESIGN mode) to get a positioning line, a
-   spine (Before-After-Bridge is the default for tight cuts), a beat sheet, and a shot list.
-   Don't free-associate scenes — the skill exists because that's where these videos live or die.
+1. **Story first.**
+   Establish a positioning line, a message spine, a beat sheet, and a shot list before designing scenes.
+   Before-After-Bridge is the default message structure for tight cuts.
 2. `cp -r projects/launch projects/<angle>`, then in `body.html` keep the `<link>`/`<script>` includes
    and the `whenReady(seek)` boot, and replace the **scene content and timeline**.
 3. Edit the `TL` object (scene start/end times) and the per-scene `draw*()` functions / DOM.
    Reuse `rev()`, `mix()`, easings (and `whenReady`) from `lib.js`. Put any new screenshots in `<repo>/docs/` and the project's asset list.
-4. `DUR=<seconds> ./build.sh <angle>`, then QA it (Recipe 3). If the user approves the cut for
-   publishing, use the video-assets publishing workflow above rather than uploading one-off files.
+4. `DUR=<seconds> ./build.sh <angle>`, then QA it (Recipe 3).
+   If the user approves the cut for publishing, use the publishing helper above to keep the asset set together.
 
 A video's structure (see `projects/launch/body.html`): a `TL` map of named scenes → `[start,end]`, a `seek(t)`
 that dispatches to small `draw*()` functions, each computing its elements from `t`. The launch cut's
@@ -126,9 +125,8 @@ a new angle rearranges/replaces beats.
 Stills hide motion problems, so QA off the **encoded** mp4, not the source:
 
 1. `ffmpeg -i projects/<p>/.video-build/<p>.mp4 -vf fps=5 /tmp/sweep/frame_%05d.png` (every 0.2s; `frame_N = (N-1)*0.2s`).
-2. Fan out parallel reviewers over **overlapping** time-windows (so each transition sits inside one
-   window), + a cold-viewer comprehension pass, + an audit using the video-storyboard skill; a
-   synthesizer merges into a deduped fix list. (This repo's sessions used the `Workflow` tool for it.)
+2. Review **overlapping** time-windows so each transition sits inside one window.
+   Check whether a first-time viewer can follow the story, then compare the render with the storyboard and combine the findings into one fix list.
 3. Apply fixes to the video HTML, re-render, repeat. A transient API overload can kill a whole
    workflow run — fall back to a hand pass over the same frames.
 
@@ -202,15 +200,13 @@ build time rather than duplicating. The **heavy, regenerable** parts — `frames
 mp4s — are `.gitignore`d.
 
 So **a separate repo isn't needed.** Keep finished binaries on GitHub Releases / object storage, not
-in git. For the launch cut, the canonical release bucket is `media-assets`, with stable asset names
-managed by `$video-assets`.
+in git.
+For the launch cut, the canonical release bucket is `media-assets`, with stable asset names documented in [DELIVERABLES.md](DELIVERABLES.md).
 
 ---
 
 ## See also
-- **the video-storyboard skill** — the narrative process: positioning → spine → beats → script →
-  storyboard → review, plus the failure-mode checklist.
-- **the video-assets skill** — the release asset process: generate the AVIF preview, upload the MP4s
-  and AVIF together, and keep README links stable.
+- For narrative work, establish positioning, message spine, beats, script, and storyboard before reviewing the render.
+- [DELIVERABLES.md](DELIVERABLES.md) documents the release asset process, including the AVIF preview, MP4 uploads, and stable README links.
 - **the video-pipeline memory** — the pipeline at a glance.
 - the v1 making-of is parked in the gitignored `.video-archive/` (it documents the superseded pipeline).
