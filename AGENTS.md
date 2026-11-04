@@ -51,6 +51,7 @@ Keep canonical repository guidance in this file. Pointer files, such as `CLAUDE.
 
 ## GitHub and PR Rules
 
+- Use squash merge when merging PR branches into `master`.
 - Never post PR replies, comments, issue comments, or reviews. Leave all GitHub text to the developer.
 - Independent review must verify that each eligible bot-authored thread is fixed, deliberately dismissed, or outdated.
 - Before reporting the PR ready, the active driver must resolve each verified thread. This requirement includes unknown bot authors.
