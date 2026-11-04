@@ -20,6 +20,7 @@ struct DisplayState: Codable {
         let cctopSessionId: String
         let name: String
         let status: String
+        let statusLabel: String?
         let color: String
 
         // swiftlint:disable:next nesting
@@ -27,6 +28,7 @@ struct DisplayState: Codable {
             case cctopSessionId = "cctop_session_id"
             case name
             case status
+            case statusLabel = "status_label"
             case color
         }
     }
@@ -132,6 +134,7 @@ final class DisplayStateWriter {
                     cctopSessionId: cctopSessionId,
                     name: data.displayName,
                     status: userSession.status.rawValue,
+                    statusLabel: data.statusLabel,
                     color: hexColor(for: userSession.status, theme: theme)
                 )
             }
@@ -158,7 +161,7 @@ final class DisplayStateWriter {
         let color: NSColor
         switch status {
         case .waitingPermission: color = theme.statusPermission.dark
-        case .waitingInput, .needsAttention: color = theme.statusAttention.dark
+        case .waitingAnswer, .waitingInput, .needsAttention: color = theme.statusAttention.dark
         case .working: color = theme.statusWorking.dark
         case .compacting: color = theme.agentBadge.dark
         case .idle: color = theme.statusIdle.dark

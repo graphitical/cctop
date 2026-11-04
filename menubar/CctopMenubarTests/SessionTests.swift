@@ -126,7 +126,7 @@ final class SessionTests: XCTestCase {
         )
 
         XCTAssertEqual(session.notificationContent.title, "[cctop] Handle notification permission flow")
-        XCTAssertEqual(session.notificationContent.subtitle, "Codex is waiting for input")
+        XCTAssertEqual(session.notificationContent.subtitle, "Codex is ready")
         XCTAssertEqual(
             session.notificationContent.body,
             "New comment. Keep the loop until there's a thumb up on pr description"

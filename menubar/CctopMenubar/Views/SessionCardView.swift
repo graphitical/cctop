@@ -156,8 +156,8 @@ struct SessionCardView: View {
                 statusDotLabel("Compacting", dotColor: Color.agentBadge)
             case .waitingPermission:
                 permissionStatusLabel
-            case .waitingInput, .needsAttention:
-                statusDotLabel("Waiting", dotColor: Color.statusAttention, textColor: Color.statusAttentionText)
+            case .waitingAnswer, .waitingInput, .needsAttention:
+                statusDotLabel(session.statusLabel, dotColor: Color.statusAttention, textColor: Color.statusAttentionText)
             }
         }
     }
@@ -229,7 +229,7 @@ struct SessionCardView: View {
         switch session.status {
         case .waitingPermission:
             return session.notificationMessage ?? "Permission needed"
-        case .waitingInput, .needsAttention:
+        case .waitingAnswer, .waitingInput, .needsAttention:
             return session.contextLine ?? "Waiting for input"
         default:
             return nil
@@ -255,7 +255,7 @@ struct SessionCardView: View {
         }
         parts += [
             session.displayName, "on branch", session.branch,
-            session.status.accessibilityDescription
+            session.statusAccessibilityDescription
         ]
         if session.subagentCount > 0 {
             parts.append(

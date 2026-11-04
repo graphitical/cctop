@@ -413,7 +413,9 @@ extension SessionData {
         case .waitingPermission:
             return notificationMessage ?? "Permission needed"
         case .waitingInput:
-            return notificationMessage ?? promptSnippet
+            return notificationMessage ?? promptSnippet ?? (isCodex ? "Ready for your next task" : nil)
+        case .waitingAnswer:
+            return "Waiting for your answer"
         case .needsAttention:
             return notificationMessage ?? promptSnippet ?? "Needs attention"
         case .working:

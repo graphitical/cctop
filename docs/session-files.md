@@ -17,6 +17,15 @@ The lookup reads in chunks, scanning at most 4 MiB backward, before acquiring th
 Missing, partial, malformed, changing, unsupported, or out-of-range evidence leaves permission notifications enabled.
 Codex's transcript format is not a stable API, so the hook never substitutes global configuration or an earlier turn's setting.
 
+## Codex question display status
+
+The app reads local Codex runtime metadata for tracked sessions in the shared daemon and Desktop IPC cache.
+An unanswered structured question displays as **Blocked** (`waiting_answer`); a finished turn displays as **Ready** (`waiting_input`).
+Ordinary chat questions are not inferred, and permission requests keep their separate status.
+These runtime observations adjust the display only, without rewriting hook session files.
+Missing or unsupported runtime metadata leaves the hook status in place.
+The app's Stream Deck projection includes an optional `status_label` so downstream displays can use the same wording without reconstructing Codex policy.
+
 ## Identity
 
 ### `cctop_session_id`

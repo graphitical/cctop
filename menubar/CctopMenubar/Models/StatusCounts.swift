@@ -35,7 +35,7 @@ struct StatusCounts: Equatable {
             case .idle: idleCount += 1
             case .working, .compacting: work += 1
             case .waitingPermission: perm += 1
-            case .waitingInput, .needsAttention: attn += 1
+            case .waitingAnswer, .waitingInput, .needsAttention: attn += 1
             }
         }
         self.permission = perm

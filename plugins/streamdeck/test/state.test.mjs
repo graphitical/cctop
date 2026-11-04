@@ -145,3 +145,14 @@ test("watches atomic replacement of the app projection without polling", async (
     watcher.close();
   }
 });
+
+
+test("keeps the app status label optional for older display publishers", () => {
+  const sessions = validState().sessions;
+  sessions[0].status = "waiting_answer";
+  sessions[0].status_label = "Blocked";
+  const state = parseDisplayState(JSON.stringify(validState({ sessions })));
+  assert.equal(state.sessions[0].statusLabel, "Blocked");
+  assert.equal(state.sessions[0].status, "waiting_answer");
+  assert.equal(state.sessions[1].statusLabel, undefined);
+});

@@ -4,7 +4,7 @@ extension SessionStatus {
     var color: Color {
         switch self {
         case .waitingPermission: return Color.statusPermission
-        case .waitingInput, .needsAttention: return Color.statusAttention
+        case .waitingAnswer, .waitingInput, .needsAttention: return Color.statusAttention
         case .working: return Color.statusGreen
         case .compacting:
             return Color(nsColor: NSColor(name: nil) { appearance in
@@ -20,6 +20,7 @@ extension SessionStatus {
     var label: String {
         switch self {
         case .waitingPermission: return "PERMISSION"
+        case .waitingAnswer: return "BLOCKED"
         case .waitingInput, .needsAttention: return "WAITING"
         case .working: return "WORKING"
         case .compacting: return "COMPACTING"
@@ -30,11 +31,22 @@ extension SessionStatus {
     var accessibilityDescription: String {
         switch self {
         case .waitingPermission: return "waiting for permission"
+        case .waitingAnswer: return "blocked, waiting for your answer"
         case .waitingInput: return "waiting for input"
         case .needsAttention: return "needs attention"
         case .working: return "working"
         case .compacting: return "compacting context"
         case .idle: return "idle"
         }
+    }
+}
+
+extension SessionData {
+    var statusLabel: String {
+        isCodex && status == .waitingInput ? "Ready" : status.label.capitalized
+    }
+
+    var statusAccessibilityDescription: String {
+        isCodex && status == .waitingInput ? "ready for your next task" : status.accessibilityDescription
     }
 }

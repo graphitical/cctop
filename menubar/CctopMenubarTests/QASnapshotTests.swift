@@ -50,6 +50,25 @@ final class QASnapshotTests: XCTestCase {
         try renderSnapshot(sessions: SessionData.qaAllAttention, name: "07-all-attention")
     }
 
+    func testCodexQuestionStatuses() throws {
+        let sessions = [
+            SessionData.mock(id: "question", project: "cctop", sessionName: "Choose a status label",
+                             status: .waitingAnswer, source: "codex"),
+            SessionData.mock(id: "ready", project: "api", sessionName: "Review the changes",
+                             status: .waitingInput, source: "codex"),
+            SessionData.mock(id: "permission", project: "website", sessionName: "Install dependencies",
+                             status: .waitingPermission, source: "codex"),
+            SessionData.mock(id: "working", project: "cctop", sessionName: "Run the focused tests",
+                             status: .working, source: "codex")
+        ]
+        for colorScheme in [ColorScheme.light, .dark] {
+            let view = PopupView(userSessions: userSessions(fromDataFixtures: sessions),
+                                 updater: DisabledUpdater(), pluginManager: inertPluginManager())
+            try renderPanelScreenshot(view: view, colorScheme: colorScheme, directoryName: "cctop-qa",
+                                      filename: "codex-question-status-\(colorScheme).png")
+        }
+    }
+
     func testAllIdle() throws {
         try renderSnapshot(sessions: SessionData.qaAllIdle, name: "08-all-idle")
     }

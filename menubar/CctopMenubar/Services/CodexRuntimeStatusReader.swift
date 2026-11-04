@@ -1,8 +1,8 @@
 import Foundation
 
 /// Runtime facts only. A missing entry is unknown, never evidence that a session is ready.
-struct CodexRuntimeStatus: Equatable {
-    enum State: String {
+struct CodexRuntimeStatus: Equatable, Sendable {
+    enum State: String, Sendable {
         case active, idle, notLoaded, systemError
     }
 

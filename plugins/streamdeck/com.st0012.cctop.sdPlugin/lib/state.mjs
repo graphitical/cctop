@@ -33,6 +33,8 @@ function parseEntry(entry) {
     cctopSessionId: entry.cctop_session_id,
     name: entry.name,
     status: entry.status,
+    ...(typeof entry.status_label === "string" && entry.status_label.trim()
+      ? { statusLabel: entry.status_label } : {}),
     color: entry.color,
   };
 }

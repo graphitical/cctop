@@ -1,6 +1,6 @@
 import Foundation
 
-struct CodexDesktopStatus: Equatable {
+struct CodexDesktopStatus: Equatable, Sendable {
     let runtime: CodexRuntimeStatus
     let hasPendingQuestion: Bool
 

@@ -82,6 +82,20 @@ final class DisplayStateWriterTests: XCTestCase {
         XCTAssertEqual(snapshot.sessions.map(\.cctopSessionId), [active.cctopSessionId ?? ""])
     }
 
+    func testProjectionCarriesAppLabelsForBlockedAndReadyCodexSessions() {
+        let sessions = [
+            SessionData.mock(id: "blocked", status: .waitingAnswer, source: "codex"),
+            SessionData.mock(id: "ready", status: .waitingInput, source: "codex")
+        ]
+        let snapshot = DisplayStateWriter.snapshot(
+            userSessions: userSessions(fromDataFixtures: sessions), theme: .claude,
+            appRunning: true, appIdentity: nil, now: Date()
+        )
+        XCTAssertEqual(snapshot.sessions.map(\.status), ["waiting_answer", "waiting_input"])
+        XCTAssertEqual(snapshot.sessions.map(\.statusLabel), ["Blocked", "Ready"])
+        XCTAssertEqual(snapshot.sessions.map(\.color), ["#C15F3C", "#C15F3C"])
+    }
+
     func testProjectionContainsOnlyAppOwnedDisplayFields() throws {
         let now = Date()
         let session = SessionData.mock(
@@ -111,7 +125,7 @@ final class DisplayStateWriterTests: XCTestCase {
         XCTAssertEqual(object["app_pid"] as? Int, 456)
         XCTAssertEqual(object["app_start_time"] as? Double, 1_234.5)
         let entry = try XCTUnwrap((object["sessions"] as? [[String: Any]])?.first)
-        XCTAssertEqual(Set(entry.keys), ["cctop_session_id", "name", "status", "color"])
+        XCTAssertEqual(Set(entry.keys), ["cctop_session_id", "name", "status", "status_label", "color"])
         XCTAssertEqual(entry["cctop_session_id"] as? String, session.cctopSessionId)
         XCTAssertTrue(CctopSessionID.isValid(entry["cctop_session_id"] as? String))
         XCTAssertEqual(entry["name"] as? String, "fix panel drift")

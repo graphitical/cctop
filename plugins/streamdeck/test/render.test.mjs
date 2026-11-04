@@ -62,3 +62,12 @@ test("renders session and unavailable keys as SVG data URLs", () => {
   assert.ok(keyImageFor(session(), 1).startsWith("data:image/svg+xml,"));
   assert.ok(keyImageFor(null, 2).startsWith("data:image/svg+xml,"));
 });
+
+
+test("uses the app label for Blocked and Ready while preserving legacy fallback", () => {
+  for (const [status, statusLabel] of [["waiting_answer", "Blocked"], ["waiting_input", "Ready"]]) {
+    const svg = renderSessionKey(session({ status, statusLabel }), 1);
+    assert.ok(svg.includes(`>${statusLabel}</text>`));
+  }
+  assert.ok(renderSessionKey(session({ status: "waiting_input" }), 1).includes(">waiting input</text>"));
+});

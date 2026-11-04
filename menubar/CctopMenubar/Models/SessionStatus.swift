@@ -5,6 +5,7 @@ enum SessionStatus: String, Codable {
     case working
     case compacting
     case waitingPermission = "waiting_permission"
+    case waitingAnswer = "waiting_answer"
     case waitingInput = "waiting_input"
     case needsAttention = "needs_attention"
 
@@ -15,7 +16,7 @@ enum SessionStatus: String, Codable {
 
     var needsAttention: Bool {
         switch self {
-        case .waitingPermission, .waitingInput, .needsAttention: return true
+        case .waitingPermission, .waitingAnswer, .waitingInput, .needsAttention: return true
         default: return false
         }
     }
@@ -23,7 +24,7 @@ enum SessionStatus: String, Codable {
     var sortOrder: Int {
         switch self {
         case .waitingPermission: return 0
-        case .waitingInput, .needsAttention: return 1
+        case .waitingAnswer, .waitingInput, .needsAttention: return 1
         case .working: return 2
         case .compacting: return 3
         case .idle: return 4

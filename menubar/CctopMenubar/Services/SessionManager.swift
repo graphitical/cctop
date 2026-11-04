@@ -33,6 +33,10 @@ class SessionManager: ObservableObject {
     var lastLoadLogSignature: SessionLoadLogSignature?
     var sessionFileCache: [String: SessionFileCacheEntry] = [:]
     var pendingIdentityMigrationPaths: Set<String> = []
+    let monitorsRuntimeStatus: Bool
+    var codexQuestionObservations: [String: CodexQuestionObservation] = [:]
+    var codexQuestionReadTask: Task<Void, Never>?
+    var codexQuestionReadAfter = Date.distantPast
     /// Lifecycle windows: `active` is the recent-activity connection fallback; `retention`
     /// is Codex's absolute inactivity cap and the dormant non-Codex desktop cleanup window.
     nonisolated static let lifecycleWindows = LifecycleWindows(active: 600, retention: 1_209_600)
@@ -48,6 +52,7 @@ class SessionManager: ObservableObject {
         self.historyManager = historyManager
         self.dataSources = dataSources
         self.sessionsDir = dataSources.sessionsDir
+        self.monitorsRuntimeStatus = startMonitoring
         loadSessions()
         guard startMonitoring else { return }
         startWatching()
@@ -115,6 +120,7 @@ class SessionManager: ObservableObject {
             winners: visibleCandidates,
             records: visibleRecords
         )
+        scheduleCodexQuestionRead(for: groupedUserSessions)
         let loadedUserSessions = groupedUserSessions.map {
             $0.replacingDisplayData(adjustDisplayStatus($0.displayRecord.data))
         }
@@ -338,6 +344,9 @@ class SessionManager: ObservableObject {
             return result
         }
         var result = adjustPermissionStatus(session)
+        if let observation = codexQuestionObservations[session.sessionId], observation.activity == session.lastActivity {
+            result = Self.applyingCodexQuestionStatus(observation.status, to: result)
+        }
         result = Self.adjustIdleTimeout(result, now: dataSources.now())
         return result
     }
@@ -421,6 +430,7 @@ class SessionManager: ObservableObject {
     }
 
     deinit {
+        codexQuestionReadTask?.cancel()
         source?.cancel()
         livenessTimer?.invalidate()
         gcTimer?.invalidate()

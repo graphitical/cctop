@@ -107,9 +107,11 @@ export function renderSessionKey(session, slot) {
   const fill = textColorFor(background);
   const name = typeof session.name === "string" && session.name.trim() ? session.name : `#${slot}`;
   const lines = wrapName(name);
-  const status = typeof session.status === "string" && session.status
-    ? session.status.replace(/[_-]+/g, " ")
-    : null;
+  const status = typeof session.statusLabel === "string" && session.statusLabel
+    ? session.statusLabel
+    : typeof session.status === "string" && session.status
+      ? session.status.replace(/[_-]+/g, " ")
+      : null;
   const centerY = status ? 66 : 72;
   const firstLineCenter = centerY - ((lines.length - 1) * NAME_LINE_HEIGHT) / 2;
 

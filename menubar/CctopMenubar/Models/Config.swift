@@ -135,7 +135,7 @@ enum Config {
         return nil
     }
 
-    private static func codexHome() -> String {
+    static func codexHome() -> String {
         let environment = ProcessInfo.processInfo.environment
         return environment["CODEX_HOME"].flatMap(nonEmpty).map { standardizedAbsolutePath($0) }
             ?? standardizedAbsolutePath("~/.codex")

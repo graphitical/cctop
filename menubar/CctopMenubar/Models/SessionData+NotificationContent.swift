@@ -66,8 +66,10 @@ extension SessionData {
         switch status {
         case .waitingPermission:
             return "\(sender) needs permission"
+        case .waitingAnswer:
+            return "\(sender) is waiting for your answer"
         case .waitingInput:
-            return "\(sender) is waiting for input"
+            return isCodex ? "\(sender) is ready" : "\(sender) is waiting for input"
         default:
             return "\(sender) needs attention"
         }
@@ -78,6 +80,8 @@ extension SessionData {
         switch status {
         case .waitingPermission:
             detail = Self.cleanOptionalNotificationBodyText(notificationMessage) ?? "Permission needed"
+        case .waitingAnswer:
+            detail = "Answer the question in \(notificationSenderName)"
         case .waitingInput:
             detail = Self.cleanOptionalNotificationBodyText(notificationMessage)
                 ?? Self.cleanOptionalPromptFallbackText(
