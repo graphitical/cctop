@@ -29,7 +29,9 @@ Keep canonical repository guidance in this file. Pointer files, such as `CLAUDE.
 
 ## Driver Workflow
 
-- Start each independent change from the latest fetched `origin/master` in an isolated worktree.
+- Before starting any new work, run `git pull --ff-only origin master` in the main repository checkout so it is up to date.
+- Start each independent change in an isolated worktree created from the updated `origin/master`.
+- Make all task edits in the worktree, keeping the main repository checkout clean.
 - For a stacked child, start from the exact approved parent head and target the parent branch.
 - Until GitHub retargets the child after the parent merges, keep the parent branch as the target.
 - For every PR-capable cctop task, the chief must use `$cctop-chief-workflow` to assign one visible Codex driver.
@@ -49,6 +51,7 @@ Keep canonical repository guidance in this file. Pointer files, such as `CLAUDE.
 
 ## GitHub and PR Rules
 
+- Use squash merge when merging PR branches into `master`.
 - Never post PR replies, comments, issue comments, or reviews. Leave all GitHub text to the developer.
 - Independent review must verify that each eligible bot-authored thread is fixed, deliberately dismissed, or outdated.
 - Before reporting the PR ready, the active driver must resolve each verified thread. This requirement includes unknown bot authors.
