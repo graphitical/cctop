@@ -42,17 +42,20 @@ final class NavigateControllerTests: XCTestCase {
 
     func testActivatePreservesCanonicalSessionOrder() {
         let now = Date()
-        let waiting = SessionData.mock(id: "1", project: "alpha", status: .waitingInput)
+        var waiting = SessionData.mock(id: "1", project: "alpha", status: .waitingInput)
+        waiting.lastActivity = now.addingTimeInterval(-30)
         var workingOld = SessionData.mock(id: "2", project: "beta", status: .working)
         workingOld.lastActivity = now.addingTimeInterval(-600)
         var workingNew = SessionData.mock(id: "3", project: "gamma", status: .working)
         workingNew.lastActivity = now
-        let idle = SessionData.mock(id: "4", project: "delta", status: .idle)
+        var idle = SessionData.mock(id: "4", project: "delta", status: .idle)
 
-        let userSessions = [waiting, workingOld, workingNew, idle].map {
-            userSession(identity: SessionIdentityPolicy.logicalIdentity(for: $0), display: $0, records: [$0])
-        }
+        idle.lastActivity = now.addingTimeInterval(-60)
+        let userSessions = SessionDisplayPolicy.reconcilingOrder(
+            in: userSessions(fromDataFixtures: [waiting, workingOld, workingNew, idle]), preserving: []
+        )
         sut.activate(userSessions: userSessions)
+        XCTAssertEqual(userSessions.map(\.displayRecord.data.id), ["3", "1", "4", "2"])
 
         XCTAssertEqual(
             sut.frozenSessionIdentities,

@@ -41,7 +41,7 @@ flowchart TD
     H -->|active| I["Group current records into UserSession<br/>using the winner's cctop ID or legacy fallback"]
     H -->|dormant| I
     I --> J["Choose displayRecord<br/>and apply the existing display-only status adjustment"]
-    J --> K["Reconcile UserSession order<br/>by LogicalIdentity and status group"]
+    J --> K["Reconcile UserSession order<br/>by latest activity, then prior LogicalIdentity order"]
     K --> N["Publish SessionManager.userSessions"]
     N --> P["At presentation boundaries, derive SessionData<br/>from each displayRecord.data"]
 ```

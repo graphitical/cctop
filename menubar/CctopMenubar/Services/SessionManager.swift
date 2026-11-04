@@ -120,8 +120,7 @@ class SessionManager: ObservableObject {
         }
         let newUserSessions = SessionDisplayPolicy.reconcilingOrder(
             in: loadedUserSessions,
-            preserving: oldUserSessions,
-            now: now
+            preserving: oldUserSessions
         )
         let displaySignature = SessionDisplayPolicy.signature(for: newUserSessions, now: now)
         updateSessionProjection(

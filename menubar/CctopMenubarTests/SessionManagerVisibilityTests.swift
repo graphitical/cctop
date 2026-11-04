@@ -1827,8 +1827,8 @@ final class SessionManagerVisibilityTests: XCTestCase {
     }
 
     @MainActor
-    func testSessionManagerPublishesOneGroupedActiveOrderThroughRealisticFileUpdates() throws {
-        let root = NSTemporaryDirectory() + "cctop-stable-active-order-\(UUID().uuidString)"
+    func testSessionManagerPublishesRecencyOrderThroughRealisticFileUpdates() throws {
+        let root = NSTemporaryDirectory() + "cctop-recency-order-\(UUID().uuidString)"
         let sessionsDir = (root as NSString).appendingPathComponent("sessions")
         let historyDir = (root as NSString).appendingPathComponent("history")
         let now = Date(timeIntervalSince1970: 1_900_000_000)
@@ -1855,7 +1855,7 @@ final class SessionManagerVisibilityTests: XCTestCase {
         )
         XCTAssertEqual(
             SessionDisplayPolicy.activeSessions(from: manager.userSessions, now: now).map(\.displayRecord.data.id),
-            ["101", "202"]
+            ["202", "101"]
         )
 
         var gamma = SessionData.mock(id: "gamma", status: .waitingInput, pid: 303, source: SessionData.opencodeSource)
@@ -1867,7 +1867,7 @@ final class SessionManagerVisibilityTests: XCTestCase {
         manager.loadSessions()
         XCTAssertEqual(
             SessionDisplayPolicy.activeSessions(from: manager.userSessions, now: now).map(\.displayRecord.data.id),
-            ["303", "404", "101", "202"]
+            ["202", "404", "303", "101"]
         )
 
         alpha.status = .waitingInput
@@ -1882,7 +1882,7 @@ final class SessionManagerVisibilityTests: XCTestCase {
         manager.loadSessions()
 
         let activeAfterUpdates = SessionDisplayPolicy.activeSessions(from: manager.userSessions, now: now)
-        XCTAssertEqual(activeAfterUpdates.map(\.displayRecord.data.id), ["303", "404", "101", "202"])
+        XCTAssertEqual(activeAfterUpdates.map(\.displayRecord.data.id), ["101", "404", "303", "202"])
         let snapshot = DisplayStateWriter.snapshot(
             userSessions: manager.userSessions,
             theme: .claude,
@@ -1902,7 +1902,7 @@ final class SessionManagerVisibilityTests: XCTestCase {
         manager.loadSessions()
         XCTAssertEqual(
             SessionDisplayPolicy.activeSessions(from: manager.userSessions, now: now).map(\.displayRecord.data.id),
-            ["303", "404", "202"]
+            ["404", "303", "202"]
         )
 
         beta.endedAt = now
@@ -1910,7 +1910,7 @@ final class SessionManagerVisibilityTests: XCTestCase {
         manager.loadSessions()
         XCTAssertEqual(
             SessionDisplayPolicy.activeSessions(from: manager.userSessions, now: now).map(\.displayRecord.data.id),
-            ["303", "404"]
+            ["404", "303"]
         )
     }
 

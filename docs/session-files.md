@@ -136,10 +136,9 @@ conversation. That record sets the group identity. Older related records remain
 attached as evidence, even when their identity data is stale.
 
 `SessionManager.userSessions` owns the canonical visible identity and row order.
-It preserves prior `UserSession` order by `LogicalIdentity` while applying the
-existing status-group rules. A presentation or direct-action leaf can read
-`UserSession.displayRecord.data`, but it must not use that value to assign
-identity, control order, or rebuild a `UserSession`.
+It orders sessions by `displayRecord.data.lastActivity`, newest first across all statuses.
+Equal timestamps preserve prior `UserSession` order by `LogicalIdentity`, followed by newly seen sessions in their supplied order.
+A presentation or direct-action leaf can read `UserSession.displayRecord.data`, but it must not use that value to assign identity, control order, or rebuild a `UserSession`.
 
 Every session-file change starts a fresh forward rebuild: decode `SessionData`,
 wrap it in `SessionRecord`, group records into `UserSession`, reconcile group
@@ -165,20 +164,17 @@ a privacy-safe stale-state diagnostic. It performs one canonical reload and one
 re-resolution, then fails closed if the target is still missing. It never falls
 back to a client conversation reference, PID, or display slot.
 
-`SessionManager` collapses visible records with the same logical identity into
-one `UserSession` before applying its existing status-group ordering. It
-reconciles current groups with the prior `UserSession` order by identity. The
-existing lifecycle preference chooses `displayRecord`; it does not choose row
-identity or order. Panel navigation, URL focus, notifications, hiding, and
-`DisplayStateWriter` consume the ordered groups. Presentation code derives
-`SessionData` only from `displayRecord.data`. `DisplayStateWriter` never sorts,
-deduplicates, or removes manager groups, so Stream Deck slots remain a one-to-one
-projection.
+`SessionManager` collapses visible records with the same logical identity into one `UserSession` before applying newest-first activity ordering.
+Prior identity order breaks ties between equal activity timestamps.
+The existing lifecycle preference chooses `displayRecord`; it does not choose row identity or order.
+Panel navigation, URL focus, notifications, hiding, and `DisplayStateWriter` consume the ordered groups.
+Presentation code derives `SessionData` only from `displayRecord.data`.
+`DisplayStateWriter` never sorts, deduplicates, or removes manager groups, so Stream Deck slots remain a one-to-one projection.
 
 A direct pointer or context-menu action focuses the exact current record
 rendered in that row. Keyboard selection instead retains logical identity and
 resolves it against current user sessions, so reloads, focus-target changes,
-and status-group movement cannot retarget selection by row index. Navigate-mode
+and recency changes cannot retarget selection by row index. Navigate-mode
 number slots freeze those identities at activation; a missing identity leaves its
 original number unusable rather than shifting a later conversation into that slot.
 
