@@ -343,6 +343,11 @@ class SessionManager: ObservableObject {
             result.status = .idle
             return result
         }
+        if session.isCodex, session.status == .waitingPermission, session.codexPermissionReviewer == .autoReview {
+            var result = session
+            result.status = .working
+            return result
+        }
         var result = adjustPermissionStatus(session)
         if let observation = codexQuestionObservations[session.sessionId], observation.activity == session.lastActivity {
             result = Self.applyingCodexQuestionStatus(observation.status, to: result)

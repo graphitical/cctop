@@ -96,6 +96,20 @@ final class DisplayStateWriterTests: XCTestCase {
         XCTAssertEqual(snapshot.sessions.map(\.color), ["#C15F3C", "#C15F3C"])
     }
 
+    func testProjectionCarriesReviewerAwarePermissionLabels() {
+        let sessions = ([nil, .autoReview, .user] as [CodexPermissionReviewer?]).enumerated().map { index, reviewer in
+            var session = SessionData.mock(id: "permission-\(index)", status: .waitingPermission, source: "codex")
+            session.codexPermissionReviewer = reviewer
+            return session
+        }
+        let snapshot = DisplayStateWriter.snapshot(
+            userSessions: userSessions(fromDataFixtures: sessions), theme: .claude,
+            appRunning: true, appIdentity: nil, now: Date()
+        )
+        XCTAssertEqual(snapshot.sessions.map(\.statusLabel), ["Waiting", "Waiting", "Permission"])
+        XCTAssertEqual(snapshot.sessions.map(\.status), Array(repeating: "waiting_permission", count: 3))
+    }
+
     func testProjectionContainsOnlyAppOwnedDisplayFields() throws {
         let now = Date()
         let session = SessionData.mock(

@@ -6,18 +6,24 @@ final class CodexPermissionReviewerTests: XCTestCase {
         "{\"type\":\"turn_context\",\"payload\":{\"turn_id\":\"\(turnID)\",\"approvals_reviewer\":\"\(reviewer)\"}}\n"
     }
 
-    private func transcript(_ body: String, sessionID: String = "session") throws -> URL {
+    private func transcript(_ body: String, sessionID: String = "session", parentSessionID: String? = nil) throws -> URL {
         let url = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString + ".jsonl")
-        try ("{\"type\":\"session_meta\",\"payload\":{\"id\":\"\(sessionID)\"}}\n" + body)
-            .write(to: url, atomically: true, encoding: .utf8)
+        var metadata: [String: Any] = ["id": sessionID]
+        if let parentSessionID {
+            metadata["source"] = ["subagent": ["thread_spawn": ["parent_thread_id": parentSessionID]]]
+        }
+        var data = try JSONSerialization.data(withJSONObject: ["type": "session_meta", "payload": metadata])
+        data.append(Data(("\n" + body).utf8))
+        try data.write(to: url)
         addTeardownBlock { try? FileManager.default.removeItem(at: url) }
         return url
     }
 
-    private func input(path: String?, turnID: String? = "turn") throws -> HookInput {
+    private func input(path: String?, turnID: String? = "turn", agentID: String? = nil) throws -> HookInput {
         var payload = ["session_id": "session", "cwd": "/tmp/project", "hook_event_name": "PermissionRequest"]
         payload["transcript_path"] = path
         payload["turn_id"] = turnID
+        payload["agent_id"] = agentID
         return try JSONDecoder().decode(HookInput.self, from: JSONSerialization.data(withJSONObject: payload))
     }
 
@@ -49,6 +55,31 @@ final class CodexPermissionReviewerTests: XCTestCase {
         XCTAssertNil(CodexPermissionReviewerLookup.reviewer(for: try input(path: matching.path, turnID: nil)))
     }
 
+    func testAgentReviewerUsesItsOwnTranscriptWithVerifiedParent() throws {
+        let cases: [(String, CodexPermissionReviewer?)] = [
+            ("auto_review", .autoReview), ("guardian_subagent", .autoReview), ("user", .user), ("future_reviewer", nil),
+        ]
+        for (reviewer, expected) in cases {
+            let inheritedParent = "{\"type\":\"session_meta\",\"payload\":{\"id\":\"session\"}}\n"
+            let url = try transcript(inheritedParent + context(reviewer), sessionID: "agent", parentSessionID: "session")
+            XCTAssertEqual(CodexPermissionReviewerLookup.reviewer(for: try input(path: url.path, agentID: "agent")), expected)
+        }
+    }
+
+    func testAgentReviewerRejectsUnverifiedRelationships() throws {
+        let child = try transcript(context("auto_review"), sessionID: "agent", parentSessionID: "session")
+        for agentID in [nil, "", "other-agent"] as [String?] {
+            XCTAssertNil(CodexPermissionReviewerLookup.reviewer(for: try input(path: child.path, agentID: agentID)))
+        }
+        let unrelated = try transcript(context("auto_review"), sessionID: "agent", parentSessionID: "other-parent")
+        let unlinked = try transcript(context("auto_review"), sessionID: "agent")
+        let parent = try transcript(context("auto_review"))
+        for url in [unrelated, unlinked, parent] {
+            XCTAssertNil(CodexPermissionReviewerLookup.reviewer(for: try input(path: url.path, agentID: "agent")))
+        }
+        XCTAssertNil(CodexPermissionReviewerLookup.reviewer(for: try input(path: child.path, turnID: "other-turn", agentID: "agent")))
+    }
+
     func testChunkBoundariesAndScanLimit() throws {
         let event = "{\"type\":\"event_msg\",\"payload\":{\"message\":\"" + String(repeating: "x", count: 70_000) + "\"}}\n"
         let nearby = try transcript(context("auto_review") + event)
@@ -68,6 +99,48 @@ final class CodexPermissionReviewerTests: XCTestCase {
         XCTAssertNil(CodexPermissionReviewerLookup.reviewer(for: hookInput))
         try writer.write(contentsOf: Data(manual.suffix(3).utf8))
         XCTAssertEqual(CodexPermissionReviewerLookup.reviewer(for: hookInput), .user)
+    }
+
+    func testCompleteUnrelatedAppendPreservesReviewer() throws {
+        let event = "{\"type\":\"token_usage_record\",\"payload\":{}}\n"
+        for reviewer in [CodexPermissionReviewer.autoReview, .user] {
+            let result = try reviewerAfterAppend(event, reviewer: reviewer)
+            XCTAssertEqual(result, reviewer)
+        }
+    }
+
+    func testAppendedContextOrIncompleteRecordKeepsReviewerUnknown() throws {
+        let cases = [
+            context("user"),
+            context("auto_review"),
+            context("auto_review", turnID: "different-turn"),
+            context("future_reviewer"),
+            "{\"type\":\"turn_context\",\"payload\":",
+            "{\"type\":\"event_msg\",\"payload\":",
+            "not valid JSON\n"
+        ]
+        for append in cases {
+            XCTAssertNil(try reviewerAfterAppend(append), append)
+        }
+    }
+
+    func testAppendBeyondScanLimitKeepsReviewerUnknown() throws {
+        let event = "{\"type\":\"event_msg\",\"payload\":\"" + String(repeating: "x", count: 70_000) + "\"}\n"
+        XCTAssertNil(try reviewerAfterAppend(String(repeating: event, count: 61)))
+    }
+
+    private func reviewerAfterAppend(
+        _ append: String, reviewer: CodexPermissionReviewer = .autoReview
+    ) throws -> CodexPermissionReviewer? {
+        let url = try transcript(context(reviewer.rawValue))
+        let reader = try FileHandle(forReadingFrom: url)
+        defer { try? reader.close() }
+        let snapshotEnd = try reader.seekToEnd()
+        let writer = try FileHandle(forWritingTo: url)
+        defer { try? writer.close() }
+        try writer.seekToEnd()
+        try writer.write(contentsOf: Data(append.utf8))
+        return try? CodexPermissionReviewerLookup.latestReviewer(in: reader, end: snapshotEnd, turnID: "turn")
     }
 
     func testSuppressionPreservesOtherAttentionTransitions() {

@@ -42,11 +42,17 @@ extension SessionStatus {
 }
 
 extension SessionData {
+    private var usesGenericPermissionLabel: Bool {
+        isCodex && status == .waitingPermission && codexPermissionReviewer != .user
+    }
+
     var statusLabel: String {
-        isCodex && status == .waitingInput ? "Ready" : status.label.capitalized
+        if usesGenericPermissionLabel { return "Waiting" }
+        return isCodex && status == .waitingInput ? "Ready" : status.label.capitalized
     }
 
     var statusAccessibilityDescription: String {
-        isCodex && status == .waitingInput ? "ready for your next task" : status.accessibilityDescription
+        if usesGenericPermissionLabel { return "waiting for permission review" }
+        return isCodex && status == .waitingInput ? "ready for your next task" : status.accessibilityDescription
     }
 }

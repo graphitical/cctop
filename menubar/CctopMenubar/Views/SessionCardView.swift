@@ -186,7 +186,7 @@ struct SessionCardView: View {
             Circle()
                 .fill(Color.statusPermission)
                 .frame(width: 6, height: 6)
-            Text("Permission")
+            Text(session.statusLabel)
                 .font(.system(size: 10.5, weight: .semibold))
                 .foregroundStyle(Color.statusPermissionText)
         }

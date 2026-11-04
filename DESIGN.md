@@ -320,6 +320,10 @@ when you glance at it from peripheral vision.
 | Source badge visibility   | Shown only when `Set(sessions.map(\.agentBadge)).count > 1` (keyed on `agentBadge`, not `sourceLabel`, so CC + Claude Desktop counts as multiple sources) |
 | Hide interaction          | A native context-menu item and named accessibility action open the same destructive confirmation. Left-click remains jump-to-session. |
 
+Codex permission requests use the label **Permission** only when the reviewer is confirmed as the user.
+Unknown review uses **Waiting** inside the same permission capsule.
+Confirmed automatic review stays **Working**, without an attention badge or permission notification.
+
 #### Source badge (`SourceBadgeView.swift`) — six variants
 
 | Variant         | Render                                  | Color token              |

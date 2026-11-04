@@ -8,13 +8,20 @@ Session files are intentionally local and inspectable. Missing optional fields m
 
 The optional `codex_permission_reviewer` field records `user` or `auto_review` for the permission request currently represented by `waiting_permission`.
 It is absent when the reviewer cannot be confirmed, and is cleared when the session leaves that status.
-Only a Codex permission request with confirmed automatic review suppresses a macOS notification; the visible waiting status is unchanged.
+Only a Codex permission request with confirmed automatic review suppresses a macOS notification.
+Codex permission requests display **Permission** when the reviewer is confirmed as `user`, and **Waiting** for unknown review.
+Confirmed automatic review stays **Working** across the app, status counts, and Stream Deck, without rewriting the stored `waiting_permission` status.
 Other attention notifications retain their existing behavior.
 
 The hook reads this value from the latest `turn_context` in the supplied transcript, requiring the transcript session ID and turn ID to match the hook request.
+For a helper-agent request, the transcript's first session ID must match the hook's `agent_id`, and its structured `source.subagent.thread_spawn.parent_thread_id` must match the hook's parent session ID.
+Inherited parent metadata inside the child transcript is not used as identity evidence.
+The exact turn must still explicitly identify the reviewer; missing or contradictory child/parent evidence leaves alerts enabled.
 It recognizes `guardian_subagent` as Codex's legacy name for `auto_review`.
 The lookup reads in chunks, scanning at most 4 MiB backward, before acquiring the session lock.
-Missing, partial, malformed, changing, unsupported, or out-of-range evidence leaves permission notifications enabled.
+If the transcript grows during the read, the lookup validates up to 4 MiB of appended records.
+Complete records unrelated to turn context preserve the confirmed reviewer.
+An appended turn context, truncation, or missing, partial, malformed, unsupported, or out-of-range evidence leaves permission notifications enabled.
 Codex's transcript format is not a stable API, so the hook never substitutes global configuration or an earlier turn's setting.
 
 ## Codex question display status

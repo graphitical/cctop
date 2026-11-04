@@ -18,17 +18,14 @@ enum CodexPermissionReviewerLookup {
             let handle = try FileHandle(forReadingFrom: URL(fileURLWithPath: path))
             defer { try? handle.close() }
             let end = try handle.seekToEnd()
-            guard try sessionID(in: handle) == input.sessionId else { return nil }
-            let reviewer = try latestReviewer(in: handle, end: end, turnID: turnID)
-            // Appends or truncation during the read can make the selected context stale.
-            guard try handle.seekToEnd() == end else { return nil }
-            return reviewer
+            guard let metadata = try sessionMetadata(in: handle), matchesSession(metadata, input: input) else { return nil }
+            return try latestReviewer(in: handle, end: end, turnID: turnID)
         } catch {
             return nil
         }
     }
 
-    private static func sessionID(in handle: FileHandle) throws -> String? {
+    private static func sessionMetadata(in handle: FileHandle) throws -> [String: Any]? {
         try handle.seek(toOffset: 0)
         var buffer = Data()
         while buffer.count < maxScanBytes {
@@ -39,13 +36,25 @@ enum CodexPermissionReviewerLookup {
                 let record = try JSONSerialization.jsonObject(with: Data(buffer[..<newline])) as? [String: Any]
                 guard record?["type"] as? String == "session_meta",
                       let payload = record?["payload"] as? [String: Any] else { return nil }
-                return payload["id"] as? String
+                return payload
             }
         }
         return nil
     }
 
-    private static func latestReviewer(
+    private static func matchesSession(_ metadata: [String: Any], input: HookInput) -> Bool {
+        guard let agentID = input.agentId else {
+            return metadata["id"] as? String == input.sessionId
+        }
+        // Agent hooks identify the parent chat, but their transcript belongs to the child.
+        guard !agentID.isEmpty, metadata["id"] as? String == agentID,
+              let source = metadata["source"] as? [String: Any],
+              let subagent = source["subagent"] as? [String: Any],
+              let spawn = subagent["thread_spawn"] as? [String: Any] else { return false }
+        return spawn["parent_thread_id"] as? String == input.sessionId
+    }
+
+    static func latestReviewer(
         in handle: FileHandle, end: UInt64, turnID: String
     ) throws -> CodexPermissionReviewer? {
         let lowerBound = end > UInt64(maxScanBytes) ? end - UInt64(maxScanBytes) : 0
@@ -68,11 +77,34 @@ enum CodexPermissionReviewerLookup {
                 if line.isEmpty { continue }
                 guard let record = try JSONSerialization.jsonObject(with: line) as? [String: Any] else { return nil }
                 if record["type"] as? String == "turn_context" {
+                    guard try hasOnlyUnrelatedAppends(in: handle, after: end) else { return nil }
                     return reviewer(in: record, turnID: turnID)
                 }
             }
         }
         return nil
+    }
+
+    /// Complete telemetry/tool records cannot change the selected reviewer.
+    /// A context change or uncertain appended data must still leave alerts enabled.
+    private static func hasOnlyUnrelatedAppends(in handle: FileHandle, after snapshotEnd: UInt64) throws -> Bool {
+        var validatedEnd = snapshotEnd
+        var remainingBytes = maxScanBytes
+        while true {
+            let end = try handle.seekToEnd()
+            guard end >= validatedEnd, end - validatedEnd <= UInt64(remainingBytes) else { return false }
+            if end == validatedEnd { return true }
+            let count = Int(end - validatedEnd)
+            try handle.seek(toOffset: validatedEnd)
+            guard let appended = try handle.read(upToCount: count),
+                  appended.count == count, appended.last == 0x0a else { return false }
+            for line in appended.split(separator: 0x0a) {
+                guard let record = try JSONSerialization.jsonObject(with: Data(line)) as? [String: Any],
+                      record["type"] as? String != "turn_context" else { return false }
+            }
+            remainingBytes -= count
+            validatedEnd = end
+        }
     }
 
     private static func reviewer(in record: [String: Any], turnID: String) -> CodexPermissionReviewer? {

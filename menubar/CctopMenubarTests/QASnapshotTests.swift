@@ -51,7 +51,7 @@ final class QASnapshotTests: XCTestCase {
     }
 
     func testCodexQuestionStatuses() throws {
-        let sessions = [
+        var sessions = [
             SessionData.mock(id: "question", project: "cctop", sessionName: "Choose a status label",
                              status: .waitingAnswer, source: "codex"),
             SessionData.mock(id: "ready", project: "api", sessionName: "Review the changes",
@@ -61,11 +61,40 @@ final class QASnapshotTests: XCTestCase {
             SessionData.mock(id: "working", project: "cctop", sessionName: "Run the focused tests",
                              status: .working, source: "codex")
         ]
+        sessions[2].codexPermissionReviewer = .user
         for colorScheme in [ColorScheme.light, .dark] {
             let view = PopupView(userSessions: userSessions(fromDataFixtures: sessions),
                                  updater: DisabledUpdater(), pluginManager: inertPluginManager())
             try renderPanelScreenshot(view: view, colorScheme: colorScheme, directoryName: "cctop-qa",
                                       filename: "codex-question-status-\(colorScheme).png")
+        }
+    }
+
+    func testCodexPermissionReviewerLabels() throws {
+        let sources = try isolatedSessionDataSources(prefix: "permission-review-snapshot")
+        let sessions = ([CodexPermissionReviewer.autoReview, .user, nil] as [CodexPermissionReviewer?])
+            .enumerated().map { index, reviewer in
+                var session = SessionData.mock(
+                    id: "permission-\(index)", project: "cctop",
+                    sessionName: ["Automatic permission review", "Your permission needed", "Unknown permission reviewer"][index],
+                    status: .waitingPermission, pid: UInt32(ProcessInfo.processInfo.processIdentifier), source: "codex"
+                )
+                session.codexPermissionReviewer = reviewer
+                session.notificationMessage = "Bash: npm install"
+                return session
+            }
+        for session in sessions {
+            try session.writeToFile(path: sources.sessionsDir.appendingPathComponent("\(session.sessionId).json").path)
+        }
+        let manager = SessionManager(
+            historyManager: HistoryManager(historyDir: sources.sessionsDir.appendingPathComponent("history")),
+            dataSources: sources, startMonitoring: false
+        )
+        for colorScheme in [ColorScheme.light, .dark] {
+            let view = PopupView(userSessions: manager.userSessions,
+                                 updater: DisabledUpdater(), pluginManager: inertPluginManager())
+            try renderPanelScreenshot(view: view, colorScheme: colorScheme, directoryName: "cctop-qa",
+                                      filename: "codex-permission-reviewer-\(colorScheme).png")
         }
     }
 
