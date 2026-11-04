@@ -17,9 +17,9 @@ extension AppDelegate {
     }
 
     @MainActor func positionPanel(animate: Bool = false) {
-        guard let size = panelFittingSize() else { return }
         let clickKey = focusLocation.flatMap { screenKey(at: $0) }
             ?? panelScreenKey()
+        guard let size = panelFittingSize(maximumHeight: maximumPanelHeight(screenKey: clickKey)) else { return }
         if let frame = panelGeometry.showFrame(
             clickScreenKey: clickKey,
             clickLocation: focusLocation,
@@ -48,7 +48,7 @@ extension AppDelegate {
     /// under the menubar icon's mirrored position on the panel's current screen
     /// so it doesn't jump across screens.
     @MainActor private func resetPanelToCurrentScreen(animate: Bool = false) {
-        guard let size = panelFittingSize() else { return }
+        guard let size = panelFittingSize(maximumHeight: maximumPanelHeight(screenKey: panelScreenKey())) else { return }
         let layouts = screenLayouts
         let panelIdx = PanelPositioning.screenIndex(forPanelFrame: panel.frame, in: layouts)
         if let frame = PanelPositioning.resolveResetPosition(
@@ -82,18 +82,29 @@ extension AppDelegate {
     }
 
     @MainActor func resizePanel(animate: Bool = false) {
-        guard !suppressResize else { return }
-        guard let size = panelFittingSize() else { return }
+        guard !suppressResize, !panel.inLiveResize else { return }
+        let maximumHeight = maximumPanelHeight(screenKey: panelScreenKey(), below: panel.frame.maxY)
+        guard let size = panelFittingSize(maximumHeight: maximumHeight) else { return }
         let newFrame = panelGeometry.resizedFrame(
             from: panel.frame, to: size, panelScreenKey: panelScreenKey()
         )
         setPanelFrame(newFrame, animate: animate)
     }
 
-    private func panelFittingSize() -> NSSize? {
+    private func panelFittingSize(maximumHeight: CGFloat) -> NSSize? {
+        if let height = panelHeightModel.resolveHeight(maximumHeight: maximumHeight) {
+            return NSSize(width: 320, height: height)
+        }
         panel.contentView?.layout()
         guard let size = panel.contentView?.fittingSize else { return nil }
-        return NSSize(width: max(size.width, 320), height: min(size.height, 600))
+        return NSSize(width: 320, height: min(size.height, 600, maximumHeight))
+    }
+
+    private func maximumPanelHeight(screenKey: String?, below topY: CGFloat? = nil) -> CGFloat {
+        let screen = screenLayouts.first { $0.key == screenKey } ?? screenLayouts.first
+        guard let visibleFrame = screen?.visibleFrame else { return 600 }
+        let top = min(topY ?? visibleFrame.maxY - PanelPositioning.margin, visibleFrame.maxY)
+        return max(1, top - visibleFrame.minY - PanelPositioning.margin)
     }
 
     private func setPanelFrame(_ frame: NSRect, animate: Bool) {
@@ -133,5 +144,32 @@ extension AppDelegate: FloatingPanelDelegate {
     @MainActor func panelDidRequestReset() {
         panelGeometry.clearUserPosition(forPanelFrame: panel.frame, screens: screenLayouts)
         resetPanelToCurrentScreen(animate: true)
+    }
+}
+
+// MARK: - Native vertical resizing
+extension AppDelegate: NSWindowDelegate {
+    func windowWillStartLiveResize(_ notification: Notification) {
+        // AppKit also sends these callbacks for animated, programmatic frame changes.
+        isUserResizingPanel = panel.isUserResizeEvent(NSApp.currentEvent)
+    }
+
+    func windowWillResize(_ sender: NSWindow, to frameSize: NSSize) -> NSSize {
+        let maximumHeight = maximumPanelHeight(screenKey: panelScreenKey(), below: sender.frame.maxY)
+        return NSSize(
+            width: 320,
+            height: PanelHeightModel.clampedHeight(frameSize.height, maximumHeight: maximumHeight)
+        )
+    }
+
+    func windowDidResize(_ notification: Notification) {
+        guard isUserResizingPanel, panel.inLiveResize else { return }
+        panelHeightModel.updateLiveHeight(panel.frame.height)
+    }
+
+    func windowDidEndLiveResize(_ notification: Notification) {
+        defer { isUserResizingPanel = false }
+        guard isUserResizingPanel else { return }
+        panelHeightModel.rememberHeight(panel.frame.height)
     }
 }

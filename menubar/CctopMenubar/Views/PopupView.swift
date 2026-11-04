@@ -18,6 +18,7 @@ struct PopupView: View {
     @ObservedObject var overlayController: OverlayController = OverlayController()
     var initialTab: PopupTab = .active
     var initialCleanupCandidate: WorktreeCleanupCandidate?
+    var panelHeight: CGFloat?
     var onOpenUpdater: (() -> Void)?
     var onHideSession: (SessionIdentityPolicy.LogicalIdentity) -> Void = { _ in }
     var onSelectCleanupRemovalAction: ((WorktreeCleanupCandidate) async -> WorktreeRemovalService.RemovalAction)?
@@ -84,16 +85,20 @@ struct PopupView: View {
                         }
                     case .about:
                         overlayPanel {
-                            AboutView()
+                            scrollWhenResized { AboutView() }
                         }
                     }
                 }
             }
-            .frame(minHeight: overlayController.active != nil ? AppChrome.overlayMinimumContentHeight : 0)
+            .frame(
+                minHeight: overlayController.active != nil && panelHeight == nil ? AppChrome.overlayMinimumContentHeight : 0,
+                maxHeight: panelHeight == nil ? nil : .infinity
+            )
             .clipped()
             .animation(.easeInOut(duration: overlayAnimationDuration), value: overlayController.active)
             footerBar
         }
+        .frame(height: panelHeight)
         .onReceive(navigate?.didActivateSubject.eraseToAnyPublisher() ?? Empty().eraseToAnyPublisher()) { _ in
             selectedIndex = nil
             selectedSessionIdentity = nil
@@ -181,7 +186,7 @@ struct PopupView: View {
     private var activeContent: some View {
         Group {
             if userSessions.isEmpty {
-                EmptyStateView(pluginManager: pluginManager)
+                scrollWhenResized { EmptyStateView(pluginManager: pluginManager) }
             } else if activeSessionRows.isEmpty {
                 noActiveSessionsContent
             } else {
@@ -227,7 +232,7 @@ struct PopupView: View {
                 }
                 .padding(.bottom, AppChrome.listVerticalPadding)
             }
-            .frame(maxHeight: AppChrome.overlayMinimumContentHeight)
+            .frame(maxHeight: panelHeight == nil ? AppChrome.overlayMinimumContentHeight : .infinity)
             .onChange(of: selectedIndex) { newIndex in
                 guard selectedTab == tab,
                       let idx = newIndex, idx < list.count else { return }
@@ -256,6 +261,14 @@ extension PopupView {
         .padding(.trailing, 12)
         .padding(.top, 6)
         .padding(.bottom, 10)
+        .overlay(alignment: .bottom) {
+            Capsule()
+                .fill(Color.textMuted.opacity(0.45))
+                .frame(width: 28, height: 3)
+                .padding(.bottom, 3)
+                .allowsHitTesting(false)
+                .accessibilityHidden(true)
+        }
     }
 
     private var versionButton: some View {

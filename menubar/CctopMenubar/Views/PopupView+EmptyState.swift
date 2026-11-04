@@ -1,13 +1,22 @@
 import SwiftUI
 
 extension PopupView {
+    @ViewBuilder
+    func scrollWhenResized<Content: View>(@ViewBuilder content: () -> Content) -> some View {
+        if panelHeight == nil {
+            content()
+        } else {
+            ScrollView(showsIndicators: false) { content() }
+        }
+    }
+
     func overlayPanel<Content: View>(
         verticalPadding: CGFloat = AppChrome.overlayContentVerticalPadding,
         @ViewBuilder content: () -> Content
     ) -> some View {
         content()
             .padding(.vertical, verticalPadding)
-            .frame(maxWidth: .infinity, minHeight: AppChrome.overlayMinimumContentHeight, alignment: .top)
+            .frame(maxWidth: .infinity, minHeight: panelHeight == nil ? AppChrome.overlayMinimumContentHeight : 0, alignment: .top)
             .background {
                 PanelSurfaceBackground()
             }

@@ -20,6 +20,21 @@ final class QASnapshotTests: XCTestCase {
 
     // MARK: - Session count scenarios
 
+    func testManualPanelHeights() throws {
+        for height: CGFloat in [280, 540] {
+            let view = PopupView(userSessions: userSessions(fromDataFixtures: SessionData.qaEightSessions),
+                                 updater: DisabledUpdater(), pluginManager: inertPluginManager(), panelHeight: height)
+            for colorScheme in [ColorScheme.light, .dark] {
+                let size = try renderPanelScreenshot(
+                    view: view, colorScheme: colorScheme, directoryName: "cctop-qa",
+                    filename: "panel-height-\(Int(height))-\(colorScheme).png"
+                )
+                XCTAssertEqual(size.width, 320)
+                XCTAssertEqual(size.height, height)
+            }
+        }
+    }
+
     func testSessionDensity() throws {
         let suite = "cctop-density-snapshot-\(UUID().uuidString)"
         let defaults = try XCTUnwrap(UserDefaults(suiteName: suite))

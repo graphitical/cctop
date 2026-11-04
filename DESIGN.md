@@ -533,13 +533,15 @@ site-only and reserved for sections, not components.
 | Card padding              | 9 px inner horizontal + 8 px selection inset · 8 px vertical |
 | Footer padding            | 16 / 12 / 6 / 10 (l / r / t / b)              |
 | Footer content            | 10.5 px Quit · version · shortcut, separated by muted middle dots; 20 px neutral Settings glyph/fill with a 28 px hit target |
-| Scroll area max height    | 290 px (then scrolls)                          |
+| Scroll area max height    | 290 px by default; fills the available area after a manual vertical resize |
 | Active/Idle/Recent spacing| 2 px row gap, 0 px top and 4 px bottom; no dividers |
 | Settings content padding  | 8 px horizontal · 0 px top · 6 px bottom around the sunk well |
 
-The panel reflows in **height only**; width is fixed to keep card layout
-predictable. When sessions overflow 290 px, the inner area scrolls and the
-header / footer / tab bar stay anchored.
+The panel is fixed at 320 px wide and can be resized vertically by dragging its bottom edge, marked by a quiet grip.
+Before a manual resize, the content determines the height and lists scroll after 290 px.
+A manual height is remembered across session updates, density changes, reopening, and relaunching.
+The chat list grows within that height while the header, footer, and tabs stay anchored.
+The visible height is limited to the available screen space without discarding the saved height.
 
 ### Site grid
 

@@ -1,4 +1,5 @@
 import AppKit
+import Combine
 
 /// Screen geometry for panel positioning, decoupled from NSScreen for testability.
 struct ScreenLayout: Equatable {
@@ -133,6 +134,42 @@ struct PanelGeometryModel {
         )
     }
 
+}
+
+/// Keeps the user's chosen height separate from a temporary screen-size clamp.
+final class PanelHeightModel: ObservableObject {
+    static let minimumHeight: CGFloat = 280
+    @Published private(set) var height: CGFloat?
+    private let defaults: UserDefaults
+    private var preferredHeight: CGFloat?
+
+    init(defaults: UserDefaults = .standard) {
+        self.defaults = defaults
+        let saved = defaults.double(forKey: "panelHeight")
+        preferredHeight = saved.isFinite && saved > 0 ? CGFloat(saved) : nil
+        height = preferredHeight
+    }
+
+    @discardableResult
+    func resolveHeight(maximumHeight: CGFloat) -> CGFloat? {
+        let resolved = preferredHeight.map { Self.clampedHeight($0, maximumHeight: maximumHeight) }
+        if height != resolved { height = resolved }
+        return resolved
+    }
+
+    func updateLiveHeight(_ height: CGFloat) {
+        self.height = height
+    }
+
+    func rememberHeight(_ height: CGFloat) {
+        preferredHeight = height
+        self.height = height
+        defaults.set(Double(height), forKey: "panelHeight")
+    }
+
+    static func clampedHeight(_ height: CGFloat, maximumHeight: CGFloat) -> CGFloat {
+        min(max(height, minimumHeight), max(1, maximumHeight))
+    }
 }
 
 /// Pure positioning math for the floating panel.

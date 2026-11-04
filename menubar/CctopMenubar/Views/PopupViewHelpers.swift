@@ -316,6 +316,7 @@ struct PanelContentView: View {
     @ObservedObject var updater: UpdaterBase
     @ObservedObject var pluginManager: PluginManager
     @ObservedObject var navigate: NavigateController
+    @ObservedObject var panelHeightModel: PanelHeightModel
     var onOpenUpdater: (() -> Void)?
     var onSelectCleanupRemovalAction: ((WorktreeCleanupCandidate) async -> WorktreeRemovalService.RemovalAction)?
     var onExecuteCleanupRemovalAction: ((WorktreeRemovalService.RemovalAction) async -> WorktreeRemovalService.RemovalResult)?
@@ -338,6 +339,7 @@ struct PanelContentView: View {
             pluginManager: pluginManager,
             navigate: navigate,
             overlayController: overlayController,
+            panelHeight: panelHeightModel.height,
             onOpenUpdater: onOpenUpdater,
             onHideSession: { sessionManager.hideSession($0) },
             onSelectCleanupRemovalAction: onSelectCleanupRemovalAction,

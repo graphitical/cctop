@@ -26,6 +26,35 @@ final class PanelPositioningTests: XCTestCase {
     // Anchor (menubar icon) near the right side of the primary screen
     let anchorOnPrimary = NSRect(x: 1870, y: 1058, width: 40, height: 22)
 
+    func testManualHeightSurvivesReopenAndTemporaryScreenClamp() throws {
+        let suite = "cctop-panel-height-\(UUID().uuidString)"
+        let defaults = try XCTUnwrap(UserDefaults(suiteName: suite))
+        defer { defaults.removePersistentDomain(forName: suite) }
+        defaults.set(["primary": ["originX": 200, "topY": 900]], forKey: "panelPositions")
+        let model = PanelHeightModel(defaults: defaults)
+        XCTAssertNil(model.resolveHeight(maximumHeight: 1_000))
+        model.updateLiveHeight(720)
+        XCTAssertNil(PanelHeightModel(defaults: defaults).height, "A live drag must not persist until it finishes")
+        model.rememberHeight(720)
+
+        let reopened = PanelHeightModel(defaults: defaults)
+        XCTAssertEqual(reopened.resolveHeight(maximumHeight: 1_000), 720)
+        XCTAssertEqual(reopened.resolveHeight(maximumHeight: 500), 500)
+        XCTAssertEqual(reopened.resolveHeight(maximumHeight: 1_000), 720)
+        XCTAssertEqual(reopened.resolveHeight(maximumHeight: 1_000), 720, "Content refreshes retain the chosen height")
+        XCTAssertEqual(defaults.double(forKey: "panelHeight"), 720)
+        XCTAssertEqual(
+            defaults.dictionary(forKey: "panelPositions") as? [String: [String: Int]],
+            ["primary": ["originX": 200, "topY": 900]]
+        )
+    }
+
+    func testVerticalResizeLimitsKeepTheBottomOnScreen() {
+        XCTAssertEqual(PanelHeightModel.clampedHeight(100, maximumHeight: 900), PanelHeightModel.minimumHeight)
+        XCTAssertEqual(PanelHeightModel.clampedHeight(900, maximumHeight: 480), 480)
+        XCTAssertEqual(PanelHeightModel.clampedHeight(900, maximumHeight: 200), 200)
+    }
+
     // MARK: - screenIndex
 
     func testScreenIndexOnPrimary() {

@@ -1,4 +1,5 @@
 import AppKit
+import SwiftUI
 
 @MainActor protocol FloatingPanelDelegate: AnyObject {
     func panelDidDrag(originX: CGFloat, topY: CGFloat)
@@ -37,6 +38,13 @@ class FloatingPanel: NSPanel {
         !isKeyWindow && !isHeaderClick
     }
 
+    func isUserResizeEvent(_ event: NSEvent?) -> Bool {
+        guard let event, event.window === self, event.clickCount < 2,
+              event.type == .leftMouseDown || event.type == .leftMouseDragged else { return false }
+        let interior = NSRect(origin: .zero, size: frame.size).insetBy(dx: 6, dy: 6)
+        return !interior.contains(event.locationInWindow)
+    }
+
     override init(
         contentRect: NSRect,
         styleMask: NSWindow.StyleMask,
@@ -45,10 +53,13 @@ class FloatingPanel: NSPanel {
     ) {
         super.init(
             contentRect: contentRect,
-            styleMask: [.nonactivatingPanel, .fullSizeContentView, .borderless],
+            styleMask: [.nonactivatingPanel, .fullSizeContentView, .borderless, .resizable],
             backing: backing,
             defer: flag
         )
+        minSize = NSSize(width: 320, height: PanelHeightModel.minimumHeight)
+        maxSize.width = 320
+        title = "cctop"
         isFloatingPanel = true
         level = .floating
         isOpaque = false
@@ -58,6 +69,23 @@ class FloatingPanel: NSPanel {
         isMovableByWindowBackground = false
         animationBehavior = .utilityWindow
         collectionBehavior = Self.defaultCollectionBehavior
+    }
+
+    @MainActor
+    @discardableResult
+    func host<Content: View>(_ content: Content) -> NSHostingView<Content> {
+        let view = NSHostingView(rootView: content)
+        // AppKit owns resize limits; a fixed SwiftUI height must not lock the window's minimum and maximum together.
+        view.sizingOptions = [.intrinsicContentSize]
+        view.wantsLayer = true
+        view.layer?.backgroundColor = NSColor.clear.cgColor
+        view.layer?.cornerRadius = AppChrome.panelCornerRadius
+        view.layer?.masksToBounds = true
+        view.translatesAutoresizingMaskIntoConstraints = false
+        contentView = view
+        minSize = NSSize(width: 320, height: PanelHeightModel.minimumHeight)
+        maxSize.width = 320
+        return view
     }
 
     override var canBecomeKey: Bool { true }

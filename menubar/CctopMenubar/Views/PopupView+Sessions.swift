@@ -109,7 +109,7 @@ extension PopupView {
                 }
                 .padding(.bottom, AppChrome.listVerticalPadding)
             }
-            .frame(maxHeight: AppChrome.overlayMinimumContentHeight)
+            .frame(maxHeight: panelHeight == nil ? AppChrome.overlayMinimumContentHeight : .infinity)
             .onChange(of: selectedSessionIdentity) { identity in
                 guard selectedTab == tab, let identity else { return }
                 withAnimation(.easeOut(duration: 0.15)) {

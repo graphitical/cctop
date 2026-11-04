@@ -25,6 +25,7 @@ class AppDelegate: NSObject, NSApplicationDelegate, UNUserNotificationCenterDele
     var screenChangeWork: DispatchWorkItem?
     var notchVisibilityWork: DispatchWorkItem?
     var suppressResize = false
+    var isUserResizingPanel = false
     private var lastRenderedCounts: StatusCounts?
     var hasNotch = false
     var focusLocation: NSPoint?
@@ -35,6 +36,7 @@ class AppDelegate: NSObject, NSApplicationDelegate, UNUserNotificationCenterDele
     var isFullyLaunched = false
     @AppStorage("appearanceMode") var appearanceMode: String = "system"
 
+    let panelHeightModel = PanelHeightModel()
     let panelGeometry = PanelGeometryModel(store: UserDefaultsPanelPositionStore())
 
     private static var isXcodeTestHost: Bool {
@@ -73,22 +75,15 @@ class AppDelegate: NSObject, NSApplicationDelegate, UNUserNotificationCenterDele
         setupStatusItem()
         hasNotch = NSScreen.builtin?.hasPhysicalNotch == true
 
-        let contentView = makePanelContentView()
-        let hostingView = NSHostingView(rootView: contentView)
-        hostingView.wantsLayer = true
-        hostingView.layer?.backgroundColor = NSColor.clear.cgColor
-        hostingView.layer?.cornerRadius = AppChrome.panelCornerRadius
-        hostingView.layer?.masksToBounds = true
-        hostingView.translatesAutoresizingMaskIntoConstraints = false
-
         panel = FloatingPanel(
             contentRect: .zero,
             styleMask: [],
             backing: .buffered,
             defer: false
         )
-        panel.contentView = hostingView
+        panel.host(makePanelContentView())
         panel.panelDelegate = self
+        panel.delegate = self
 
         applyAppearance()
         registerShortcuts()
@@ -111,6 +106,7 @@ class AppDelegate: NSObject, NSApplicationDelegate, UNUserNotificationCenterDele
             updater: updater,
             pluginManager: pluginManager,
             navigate: navigateController,
+            panelHeightModel: panelHeightModel,
             onOpenUpdater: { [weak self] in
                 Task { @MainActor in self?.openUpdaterFromPanel() }
             },
