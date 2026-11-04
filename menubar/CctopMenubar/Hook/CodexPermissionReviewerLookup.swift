@@ -19,10 +19,7 @@ enum CodexPermissionReviewerLookup {
             defer { try? handle.close() }
             let end = try handle.seekToEnd()
             guard try sessionID(in: handle) == input.sessionId else { return nil }
-            let reviewer = try latestReviewer(in: handle, end: end, turnID: turnID)
-            // Appends or truncation during the read can make the selected context stale.
-            guard try handle.seekToEnd() == end else { return nil }
-            return reviewer
+            return try latestReviewer(in: handle, end: end, turnID: turnID)
         } catch {
             return nil
         }
@@ -45,7 +42,7 @@ enum CodexPermissionReviewerLookup {
         return nil
     }
 
-    private static func latestReviewer(
+    static func latestReviewer(
         in handle: FileHandle, end: UInt64, turnID: String
     ) throws -> CodexPermissionReviewer? {
         let lowerBound = end > UInt64(maxScanBytes) ? end - UInt64(maxScanBytes) : 0
@@ -68,11 +65,34 @@ enum CodexPermissionReviewerLookup {
                 if line.isEmpty { continue }
                 guard let record = try JSONSerialization.jsonObject(with: line) as? [String: Any] else { return nil }
                 if record["type"] as? String == "turn_context" {
+                    guard try hasOnlyUnrelatedAppends(in: handle, after: end) else { return nil }
                     return reviewer(in: record, turnID: turnID)
                 }
             }
         }
         return nil
+    }
+
+    /// Complete telemetry/tool records cannot change the selected reviewer.
+    /// A context change or uncertain appended data must still leave alerts enabled.
+    private static func hasOnlyUnrelatedAppends(in handle: FileHandle, after snapshotEnd: UInt64) throws -> Bool {
+        var validatedEnd = snapshotEnd
+        var remainingBytes = maxScanBytes
+        while true {
+            let end = try handle.seekToEnd()
+            guard end >= validatedEnd, end - validatedEnd <= UInt64(remainingBytes) else { return false }
+            if end == validatedEnd { return true }
+            let count = Int(end - validatedEnd)
+            try handle.seek(toOffset: validatedEnd)
+            guard let appended = try handle.read(upToCount: count),
+                  appended.count == count, appended.last == 0x0a else { return false }
+            for line in appended.split(separator: 0x0a) {
+                guard let record = try JSONSerialization.jsonObject(with: Data(line)) as? [String: Any],
+                      record["type"] as? String != "turn_context" else { return false }
+            }
+            remainingBytes -= count
+            validatedEnd = end
+        }
     }
 
     private static func reviewer(in record: [String: Any], turnID: String) -> CodexPermissionReviewer? {

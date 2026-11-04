@@ -70,6 +70,48 @@ final class CodexPermissionReviewerTests: XCTestCase {
         XCTAssertEqual(CodexPermissionReviewerLookup.reviewer(for: hookInput), .user)
     }
 
+    func testCompleteUnrelatedAppendPreservesReviewer() throws {
+        let event = "{\"type\":\"token_usage_record\",\"payload\":{}}\n"
+        for reviewer in [CodexPermissionReviewer.autoReview, .user] {
+            let result = try reviewerAfterAppend(event, reviewer: reviewer)
+            XCTAssertEqual(result, reviewer)
+        }
+    }
+
+    func testAppendedContextOrIncompleteRecordKeepsReviewerUnknown() throws {
+        let cases = [
+            context("user"),
+            context("auto_review"),
+            context("auto_review", turnID: "different-turn"),
+            context("future_reviewer"),
+            "{\"type\":\"turn_context\",\"payload\":",
+            "{\"type\":\"event_msg\",\"payload\":",
+            "not valid JSON\n"
+        ]
+        for append in cases {
+            XCTAssertNil(try reviewerAfterAppend(append), append)
+        }
+    }
+
+    func testAppendBeyondScanLimitKeepsReviewerUnknown() throws {
+        let event = "{\"type\":\"event_msg\",\"payload\":\"" + String(repeating: "x", count: 70_000) + "\"}\n"
+        XCTAssertNil(try reviewerAfterAppend(String(repeating: event, count: 61)))
+    }
+
+    private func reviewerAfterAppend(
+        _ append: String, reviewer: CodexPermissionReviewer = .autoReview
+    ) throws -> CodexPermissionReviewer? {
+        let url = try transcript(context(reviewer.rawValue))
+        let reader = try FileHandle(forReadingFrom: url)
+        defer { try? reader.close() }
+        let snapshotEnd = try reader.seekToEnd()
+        let writer = try FileHandle(forWritingTo: url)
+        defer { try? writer.close() }
+        try writer.seekToEnd()
+        try writer.write(contentsOf: Data(append.utf8))
+        return try? CodexPermissionReviewerLookup.latestReviewer(in: reader, end: snapshotEnd, turnID: "turn")
+    }
+
     func testSuppressionPreservesOtherAttentionTransitions() {
         let working = SessionData.mock(status: .working, source: "codex")
         var permission = working

@@ -14,7 +14,9 @@ Other attention notifications retain their existing behavior.
 The hook reads this value from the latest `turn_context` in the supplied transcript, requiring the transcript session ID and turn ID to match the hook request.
 It recognizes `guardian_subagent` as Codex's legacy name for `auto_review`.
 The lookup reads in chunks, scanning at most 4 MiB backward, before acquiring the session lock.
-Missing, partial, malformed, changing, unsupported, or out-of-range evidence leaves permission notifications enabled.
+If the transcript grows during the read, the lookup validates up to 4 MiB of appended records.
+Complete records unrelated to turn context preserve the confirmed reviewer.
+An appended turn context, truncation, or missing, partial, malformed, unsupported, or out-of-range evidence leaves permission notifications enabled.
 Codex's transcript format is not a stable API, so the hook never substitutes global configuration or an earlier turn's setting.
 
 ## Codex question display status
