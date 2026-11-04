@@ -36,20 +36,21 @@ Follow the instructions and commands documented here directly.
 - Make all task edits in the worktree, keeping the main repository checkout clean.
 - For a stacked child, start from the exact approved parent head and target the parent branch.
 - Until GitHub retargets the child after the parent merges, keep the parent branch as the target.
-- The active driver owns edits, tests, commits, PR publication, CI fixes, and the approval loop.
+- The active driver owns edits, tests, commits, merges, pushes, CI fixes, and any PR follow-through.
 - Keep exactly one active writer for a branch or PR.
 - Make the smallest change that satisfies the approved behavior.
 - Keep unrelated lifecycle, UI, release, and documentation work separate.
 - Do not add flags, configuration, abstractions, or explicit default values without a current need.
-- Before the developer approves the uncommitted result, do not commit, push, or open a PR.
-- For a UI change, show a screenshot or rendered preview before publication approval.
-- Treat no response as no approval. After explicit approval, continue without a second routine approval.
+- The developer has given standing authorization to implement requested work, run the required checks, commit the changes, squash-merge them into `master`, and push `master` to GitHub without separate publication approval.
+- Continue through those steps unless the developer explicitly asks for a review checkpoint or tells you to stop.
+- For a UI change, show a screenshot or rendered preview before merging.
 - Do not commit scratch scripts, investigation pages, screenshots, or generated debugging files. Commit only intentional project assets.
-- After you open or update a PR, check CI and review feedback, address consequential defects, and keep the approval loop with the active driver.
+- After you open or update a PR, check CI and review feedback, address consequential defects, and continue through merge and push.
 
 ## GitHub and PR Rules
 
-- Use squash merge when merging PR branches into `master`.
+- Squash-merge completed work into `master` and push `master` to GitHub.
+- A PR is optional unless the developer requests one.
 - Never post PR replies, comments, issue comments, or reviews. Leave all GitHub text to the developer.
 - Independent review must verify that each eligible bot-authored thread is fixed, deliberately dismissed, or outdated.
 - Before reporting the PR ready, the active driver must resolve each verified thread. This requirement includes unknown bot authors.
