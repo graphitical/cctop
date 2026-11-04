@@ -43,9 +43,9 @@ git add . && git commit -m "Initial tap setup" && git push
 ### 1. Merge the branch
 
 ```bash
-git checkout master
+git checkout main
 git merge <branch-name>
-git push origin master
+git push origin main
 ```
 
 ### 2. Tag and push

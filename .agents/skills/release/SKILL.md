@@ -5,7 +5,8 @@ description: Use when cutting or preparing a cctop release - "cut a release", "r
 
 # Cutting a cctop Release
 
-Releases are triggered by pushing a `v*` tag. `.github/workflows/release.yml` then runs: build (arm64 + x86_64, zip + DMG each) -> sign and notarize -> create GitHub Release -> update Sparkle appcast on master -> update Homebrew cask.
+Releases are triggered by pushing a `v*` tag.
+`.github/workflows/release.yml` then runs: build (arm64 + x86_64, zip + DMG each) -> sign and notarize -> create GitHub Release -> update Sparkle appcast on main -> update Homebrew cask.
 
 ## Authorization and checks
 
@@ -18,9 +19,11 @@ Releases are triggered by pushing a `v*` tag. `.github/workflows/release.yml` th
 
 ## 1. Establish the release contract
 
-1. Sync and review what's shipping: `git pull` then `git log $(git describe --tags --abbrev=0)..origin/master --oneline`.
+1. Sync and review what's shipping: `git pull` then `git log $(git describe --tags --abbrev=0)..origin/main --oneline`.
 2. Propose or confirm the semver bump and a short changelog summary.
-3. State how the bump commit will land. Direct push to master is allowed for this repo; most releases use this path. Use a PR if the developer prefers.
+3. State how the bump commit will land.
+   Direct push to main is allowed for this repo; most releases use this path.
+   Use a PR if the developer prefers.
 4. List the release checks and give one concise reason for each. Remove checks whose reason is only habit or duplication of already-approved feature evidence.
 5. If the developer explicitly requested the release and the version/scope are clear, continue. If they only requested preparation/readiness assessment, stop for approval.
 
@@ -33,8 +36,8 @@ Releases are triggered by pushing a `v*` tag. `.github/workflows/release.yml` th
 
 ## 3. Confirm green
 
-- Wait for master CI on the bump commit: `gh run list --branch master --limit 5`, then `gh run watch <id>`.
-- For an explicitly authorized release, continue to the exact tag as soon as expected checks and master CI pass.
+- Wait for main CI on the bump commit: `gh run list --branch main --limit 5`, then `gh run watch <id>`.
+- For an explicitly authorized release, continue to the exact tag as soon as expected checks and main CI pass.
 - For preparation/readiness-only work, report the exact candidate and stop for tag authorization. The tag push publishes the release, appcast update, and cask bump.
 
 ## 4. Tag and monitor the pipeline
@@ -61,6 +64,7 @@ git tag v<version> && git push origin v<version>
 ## 5. Verify
 
 - `gh release view v<version>` lists all four assets: `cctop-macOS-{arm64,x86_64}.{zip,dmg}`.
-- `appcast.xml` on master has separate arm64 and x86_64 `<item>` entries for the new version. CI commits this; pull and check.
+- `appcast.xml` on main has separate arm64 and x86_64 `<item>` entries for the new version.
+  CI commits this; pull and check.
 - The Homebrew cask job succeeded.
 - Report the release URL and what was verified.

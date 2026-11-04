@@ -47,10 +47,10 @@ swiftlint lint --strict
 
 ## Making Changes
 
-1. Fork the repository and create a branch from `master`.
+1. Fork the repository and create a branch from `main`.
 2. Make your changes. Add tests if applicable.
 3. Run the full test and lint suite (see above).
-4. Open a pull request against `master`.
+4. Open a pull request against `main`.
 
 ### Code Organization
 

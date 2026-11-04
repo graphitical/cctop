@@ -3,11 +3,8 @@
 Source for the public site at https://cctop.app/.
 
 `index.html` is a single static file. Shared logos live in `../assets/icons/`.
-The deploy is driven by `.github/workflows/pages.yml`, which stages this folder
-plus `assets/icons/` as the Pages artifact on every push to `master` that
-touches `site/**` or `assets/icons/**`. The `CNAME` file in this
-folder pins the custom domain (`cctop.app`) on every deploy — without it, the
-custom-domain setting gets cleared each time the artifact replaces the site.
+The deploy is driven by `.github/workflows/pages.yml`, which stages this folder plus `assets/icons/` as the Pages artifact on every push to `main` that touches `site/**` or `assets/icons/**`.
+The `CNAME` file in this folder pins the custom domain (`cctop.app`) on every deploy — without it, the custom-domain setting gets cleared each time the artifact replaces the site.
 
 ## Local preview
 
@@ -39,9 +36,8 @@ they land on master — no site change required.
 
 ## When you change the implementation
 
-Before pushing changes that affect anything in the "Manual" rows above, update
-`site/index.html` in the same commit. CI deploys whatever lands on master, so
-the README and the site should always match what shipped.
+Before pushing changes that affect anything in the "Manual" rows above, update `site/index.html` in the same commit.
+CI deploys whatever lands on `main`, so the README and the site should always match what shipped.
 
 For visuals: regenerate the snapshot-backed PNGs with `CctopMenubarTests/SnapshotTests`,
 replace the matching files under `docs/`, and the site will reflect the new images

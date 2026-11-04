@@ -31,8 +31,8 @@ Follow the instructions and commands documented here directly.
 
 ## Driver Workflow
 
-- Before starting any new work, run `git pull --ff-only origin master` in the main repository checkout so it is up to date.
-- Start each independent change in an isolated worktree created from the updated `origin/master`.
+- Before starting any new work, run `git pull --ff-only origin main` in the main repository checkout so it is up to date.
+- Start each independent change in an isolated worktree created from the updated `origin/main`.
 - Make all task edits in the worktree, keeping the main repository checkout clean.
 - For a stacked child, start from the exact approved parent head and target the parent branch.
 - Until GitHub retargets the child after the parent merges, keep the parent branch as the target.
@@ -41,7 +41,7 @@ Follow the instructions and commands documented here directly.
 - Make the smallest change that satisfies the approved behavior.
 - Keep unrelated lifecycle, UI, release, and documentation work separate.
 - Do not add flags, configuration, abstractions, or explicit default values without a current need.
-- The developer has given standing authorization to implement requested work, run the required checks, commit the changes, squash-merge them into `master`, and push `master` to GitHub without separate publication approval.
+- The developer has given standing authorization to implement requested work, run the required checks, commit the changes, squash-merge them into `main`, and push `main` to GitHub without separate publication approval.
 - Continue through those steps unless the developer explicitly asks for a review checkpoint or tells you to stop.
 - For a UI change, show a screenshot or rendered preview before merging.
 - Do not commit scratch scripts, investigation pages, screenshots, or generated debugging files. Commit only intentional project assets.
@@ -49,7 +49,7 @@ Follow the instructions and commands documented here directly.
 
 ## GitHub and PR Rules
 
-- Squash-merge completed work into `master` and push `master` to GitHub.
+- Squash-merge completed work into `main` and push `main` to GitHub.
 - A PR is optional unless the developer requests one.
 - Never post PR replies, comments, issue comments, or reviews. Leave all GitHub text to the developer.
 - Independent review must verify that each eligible bot-authored thread is fixed, deliberately dismissed, or outdated.
@@ -85,7 +85,7 @@ Choose runtime checks that exercise the affected behavior.
 For a local restart, install the worktree's hook before relaunching the app and verify both identities afterward.
 
 - For app, hook, and integration source changes, use `make all`.
-- For documentation-only changes, run focused documentation verification; the required end-of-task rebuild and restart below still apply.
+- For documentation and other non-code changes, run focused verification without rebuilding or restarting the app.
 - For hook-contract changes, run `make contract`. The schema, fixtures, validators, and sources own hook-event inventories.
 - If feasible, add a failing regression test before you correct a bug.
 - If a test replaces a persisted input, isolate every writable companion store that can react to that input.
@@ -93,7 +93,7 @@ For a local restart, install the worktree's hook before relaunching the app and 
 - A test must not prune, migrate, or rewrite real developer state.
 - For an affected public UI image, run `make snapshots` and inspect the output.
 
-Before marking any task complete, including documentation tasks:
+Before marking a task that changes code complete:
 
 1. Read `.local/README.md` and `.local/build-and-install.command` in the main repository checkout to confirm the intended source worktree.
 2. Run that `.local/build-and-install.command` helper to rebuild, reinstall, and restart cctop, passing the intended source worktree as its first argument when needed.
