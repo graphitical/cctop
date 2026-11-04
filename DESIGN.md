@@ -296,6 +296,10 @@ when you glance at it from peripheral vision.
 
 "Headline" layout — title leads, meta is quiet, third row is conditional. No left accent bar.
 
+Appearance settings offer Comfortable (the default) and Compact session density.
+Compact keeps the title, status, metadata, source badge, timestamp, and navigation chip, hides the third row, and reduces vertical padding to 4 px.
+It applies to Active and Idle session rows without changing the panel height limit.
+
 ```
 ┌──────────────────────────────────────────────────────────┐
 │ Session name (13 px semibold)                  Status     │  ← row 1

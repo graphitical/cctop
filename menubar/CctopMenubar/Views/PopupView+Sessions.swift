@@ -127,7 +127,8 @@ extension PopupView {
             navigateIndex: showNavigateNumbers && isNavigateActive ? row.slot + 1 : nil,
             showSourceBadge: hasMultipleSources,
             isSelected: selectedSessionIdentity == row.id,
-            relativeTimeNow: relativeTimeNow
+            relativeTimeNow: relativeTimeNow,
+            isCompact: compactSessionRows
         )
         .id(row.id)
         .onTapGesture { focusSession(row.session) }

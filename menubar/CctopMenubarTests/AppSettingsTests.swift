@@ -1,3 +1,5 @@
+import AppKit
+import SwiftUI
 import XCTest
 @testable import CctopMenubar
 
@@ -17,6 +19,27 @@ final class AppSettingsTests: XCTestCase {
     func testAllCasesOrder() {
         let cases = AppearanceMode.allCases
         XCTAssertEqual(cases, [.system, .light, .dark])
+    }
+
+    @MainActor
+    func testCompactSessionRowsFitMoreSessionsWithoutShrinkingText() {
+        let now = Date()
+        for status: SessionStatus in [.working, .waitingPermission, .waitingInput, .idle] {
+            let session = SessionData.mock(
+                sessionName: "Investigate a long-running task with several details", status: status,
+                lastTool: "Bash", lastToolDetail: "cargo test --workspace",
+                notificationMessage: "Allow this command?", source: SessionData.codexSource
+            )
+            let comfortable = NSHostingView(rootView: SessionCardView(
+                session: session, navigateIndex: 1, showSourceBadge: true, relativeTimeNow: now
+            ).frame(width: 320)).fittingSize
+            let compact = NSHostingView(rootView: SessionCardView(
+                session: session, navigateIndex: 1, showSourceBadge: true, relativeTimeNow: now, isCompact: true
+            ).frame(width: 320)).fittingSize
+
+            XCTAssertEqual(compact.width, comfortable.width)
+            XCTAssertLessThanOrEqual(compact.height, comfortable.height - (status == .idle ? 8 : 20))
+        }
     }
 
     func testFileAccessSettingsURLsOpenPrivacySystemSettings() {

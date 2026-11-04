@@ -8,6 +8,7 @@ struct SettingsSection: View {
     var onOpenUpdater: (() -> Void)?
     @ObservedObject private var themeManager = ThemeManager.shared
     @StateObject private var notificationPermission: NotificationPermissionController
+    @AppStorage("compactSessionRows") private var compactSessionRows = false
     @AppStorage("appearanceMode") private var appearanceMode = "system"
     @State private var launchAtLogin = SMAppService.mainApp.status == .enabled
     @State private var showFileAccessHelp = false
@@ -63,6 +64,8 @@ struct SettingsSection: View {
                     AmberSegmentedPicker(options: AppearanceMode.allCases.map { ($0.rawValue, $0.label) }, selection: $appearanceMode)
                 }
                 .onChange(of: appearanceMode) { _ in UserDefaults.standard.synchronize() }
+                groupedDivider
+                settingsRow("Density") { AmberSegmentedPicker(options: [(false, "Comfortable"), (true, "Compact")], selection: $compactSessionRows) }
             }
 
             sectionHeader("Shortcuts")

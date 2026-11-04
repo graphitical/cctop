@@ -41,6 +41,7 @@ struct PopupView: View {
     @State private var lastFocusTime: Date = .distantPast
     @State private var piBannerInstalled = false
     @State var relativeTimeNow = Date()
+    @AppStorage("compactSessionRows") var compactSessionRows = false
     @AppStorage("ocBannerDismissed") private var ocBannerDismissed = false
     @AppStorage("piBannerDismissed") private var piBannerDismissed = false
 
@@ -104,6 +105,7 @@ struct PopupView: View {
             handleNavAction(action)
         }
         .onReceive(relativeTimeRefresh) { relativeTimeNow = $0 }
+        .onChange(of: compactSessionRows) { _ in notifyLayoutChanged() }
         .onChange(of: selectedTab) { handleSelectedTabChanged($0) }
         .onChange(of: recentTargets.map(\.id)) { _ in ensureSelectedTabAvailable() }
         .onChange(of: actionableCleanupCandidates) { _ in handleCleanupCandidatesChanged() }

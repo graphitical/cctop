@@ -20,6 +20,22 @@ final class QASnapshotTests: XCTestCase {
 
     // MARK: - Session count scenarios
 
+    func testSessionDensity() throws {
+        let suite = "cctop-density-snapshot-\(UUID().uuidString)"
+        let defaults = try XCTUnwrap(UserDefaults(suiteName: suite))
+        defer { defaults.removePersistentDomain(forName: suite) }
+        for compact in [false, true] {
+            defaults.set(compact, forKey: "compactSessionRows")
+            let view = PopupView(userSessions: userSessions(fromDataFixtures: SessionData.qaFiveSessions),
+                                 updater: DisabledUpdater(), pluginManager: inertPluginManager())
+                .defaultAppStorage(defaults)
+            for colorScheme in [ColorScheme.light, .dark] {
+                try renderPanelScreenshot(view: view, colorScheme: colorScheme, directoryName: "cctop-qa",
+                                          filename: "session-density-\(compact ? "compact" : "comfortable")-\(colorScheme).png")
+            }
+        }
+    }
+
     func testEmpty() throws {
         try renderSnapshot(sessions: [], name: "01-empty")
     }

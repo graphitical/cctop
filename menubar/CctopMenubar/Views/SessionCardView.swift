@@ -7,6 +7,7 @@ struct SessionCardView: View {
     var showSourceBadge = false
     var isSelected = false
     var relativeTimeNow = Date()
+    var isCompact = false
 
     @State private var isHovered = false
     @Environment(\.colorScheme) private var colorScheme
@@ -15,10 +16,10 @@ struct SessionCardView: View {
         VStack(alignment: .leading, spacing: 0) {
             titleRow
             metaRow
-            thirdRowContent
+            if !isCompact { thirdRowContent }
         }
         .padding(.horizontal, 9)
-        .padding(.vertical, 8)
+        .padding(.vertical, isCompact ? 4 : 8)
         .cardSelectionStyle(isSelected: isSelected, isHovered: isHovered)
         .padding(.horizontal, AppChrome.rowSelectionHorizontalInset)
         // Dormant = desktop host app is not running; mute it so live work reads first.
