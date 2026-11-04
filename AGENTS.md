@@ -14,6 +14,8 @@ Use this file for rules that apply to most cctop work. Use these sources for det
 - Read [video/framework.md](video/framework.md) for the video build, quality verification, and publication workflow.
 
 Keep canonical repository guidance in this file. Pointer files, such as `CLAUDE.md`, must point to this file instead of copying it.
+Repository work does not require additional workflow skills.
+Follow the instructions and commands documented here directly.
 
 ## Required Development Rules
 
@@ -32,11 +34,7 @@ Keep canonical repository guidance in this file. Pointer files, such as `CLAUDE.
 - Start each independent change from the latest fetched `origin/master` in an isolated worktree.
 - For a stacked child, start from the exact approved parent head and target the parent branch.
 - Until GitHub retargets the child after the parent merges, keep the parent branch as the target.
-- For every PR-capable cctop task, the chief must use `$cctop-chief-workflow` to assign one visible Codex driver.
-- The visible driver must create and verify a persistent goal before repository or GitHub inspection.
-- An internal subagent does not replace the visible driver.
 - The active driver owns edits, tests, commits, PR publication, CI fixes, and the approval loop.
-- If team support is available, pair each non-trivial driver with one read-only navigator for the full task.
 - Keep exactly one active writer for a branch or PR.
 - Make the smallest change that satisfies the approved behavior.
 - Keep unrelated lifecycle, UI, release, and documentation work separate.
@@ -45,7 +43,7 @@ Keep canonical repository guidance in this file. Pointer files, such as `CLAUDE.
 - For a UI change, show a screenshot or rendered preview before publication approval.
 - Treat no response as no approval. After explicit approval, continue without a second routine approval.
 - Do not commit scratch scripts, investigation pages, screenshots, or generated debugging files. Commit only intentional project assets.
-- After you open or update a PR, invoke `$pr-until-approved`. Keep the approval loop with the active driver.
+- After you open or update a PR, check CI and review feedback, address consequential defects, and keep the approval loop with the active driver.
 
 ## GitHub and PR Rules
 
@@ -54,7 +52,7 @@ Keep canonical repository guidance in this file. Pointer files, such as `CLAUDE.
 - Before reporting the PR ready, the active driver must resolve each verified thread. This requirement includes unknown bot authors.
 - Require explicit developer authorization before you resolve a human-authored thread.
 - Before final PR closeout, verify the title, body, changed files, current head, CI, and review-thread state.
-- Use `$pull-request-description` for PR text structure. Do not copy general PR-writing rules into this file.
+- Follow the developer's PR description guidance.
 
 ## Code Review Rules
 
@@ -63,11 +61,12 @@ Keep canonical repository guidance in this file. Pointer files, such as `CLAUDE.
 - **Scope and proportionality:** Review the approved behavior instead of an adjacent redesign.
 - If the smallest safe correction needs extra machinery, require only the necessary part.
 - **Evidence and safe path:** Name the trigger, affected users or data, concrete harm, and smallest safe correction.
-- Use `$implementation-review-gate` before publication of a non-trivial change.
+- Review non-trivial changes against the approved behavior and repository rules before publication.
 
 ## Runtime and Test Safety
 
-Before any runtime action, use `$cctop-runtime-lane`. Request the private lease, wait for an explicit grant, and verify ownership.
+Keep runtime actions serial so builds, tests, and app restarts do not interfere with one another.
+Check for an active build or test run before starting another, and verify the running app's worktree before replacing it.
 
 Runtime actions include:
 
@@ -78,16 +77,17 @@ Runtime actions include:
 - A Computer Use pass against cctop.
 - A fixture app or end-to-end test that can publish shared display state.
 
-Use `$cctop-e2e-testing` to define risk-based runtime proof. Use `$cctop-restart` for a local restart request.
+Choose runtime checks that exercise the affected behavior.
+For a local restart, install the worktree's hook before relaunching the app and verify both identities afterward.
 
-- For app, hook, and integration source changes, use `make all` after you obtain the runtime lease.
+- For app, hook, and integration source changes, use `make all`.
 - For documentation-only changes, run focused documentation verification. Do not run app or test-host work without a relevant risk.
 - For hook-contract changes, run `make contract`. The schema, fixtures, validators, and sources own hook-event inventories.
 - If feasible, add a failing regression test before you correct a bug.
 - If a test replaces a persisted input, isolate every writable companion store that can react to that input.
 - Never combine a fixture session inventory with real developer preferences or files.
 - A test must not prune, migrate, or rewrite real developer state.
-- For an affected public UI image, run `make snapshots` under the runtime lease and inspect the output.
+- For an affected public UI image, run `make snapshots` and inspect the output.
 
 Before reporting runtime readiness:
 
@@ -130,9 +130,9 @@ Use `~/.cctop/logs/<session-id>.log` and `~/.cctop/logs/_errors.log` to locate h
 
 ## Focused Workflow Triggers
 
-- For video story or storyboard work, use `$video-storyboard` and [video/framework.md](video/framework.md).
-- After approval of a video render, use `$video-assets`. Do not upload media through ad hoc release commands.
-- For a release request, use `$release`. That skill owns release verification, signing, appcast, and publication.
+- For video story or storyboard work, follow [video/framework.md](video/framework.md).
+- After approval of a video render, follow [video/DELIVERABLES.md](video/DELIVERABLES.md) for publication.
+- For a release request, verify the release, signing, appcast, and publication using the repository's release tooling.
 - For website changes, follow [site/README.md](site/README.md).
-- For SwiftUI debugging, use `$swiftui-debugging` and follow [DESIGN.md](DESIGN.md).
+- For SwiftUI debugging, follow [DESIGN.md](DESIGN.md) and inspect the relevant state and view ownership.
 - For build and test commands, use the `Makefile` instead of duplicating its command inventory here.
