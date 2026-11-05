@@ -13,8 +13,8 @@ class ThemeManager: ObservableObject {
 
     init(defaults: UserDefaults = .standard) {
         self.defaults = defaults
-        let saved = defaults.string(forKey: Self.defaultsKey) ?? "claude"
-        self.current = AppTheme(rawValue: saved) ?? .claude
+        let saved = defaults.string(forKey: Self.defaultsKey) ?? "codex"
+        self.current = AppTheme(rawValue: saved) ?? .codex
     }
 
     var themeId: String { current.rawValue }

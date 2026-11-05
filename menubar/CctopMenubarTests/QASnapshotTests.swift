@@ -273,7 +273,7 @@ final class QASnapshotTests: XCTestCase {
                 )
             }
         }
-        ThemeManager.shared.setTheme(.claude)
+        ThemeManager.shared.setTheme(.codex)
     }
 
     func testRefinedPanelContextSnapshots() throws {
@@ -306,7 +306,7 @@ final class QASnapshotTests: XCTestCase {
                 colorScheme: colorScheme
             )
         }
-        ThemeManager.shared.setTheme(.claude)
+        ThemeManager.shared.setTheme(.codex)
     }
 
     // MARK: - Live update simulation

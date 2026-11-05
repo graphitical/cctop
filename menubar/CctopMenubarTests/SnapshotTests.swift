@@ -545,7 +545,7 @@ final class SnapshotTests: XCTestCase {
             try renderScreenshot(view: view, colorScheme: .light, filename: "theme-\(theme.rawValue)-light.png")
         }
         // Restore default
-        ThemeManager.shared.setTheme(.claude)
+        ThemeManager.shared.setTheme(.codex)
     }
 
     @discardableResult

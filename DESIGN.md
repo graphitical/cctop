@@ -58,6 +58,7 @@ padding's sake.
 ## 2. Color Palette & Roles
 
 cctop ships **five named palettes**, each with explicit dark and light variants.
+Codex is the default when no valid theme preference has been saved.
 The Swift app exposes them via the semantic token API in
 `menubar/CctopMenubar/Models/Color+Theme.swift`; the site mirrors the
 **Tokyo Night dark** palette via CSS custom properties in `site/index.html`.

@@ -19,9 +19,9 @@ final class ThemeManagerTests: XCTestCase {
         super.tearDown()
     }
 
-    func testDefaultThemeIsClaude() {
+    func testDefaultThemeIsCodex() {
         let manager = ThemeManager(defaults: defaults)
-        XCTAssertEqual(manager.current, .claude)
+        XCTAssertEqual(manager.current, .codex)
     }
 
     func testSetThemeUpdatesCurrentValue() {
@@ -41,17 +41,17 @@ final class ThemeManagerTests: XCTestCase {
 
     func testPersistedThemeSurvivesReinitialization() {
         let manager = ThemeManager(defaults: defaults)
-        manager.setTheme(.codex)
+        manager.setTheme(.claude)
 
         // Create a new manager reading from the same defaults — simulates app relaunch
         let manager2 = ThemeManager(defaults: defaults)
-        XCTAssertEqual(manager2.current, .codex)
+        XCTAssertEqual(manager2.current, .claude)
     }
 
-    func testUnknownStoredValueFallsToClaude() {
+    func testUnknownStoredValueFallsToCodex() {
         defaults.set("nonexistent", forKey: ThemeManager.defaultsKey)
         let manager = ThemeManager(defaults: defaults)
-        XCTAssertEqual(manager.current, .claude)
+        XCTAssertEqual(manager.current, .codex)
     }
 
     func testMacOSRefinementChromeRolesResolveForEveryThemeAndAppearance() {
