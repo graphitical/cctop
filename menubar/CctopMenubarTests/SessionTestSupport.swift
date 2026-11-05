@@ -51,6 +51,7 @@ extension XCTestCase {
             desktopAppConnection: DesktopAppConnectionLookup { _ in false },
             processAlive: { $0.pid == testProcessID },
             notificationsEnabled: { false },
+            idleTimeout: { IdleTimeoutSettings.defaultSeconds },
             notificationClient: SessionNotificationClient(
                 add: { _, completion in completion(nil) },
                 removePending: { _ in },

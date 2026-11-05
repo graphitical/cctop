@@ -77,6 +77,8 @@ struct SettingsSection: View {
 
             sectionHeader("General")
             settingsGroup {
+                IdleTimeoutSettingsRow()
+                groupedDivider
                 settingsRow("Launch at Login") {
                     Toggle("", isOn: $launchAtLogin)
                         .toggleStyle(.switch).controlSize(.mini)

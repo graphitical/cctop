@@ -4,6 +4,22 @@ import XCTest
 @testable import CctopMenubar
 
 final class AppSettingsTests: XCTestCase {
+    func testIdleTimeoutDefaultsAndSavedMinutes() throws {
+        let suiteName = "cctop-idle-timeout-\(UUID().uuidString)"
+        let defaults = try XCTUnwrap(UserDefaults(suiteName: suiteName))
+        defer { defaults.removePersistentDomain(forName: suiteName) }
+
+        XCTAssertEqual(IdleTimeoutSettings.timeout(in: defaults), 3_600)
+        defaults.set(15, forKey: IdleTimeoutSettings.defaultsKey)
+        XCTAssertEqual(IdleTimeoutSettings.timeout(in: defaults), 900)
+        defaults.set(120, forKey: IdleTimeoutSettings.defaultsKey)
+        XCTAssertEqual(IdleTimeoutSettings.timeout(in: defaults), 7_200)
+        for minutes in [0, -1] {
+            defaults.set(minutes, forKey: IdleTimeoutSettings.defaultsKey)
+            XCTAssertEqual(IdleTimeoutSettings.timeout(in: defaults), 60)
+        }
+    }
+
     func testAppearanceModeRawValues() {
         XCTAssertEqual(AppearanceMode.system.rawValue, "system")
         XCTAssertEqual(AppearanceMode.light.rawValue, "light")

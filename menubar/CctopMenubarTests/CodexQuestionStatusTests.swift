@@ -42,7 +42,7 @@ final class CodexQuestionStatusTests: XCTestCase {
     func testBlockedRemainsVisibleWhenTheUserHasBeenAway() {
         var blocked = SessionData.mock(status: .waitingAnswer, source: "codex")
         blocked.lastActivity = Date().addingTimeInterval(-7_200)
-        XCTAssertEqual(SessionManager.adjustIdleTimeout(blocked, now: Date()).status, .waitingAnswer)
+        XCTAssertEqual(SessionManager.adjustIdleTimeout(blocked, now: Date(), timeout: IdleTimeoutSettings.defaultSeconds).status, .waitingAnswer)
         XCTAssertTrue(blocked.status.needsAttention)
         XCTAssertEqual(StatusCounts(userSessions: userSessions(fromDataFixtures: [blocked])).attention, 1)
     }

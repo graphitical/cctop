@@ -28,6 +28,11 @@ Dormant sessions also appear in the Idle tab.
 Fresh work or a status that needs attention returns a connected session to Active.
 These tab rules do not change lifecycle retention or archive behavior.
 
+Settings → General → **Idle after** controls how long a session can wait for the next prompt before its displayed status becomes Idle.
+The delay defaults to 60 minutes and accepts a positive whole number of minutes.
+Changes take effect on the next session refresh without restarting cctop.
+Working sessions, blocked questions, and permission requests keep their existing status.
+
 ```mermaid
 flowchart TD
     A["Session JSON files"] --> B["Decode as SessionData"]

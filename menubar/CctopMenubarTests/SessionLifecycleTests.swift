@@ -1385,15 +1385,15 @@ final class SessionLifecycleTests: XCTestCase {
         session.lastActivity = Date(timeIntervalSince1970: 1_000_000)
 
         let justUnderTimeout = session.lastActivity.addingTimeInterval(3_599)
-        XCTAssertEqual(SessionManager.adjustIdleTimeout(session, now: justUnderTimeout).status, .waitingInput)
+        XCTAssertEqual(SessionManager.adjustIdleTimeout(session, now: justUnderTimeout, timeout: IdleTimeoutSettings.defaultSeconds).status, .waitingInput)
 
         let pastTimeout = session.lastActivity.addingTimeInterval(3_601)
-        XCTAssertEqual(SessionManager.adjustIdleTimeout(session, now: pastTimeout).status, .idle)
+        XCTAssertEqual(SessionManager.adjustIdleTimeout(session, now: pastTimeout, timeout: IdleTimeoutSettings.defaultSeconds).status, .idle)
 
         // Only waitingInput times out; other statuses pass through untouched.
         var working = session
         working.status = .working
-        XCTAssertEqual(SessionManager.adjustIdleTimeout(working, now: pastTimeout).status, .working)
+        XCTAssertEqual(SessionManager.adjustIdleTimeout(working, now: pastTimeout, timeout: IdleTimeoutSettings.defaultSeconds).status, .working)
     }
 }
 

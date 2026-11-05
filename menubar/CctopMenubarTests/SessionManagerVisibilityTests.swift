@@ -19,6 +19,45 @@ final class SessionManagerVisibilityTests: XCTestCase {
     // MARK: - Manual session visibility
 
     @MainActor
+    func testChangingIdleThresholdReclassifiesWaitingSessionsWithoutRestartingOrRewritingThem() throws {
+        let suiteName = "cctop-idle-threshold-\(UUID().uuidString)"
+        let defaults = try XCTUnwrap(UserDefaults(suiteName: suiteName))
+        defer { defaults.removePersistentDomain(forName: suiteName) }
+        var sources = try isolatedSessionDataSources(prefix: "cctop-idle-threshold")
+        let now = Date(timeIntervalSince1970: 1_900_000_000)
+        sources.now = { now }
+        sources.idleTimeout = { IdleTimeoutSettings.timeout(in: defaults) }
+        var session = SessionData.mock(
+            id: "conversation", status: .waitingInput,
+            pid: UInt32(ProcessInfo.processInfo.processIdentifier), source: SessionData.opencodeSource
+        )
+        session.lastActivity = now.addingTimeInterval(-16 * 60)
+        let path = sources.sessionsDir.appendingPathComponent("session.json")
+        try session.writeToFile(path: path.path)
+        let originalData = try Data(contentsOf: path)
+        defaults.set(15, forKey: IdleTimeoutSettings.defaultsKey)
+        let manager = SessionManager(
+            historyManager: HistoryManager(historyDir: sources.sessionsDir.appendingPathComponent("history")),
+            dataSources: sources, startMonitoring: false
+        )
+        XCTAssertEqual(manager.userSessions.first?.status, .idle)
+        XCTAssertEqual(SessionDisplayPolicy.idleSessions(from: manager.userSessions).count, 1)
+
+        defaults.set(60, forKey: IdleTimeoutSettings.defaultsKey)
+        manager.loadSessions()
+        XCTAssertEqual(manager.userSessions.first?.status, .waitingInput)
+        XCTAssertEqual(SessionDisplayPolicy.activeSessions(from: manager.userSessions).count, 1)
+        XCTAssertEqual(try Data(contentsOf: path), originalData)
+
+        defaults.set(5, forKey: IdleTimeoutSettings.defaultsKey)
+        session.status = .waitingAnswer
+        try session.writeToFile(path: path.path)
+        manager.loadSessions()
+        XCTAssertEqual(manager.userSessions.first?.status, .waitingAnswer)
+        XCTAssertEqual(SessionDisplayPolicy.activeSessions(from: manager.userSessions).count, 1)
+    }
+
+    @MainActor
     func testMarkIdlePersistsWithoutChangingSessionDataAndFreshActivityRestoresAttention() throws {
         let root = NSTemporaryDirectory() + "cctop-mark-idle-\(UUID().uuidString)"
         let sessionsDir = (root as NSString).appendingPathComponent("sessions")

@@ -353,17 +353,14 @@ class SessionManager: ObservableObject {
         if let observation = codexQuestionObservations[session.sessionId], observation.activity == session.lastActivity {
             result = Self.applyingCodexQuestionStatus(observation.status, to: result)
         }
-        result = Self.adjustIdleTimeout(result, now: dataSources.now())
+        result = Self.adjustIdleTimeout(result, now: dataSources.now(), timeout: dataSources.idleTimeout())
         return result
     }
 
-    private static let idleTimeoutSeconds: TimeInterval = 3600 // 60 minutes
-
-    /// If a session has been in `waitingInput` for over 60 minutes, treat it as
-    /// `idle` for display. The user likely walked away.
-    nonisolated static func adjustIdleTimeout(_ session: SessionData, now: Date) -> SessionData {
+    /// Treat sessions waiting for the next prompt as idle after the configured delay.
+    nonisolated static func adjustIdleTimeout(_ session: SessionData, now: Date, timeout: TimeInterval) -> SessionData {
         guard session.status == .waitingInput,
-              now.timeIntervalSince(session.lastActivity) > Self.idleTimeoutSeconds else {
+              now.timeIntervalSince(session.lastActivity) > timeout else {
             return session
         }
         var adjusted = session

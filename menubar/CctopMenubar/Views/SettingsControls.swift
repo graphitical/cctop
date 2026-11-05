@@ -1,6 +1,34 @@
 import KeyboardShortcuts
 import SwiftUI
 
+struct IdleTimeoutSettingsRow: View {
+    @AppStorage(IdleTimeoutSettings.defaultsKey) private var minutes = IdleTimeoutSettings.defaultMinutes
+
+    var body: some View {
+        HStack(spacing: 8) {
+            Text("Idle after")
+                .font(.system(size: 11, weight: .medium))
+                .foregroundStyle(Color.textPrimary)
+            Spacer(minLength: 8)
+            TextField("Minutes", value: $minutes, format: .number.grouping(.never))
+                .textFieldStyle(.roundedBorder)
+                .controlSize(.small)
+                .font(.system(size: 11))
+                .multilineTextAlignment(.trailing)
+                .frame(width: 46)
+                .accessibilityLabel("Idle after, in minutes")
+            Text("min")
+                .font(.system(size: 10))
+                .foregroundStyle(Color.textSecondary)
+        }
+        .padding(.horizontal, AppChrome.settingsRowHorizontalPadding)
+        .padding(.vertical, 4)
+        .frame(minHeight: 25)
+        .onChange(of: minutes) { value in minutes = max(1, value) }
+        .help("Move sessions waiting for the next prompt to Idle after this many minutes.")
+    }
+}
+
 struct SettingsSecondaryRow<Content: View>: View {
     let spacing: CGFloat
     let content: Content

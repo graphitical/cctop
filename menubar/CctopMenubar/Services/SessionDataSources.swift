@@ -13,6 +13,7 @@ struct SessionDataSources {
     var desktopAppConnection: DesktopAppConnectionLookup
     var processAlive: (SessionData) -> Bool
     var notificationsEnabled: () -> Bool
+    var idleTimeout: () -> TimeInterval
     var notificationClient: SessionNotificationClient = .live
     var manualSessionVisibility: ManualSessionVisibilityStore = .live
     var readCodexQuestions: (@Sendable (Set<String>) async -> [String: CodexQuestionStatus])?
@@ -35,6 +36,7 @@ struct SessionDataSources {
             desktopAppConnection: .live,
             processAlive: { $0.isAlive },
             notificationsEnabled: { UserDefaults.standard.bool(forKey: "notificationsEnabled") },
+            idleTimeout: { IdleTimeoutSettings.timeout(in: .standard) },
             readCodexQuestions: readCodexQuestions,
             now: Date.init
         )
