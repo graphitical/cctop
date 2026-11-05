@@ -13,9 +13,9 @@ python3 -m http.server 8000
 # open http://localhost:8000/site/
 ```
 
-Screenshots are pulled from `https://raw.githubusercontent.com/st0012/cctop/master/docs/`,
+Screenshots are pulled from `https://raw.githubusercontent.com/graphitical/cctop/main/docs/`,
 so updates to `docs/*.png` and `docs/*.gif` show up on the site automatically once
-they land on master — no site change required.
+they land on main — no site change required.
 
 ## What auto-syncs vs what you have to update by hand
 

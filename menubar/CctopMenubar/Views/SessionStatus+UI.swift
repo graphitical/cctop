@@ -12,7 +12,7 @@ extension SessionStatus {
         case .waitingPermission, .waitingAnswer: return theme.statusPermission
         case .waitingInput, .needsAttention: return theme.statusAttention
         case .working: return theme.statusWorking
-        case .compacting: return theme.agentBadge
+        case .compacting: return theme.statusWorking
         case .idle: return theme.statusIdle
         }
     }
@@ -45,7 +45,7 @@ extension SessionData {
     var isReadyForNextTask: Bool { isCodex && status == .waitingInput }
 
     func statusColorPair(in theme: AppTheme) -> AppTheme.ColorPair {
-        isReadyForNextTask ? theme.statusIdle : status.colorPair(in: theme)
+        isReadyForNextTask ? theme.statusReady : status.colorPair(in: theme)
     }
 
     var statusColor: Color {

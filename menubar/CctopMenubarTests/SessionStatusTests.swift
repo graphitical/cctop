@@ -1,3 +1,4 @@
+import AppKit
 import XCTest
 @testable import CctopMenubar
 
@@ -97,7 +98,7 @@ final class SessionStatusTests: XCTestCase {
         XCTAssertEqual(displayed.status, .working)
         XCTAssertEqual(displayed.statusLabel, "Working")
         XCTAssertFalse(displayed.shouldPostAttentionNotification)
-        XCTAssertEqual(StatusCounts(userSessions: manager.userSessions), .init(permission: 0, attention: 0, working: 1, idle: 0))
+        XCTAssertEqual(StatusCounts(userSessions: manager.userSessions), .init(permission: 0, attention: 0, working: 1, ready: 0))
         let snapshot = DisplayStateWriter.snapshot(
             userSessions: manager.userSessions, theme: .claude,
             appRunning: true, appIdentity: nil, now: Date()
@@ -106,4 +107,29 @@ final class SessionStatusTests: XCTestCase {
         XCTAssertEqual(snapshot.sessions.first?.status, "working")
         XCTAssertEqual(try Data(contentsOf: path), persisted)
     }
+    func testKeyboardColorMappingKeepsReadySeparateFromIdleAndInput() {
+        let ready = SessionData.mock(status: .waitingInput, source: "codex")
+        let waiting = SessionData.mock(status: .waitingInput, source: "cc")
+        let idle = SessionData.mock(status: .idle, source: "codex")
+        var pending = SessionData.mock(status: .working, source: "codex")
+        pending.hasPendingAsyncQuestion = true
+        for theme in AppTheme.allCases {
+            for appearance in [NSAppearance.Name.darkAqua, .aqua] {
+                let appearance = NSAppearance(named: appearance)!
+                func color(_ session: SessionData) -> NSColor {
+                    session.statusColorPair(in: theme).resolve(appearance)
+                }
+                XCTAssertEqual(color(ready), theme.statusReady.resolve(appearance))
+                XCTAssertEqual(color(waiting), theme.statusAttention.resolve(appearance))
+                XCTAssertEqual(color(pending), theme.statusWorking.resolve(appearance))
+                XCTAssertNotEqual(color(ready), color(idle))
+                XCTAssertNotEqual(color(ready), color(pending))
+                for status in [SessionStatus.waitingPermission, .waitingAnswer, .needsAttention] {
+                    XCTAssertEqual(color(.mock(status: status)), color(waiting))
+                }
+                XCTAssertEqual(color(.mock(status: .compacting)), color(pending))
+            }
+        }
+    }
+
 }

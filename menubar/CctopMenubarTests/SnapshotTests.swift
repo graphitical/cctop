@@ -220,13 +220,13 @@ final class SnapshotTests: XCTestCase {
             ),
             recentProofSession(
                 projectPath: projectContainerPath, projectName: "projects",
-                branch: "main", source: SessionData.codexSource,
+                branch: "main", source: SessionData.opencodeSource,
                 terminal: TerminalInfo(program: "Cursor"),
                 endedAt: now.addingTimeInterval(-60)
             ),
             recentProofSession(
                 projectPath: "/tmp/cctop-noise", projectName: "cctop-noise",
-                branch: "main", source: SessionData.codexSource,
+                branch: "main", source: SessionData.opencodeSource,
                 terminal: TerminalInfo(program: "Cursor"),
                 endedAt: now.addingTimeInterval(-90)
             ),
@@ -250,13 +250,13 @@ final class SnapshotTests: XCTestCase {
             ),
             recentProofSession(
                 projectPath: missingPath, projectName: "missing-noise",
-                branch: "main", source: SessionData.codexSource,
+                branch: "main", source: SessionData.opencodeSource,
                 terminal: TerminalInfo(program: "Code"),
                 endedAt: now.addingTimeInterval(-210)
             ),
             recentProofSession(
                 projectPath: durableEditorPath, projectName: "cctop",
-                branch: "codex/recent-projects-open-project", source: SessionData.codexSource,
+                branch: "codex/recent-projects-open-project", source: SessionData.opencodeSource,
                 terminal: TerminalInfo(program: "Cursor", bundleId: "com.todesktop.230313mzl4w4u92"),
                 endedAt: now.addingTimeInterval(-240)
             ),
@@ -274,7 +274,7 @@ final class SnapshotTests: XCTestCase {
             ),
             recentProofSession(
                 projectPath: durableFallbackPath, projectName: "rdoc",
-                branch: "unknown", source: SessionData.codexSource,
+                branch: "unknown", source: SessionData.opencodeSource,
                 terminal: TerminalInfo(program: "Codex"),
                 endedAt: now.addingTimeInterval(-420)
             ),
@@ -283,7 +283,8 @@ final class SnapshotTests: XCTestCase {
         let recentProjects = HistoryManager.buildRecentProjects(
             from: sessions,
             projectPathExists: {
-                ["/", home, projectContainerPath, durableEditorPath, durableTerminalPath, durableFallbackPath, cachePath].contains($0)
+                ["/", home, projectContainerPath, durableEditorPath, durableTerminalPath, durableFallbackPath, cachePath]
+                    .map(HistoryManager.canonicalRecentProjectPath).contains($0)
             }
         )
 
@@ -296,7 +297,7 @@ final class SnapshotTests: XCTestCase {
         XCTAssertEqual(recentProjects[1].openActionLabel, "Open in Ghostty")
         XCTAssertEqual(recentProjects[2].editorIcon, "folder")
         XCTAssertEqual(recentProjects[2].openActionLabel, "Open Project Folder")
-        XCTAssertEqual(recentProjects[2].metadataEvidenceText, "Codex \u{00B7} 1 session")
+        XCTAssertEqual(recentProjects[2].metadataEvidenceText, "opencode \u{00B7} 1 session")
 
         let view = PopupView(
             userSessions: [],

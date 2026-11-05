@@ -122,7 +122,7 @@ struct SessionCardView: View {
             HStack(spacing: 0) {
                 Text("› ")
                     .font(.system(size: 10.5, design: .monospaced))
-                    .foregroundStyle(Color.statusGreen.opacity(0.7))
+                    .foregroundStyle(Color.statusWorking.opacity(0.7))
                 Text(cmd)
                     .font(.system(size: 10.5, design: .monospaced))
                     .foregroundStyle(Color.textSecondary)
@@ -153,13 +153,13 @@ struct SessionCardView: View {
             case .idle:
                 statusText("Idle", color: Color.statusIdle)
             case .working:
-                statusDotLabel("Working", dotColor: Color.statusGreen, textColor: Color.statusWorkingText)
+                statusDotLabel("Working", dotColor: Color.statusWorking, textColor: Color.statusWorkingText)
             case .compacting:
-                statusDotLabel("Compacting", dotColor: Color.agentBadge)
+                statusDotLabel("Compacting", dotColor: Color.statusWorking, textColor: Color.statusWorkingText)
             case .waitingPermission:
                 permissionStatusLabel
             case .waitingInput where session.isReadyForNextTask:
-                statusDotLabel(session.statusLabel, dotColor: session.statusColor)
+                statusDotLabel(session.statusLabel, dotColor: session.statusColor, textColor: Color.statusReadyText)
             case .waitingAnswer:
                 statusText(session.statusLabel, color: Color.statusPermissionText)
             case .waitingInput, .needsAttention:
@@ -216,7 +216,7 @@ struct SessionCardView: View {
                 .frame(width: 16, height: 16)
             Text("\(idx)")
                 .font(.system(size: 10, weight: .bold))
-                .foregroundStyle(session.isReadyForNextTask ? Color.panelBackground : Color.white)
+                .foregroundStyle(colorScheme == .dark ? Color.black : Color.white)
         }
         .accessibilityLabel("Press \(idx) to jump")
     }

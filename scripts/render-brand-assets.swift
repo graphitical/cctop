@@ -19,10 +19,10 @@ private let brandSegments: [(fraction: CGFloat, color: NSColor)] = [
     (13 / 96, NSColor(srgbRed: 0x4D / 255, green: 0x50 / 255, blue: 0x58 / 255, alpha: 1)),
 ]
 private let liveStatusSegments: [(fraction: CGFloat, color: NSColor)] = [
-    (52 / 96, NSColor(srgbRed: 0x9E / 255, green: 0xCE / 255, blue: 0x6A / 255, alpha: 1)),
+    (52 / 96, NSColor(srgbRed: 0x7A / 255, green: 0xA2 / 255, blue: 0xD6 / 255, alpha: 1)),
     (19 / 96, NSColor(srgbRed: 0xFF / 255, green: 0x9E / 255, blue: 0x64 / 255, alpha: 1)),
-    (12 / 96, NSColor(srgbRed: 0xF7 / 255, green: 0x76 / 255, blue: 0x8E / 255, alpha: 1)),
-    (13 / 96, NSColor(srgbRed: 0x69 / 255, green: 0x71 / 255, blue: 0x8E / 255, alpha: 1)),
+    (12 / 96, NSColor(srgbRed: 0xFF / 255, green: 0x9E / 255, blue: 0x64 / 255, alpha: 1)),
+    (13 / 96, NSColor(srgbRed: 0x9E / 255, green: 0xCE / 255, blue: 0x6A / 255, alpha: 1)),
 ]
 
 private func bitmap(size: NSSize, draw: () -> Void) throws -> NSBitmapImageRep {

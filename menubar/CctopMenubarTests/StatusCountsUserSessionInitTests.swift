@@ -16,7 +16,7 @@ final class StatusCountsUserSessionInitTests: XCTestCase {
 
             let counts = StatusCounts(userSessions: userSessions(fromDataFixtures: [session]))
 
-            XCTAssertEqual(counts.idle, 0)
+            XCTAssertEqual(counts.ready, 0)
             XCTAssertEqual(counts.total, 0)
         }
     }
@@ -72,7 +72,7 @@ final class StatusCountsUserSessionInitTests: XCTestCase {
             SessionData.mock(id: "7", status: .needsAttention),
         ])
         let counts = StatusCounts(userSessions: userSessions)
-        XCTAssertEqual(counts.idle, 0)
+        XCTAssertEqual(counts.ready, 0)
         XCTAssertEqual(counts.working, 2)  // working + compacting
         XCTAssertEqual(counts.permission, 1)
         XCTAssertEqual(counts.attention, 2)  // waitingInput + needsAttention

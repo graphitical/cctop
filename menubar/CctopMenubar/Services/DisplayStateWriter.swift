@@ -156,7 +156,7 @@ final class DisplayStateWriter {
     }
 
     /// Hardware keys always use the same dark status palette as cctop's other
-    /// persistent surfaces, including the compacting badge color.
+    /// persistent surfaces, with blue for both Working and Compacting.
     static func hexColor(for session: SessionData, theme: AppTheme) -> String {
         let color = session.statusColorPair(in: theme).dark
         let srgb = color.usingColorSpace(.sRGB) ?? color

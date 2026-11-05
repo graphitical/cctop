@@ -68,10 +68,14 @@ final class ThemeManagerTests: XCTestCase {
                 let muted = theme.textMuted.resolve(appearance)
                 let dimmed = theme.textDimmed.resolve(appearance)
                 let idle = theme.statusIdle.resolve(appearance)
+                let neutral = idle.usingColorSpace(.sRGB)!
+                XCTAssertEqual(neutral.redComponent, neutral.greenComponent, accuracy: 0.001)
+                XCTAssertEqual(neutral.greenComponent, neutral.blueComponent, accuracy: 0.001)
                 let semanticTextColors = [
                     (theme.statusPermissionText, theme.statusPermission),
                     (theme.statusAttentionText, theme.statusAttention),
                     (theme.statusWorkingText, theme.statusWorking),
+                    (theme.statusReadyText, theme.statusReady),
                 ]
 
                 XCTAssertGreaterThanOrEqual(
@@ -92,7 +96,7 @@ final class ThemeManagerTests: XCTestCase {
                 )
                 XCTAssertGreaterThanOrEqual(
                     idle.contrastRatio(against: panel), 4.5,
-                    "\(theme.displayName) ready and idle labels should stay readable in \(appearance.name.rawValue)"
+                    "\(theme.displayName) idle labels should stay readable in \(appearance.name.rawValue)"
                 )
                 let capsuleAlpha: CGFloat = appearance.bestMatch(from: [.darkAqua, .aqua]) == .darkAqua ? 0.13 : 0.10
                 for (semanticTextColor, liveColor) in semanticTextColors {

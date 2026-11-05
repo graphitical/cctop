@@ -30,11 +30,11 @@ struct HeaderView: View {
                 )
                 StatusChip(
                     count: counts.working,
-                    color: Color.statusGreen,
+                    color: Color.statusWorking,
                     textColor: Color.statusWorkingText,
                     categoryLabel: "working"
                 )
-                StatusChip(count: counts.idle, color: Color.statusIdle, textColor: Color.statusIdle, categoryLabel: "ready")
+                StatusChip(count: counts.ready, color: Color.statusReady, textColor: Color.statusReadyText, categoryLabel: "ready")
             }
         }
         .padding(.leading, 16)
@@ -78,7 +78,7 @@ private struct HairlineBrandMark: View {
 }
 
 #Preview("Normal") {
-    HeaderView(counts: StatusCounts(permission: 1, attention: 1, working: 2, idle: 1))
+    HeaderView(counts: StatusCounts(permission: 1, attention: 1, working: 2, ready: 1))
         .frame(width: 320)
         .padding()
 }

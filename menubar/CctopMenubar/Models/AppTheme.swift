@@ -38,7 +38,11 @@ enum AppTheme: String, CaseIterable, Identifiable, Hashable {
     var textMuted: ColorPair { Self.muteds[self]! }
     var textDimmed: ColorPair { Self.dimmeds[self]! }
     var panelBackground: ColorPair { Self.panels[self]! }
-    var statusIdle: ColorPair { Self.idles[self]! }
+    var statusIdle: ColorPair {
+        ColorPair(dark: NSColor(white: 0.65, alpha: 1), light: NSColor(white: 0.36, alpha: 1))
+    }
+    var statusReady: ColorPair { statusGreen }
+    var statusReadyText: ColorPair { Self.readyTexts[self]! }
     var agentBadge: ColorPair { Self.badges[self]! }
     var opencodeBadge: ColorPair { Self.opencodeBadges[self]! }
     var piBadge: ColorPair { Self.piBadges[self]! }
@@ -55,10 +59,10 @@ enum AppTheme: String, CaseIterable, Identifiable, Hashable {
     var segmentText: ColorPair { textSecondary }
     var segmentActiveText: ColorPair { textPrimary }
     var accentButtonText: ColorPair { Self.accentButtonTexts[self]! }
-    var statusPermission: ColorPair { Self.permissions[self]! }
+    var statusPermission: ColorPair { statusAttention }
     var statusAttention: ColorPair { Self.attentions[self]! }
-    var statusWorking: ColorPair { statusGreen }
-    var statusPermissionText: ColorPair { Self.permissionTexts[self]! }
+    var statusWorking: ColorPair { Self.workings[self]! }
+    var statusPermissionText: ColorPair { statusAttentionText }
     var statusAttentionText: ColorPair { Self.attentionTexts[self]! }
     var statusWorkingText: ColorPair { Self.workingTexts[self]! }
 
@@ -106,15 +110,6 @@ private extension AppTheme {
         .nord: ColorPair(dark: hex(0x11, 0x11, 0x11), light: hex(0x11, 0x11, 0x11)),
     ]
 
-    // Permission = error/red — urgent, needs approval
-    static let permissions: [AppTheme: ColorPair] = [
-        .claude: ColorPair(dark: hex(0xDD, 0x53, 0x53), light: hex(0xDD, 0x53, 0x53)),
-        .codex: ColorPair(dark: hex(0xEF, 0x86, 0x86), light: hex(0xB4, 0x23, 0x32)),
-        .tokyoNight: ColorPair(dark: hex(0xF7, 0x76, 0x8E), light: hex(0xC1, 0x3A, 0x57)),
-        .gruvbox: ColorPair(dark: hex(0xFB, 0x49, 0x34), light: hex(0x9D, 0x00, 0x06)),
-        .nord: ColorPair(dark: hex(0xBF, 0x61, 0x6A), light: hex(0xBF, 0x61, 0x6A)),
-    ]
-
     // Attention = warning/orange — waiting for input
     static let attentions: [AppTheme: ColorPair] = [
         .claude: ColorPair(dark: hex(0xC1, 0x5F, 0x3C), light: hex(0xC1, 0x5F, 0x3C)),
@@ -124,7 +119,7 @@ private extension AppTheme {
         .nord: ColorPair(dark: hex(0xD0, 0x87, 0x70), light: hex(0xD0, 0x87, 0x70)),
     ]
 
-    // Working status green
+    // Success and Ready status green
     static let greens: [AppTheme: ColorPair] = [
         .claude: ColorPair(dark: hex(0x7E, 0xAA, 0x6E), light: hex(0x4A, 0x82, 0x38)),
         .codex: ColorPair(dark: hex(0x8F, 0xC7, 0xA3), light: hex(0x2F, 0x6D, 0x47)),
@@ -135,14 +130,6 @@ private extension AppTheme {
 
     // Small semantic labels need higher contrast than the live dots and bars.
     // These keep each palette's hue while clearing 4.5:1 against its panel.
-    static let permissionTexts: [AppTheme: ColorPair] = [
-        .claude: ColorPair(dark: hex(0xE5, 0x7B, 0x7B), light: hex(0xAC, 0x41, 0x41)),
-        .codex: ColorPair(dark: hex(0xEF, 0x86, 0x86), light: hex(0xB4, 0x23, 0x32)),
-        .tokyoNight: ColorPair(dark: hex(0xF7, 0x76, 0x8E), light: hex(0xA8, 0x32, 0x4C)),
-        .gruvbox: ColorPair(dark: hex(0xFC, 0x6F, 0x5F), light: hex(0x9D, 0x00, 0x06)),
-        .nord: ColorPair(dark: hex(0xD5, 0x98, 0x9E), light: hex(0x97, 0x4D, 0x54)),
-    ]
-
     static let attentionTexts: [AppTheme: ColorPair] = [
         .claude: ColorPair(dark: hex(0xD1, 0x87, 0x6D), light: hex(0x9E, 0x4E, 0x31)),
         .codex: ColorPair(dark: hex(0xDE, 0xAC, 0x70), light: hex(0x8A, 0x53, 0x20)),
@@ -152,6 +139,14 @@ private extension AppTheme {
     ]
 
     static let workingTexts: [AppTheme: ColorPair] = [
+        .claude: ColorPair(dark: hex(0x8F, 0xAF, 0xCD), light: hex(0x3D, 0x63, 0x82)),
+        .codex: ColorPair(dark: hex(0x9B, 0xBC, 0xE0), light: hex(0x3B, 0x60, 0x8B)),
+        .tokyoNight: ColorPair(dark: hex(0x7A, 0xA2, 0xD6), light: hex(0x36, 0x5D, 0x92)),
+        .gruvbox: ColorPair(dark: hex(0x86, 0xA8, 0xB3), light: hex(0x3E, 0x64, 0x70)),
+        .nord: ColorPair(dark: hex(0x94, 0xB5, 0xC7), light: hex(0x45, 0x64, 0x77)),
+    ]
+
+    static let readyTexts: [AppTheme: ColorPair] = [
         .claude: ColorPair(dark: hex(0x7F, 0xAB, 0x6F), light: hex(0x40, 0x71, 0x31)),
         .codex: ColorPair(dark: hex(0x8F, 0xC7, 0xA3), light: hex(0x2F, 0x6D, 0x47)),
         .tokyoNight: ColorPair(dark: hex(0x9E, 0xCE, 0x6A), light: hex(0x48, 0x67, 0x25)),
@@ -199,8 +194,8 @@ private extension AppTheme {
         .nord: ColorPair(dark: hex(0x2E, 0x34, 0x40), light: hex(0xEC, 0xEF, 0xF4)),
     ]
 
-    // Ready and idle share a quiet, cool hue with enough contrast for small labels.
-    static let idles: [AppTheme: ColorPair] = [
+    // Working and Compacting share the existing blue palette.
+    static let workings: [AppTheme: ColorPair] = [
         .claude: ColorPair(dark: hex(0x8F, 0xAF, 0xCD), light: hex(0x3D, 0x63, 0x82)),
         .codex: ColorPair(dark: hex(0x9B, 0xBC, 0xE0), light: hex(0x3B, 0x60, 0x8B)),
         .tokyoNight: ColorPair(dark: hex(0x7A, 0xA2, 0xD6), light: hex(0x36, 0x5D, 0x92)),

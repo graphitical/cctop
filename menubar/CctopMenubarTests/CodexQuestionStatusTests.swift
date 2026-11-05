@@ -47,7 +47,7 @@ final class CodexQuestionStatusTests: XCTestCase {
         XCTAssertEqual(counts.working, 1)
         XCTAssertEqual(counts.questions, 2)
         XCTAssertEqual(counts.blockedQuestions, 1)
-        XCTAssertEqual(counts.idle, 1)
+        XCTAssertEqual(counts.ready, 1)
         XCTAssertEqual(counts.needsAction, 2)
         XCTAssertEqual(counts.questionLabel, "? 2")
         XCTAssertGreaterThan(MenubarIconRenderer.render(counts: counts).size.width, 36)

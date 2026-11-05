@@ -93,7 +93,11 @@ final class QASnapshotTests: XCTestCase {
             SessionData.mock(id: "permission", project: "website", sessionName: "Install dependencies",
                              status: .waitingPermission, source: "codex"),
             SessionData.mock(id: "working", project: "cctop", sessionName: "Run the focused tests",
-                             status: .working, source: "codex")
+                             status: .working, source: "codex"),
+            SessionData.mock(id: "compacting", project: "api", sessionName: "Compact the context",
+                             status: .compacting, source: "codex"),
+            SessionData.mock(id: "idle", project: "website", sessionName: "Idle conversation",
+                             status: .idle, source: "codex")
         ]
         sessions[3].codexPermissionReviewer = .user
         let ordered = SessionDisplayPolicy.reconcilingOrder(in: userSessions(fromDataFixtures: sessions), preserving: [])

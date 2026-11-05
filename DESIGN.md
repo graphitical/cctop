@@ -68,11 +68,13 @@ The Swift app exposes them via the semantic token API in
 | Role               | Token                                                      | Meaning                                          |
 |--------------------|------------------------------------------------------------|--------------------------------------------------|
 | Brand accent       | `accent` / `--accent`                                      | Themed identity color (per-palette)              |
-| Permission / Blocked question | `statusPermission`                                 | Urgent — needs approval or an answer (red family) |
+| Permission / Blocked question | `statusPermission`                                 | Needs approval or an answer (amber/orange family) |
 | Attention          | `statusAttention`                                          | Waiting for user input (orange family)           |
-| Working            | `statusGreen`                                              | Tool is running (green family)                   |
-| Ready / Idle       | `statusIdle`                                               | Quiet, available (cool blue family)              |
-| Compacting         | (reuses `agentBadge`)                                      | Context compaction in progress (purple family)   |
+| Working            | `statusWorking`                                            | Tool is running (blue family)                    |
+| Ready              | `statusReady`                                              | Turn finished, ready for the next task (green)    |
+| Idle               | `statusIdle`                                               | Quiet, inactive (neutral gray)                   |
+| Success            | `statusGreen`                                              | Setup connected or cleanup checks passed (green) |
+| Compacting         | `statusWorking`                                            | Context compaction in progress (blue family)     |
 | Subagent badge     | `agentBadge`                                               | Active subagent count (purple family)            |
 | Session source     | `textMuted`                                                | Quiet harness/source metadata                    |
 | Integration: opencode | `opencodeBadge`                                         | Setup/install accents, blue family across themes |
@@ -105,18 +107,21 @@ working session.
 | Role               | Dark      | Light     |
 |--------------------|-----------|-----------|
 | accent             | `#C15F3C` | `#C15F3C` |
-| statusPermission   | `#DD5353` | `#DD5353` |
+| statusPermission   | `#C15F3C` | `#C15F3C` |
 | statusAttention    | `#C15F3C` | `#C15F3C` |
 | statusGreen        | `#7EAA6E` | `#4A8238` |
-| permissionText     | `#E57B7B` | `#AC4141` |
+| statusReady        | `#7EAA6E` | `#4A8238` |
+| statusWorking      | `#8FAFCD` | `#3D6382` |
+| permissionText     | `#D1876D` | `#9E4E31` |
 | attentionText      | `#D1876D` | `#9E4E31` |
-| workingText        | `#7FAB6F` | `#407131` |
+| workingText        | `#8FAFCD` | `#3D6382` |
+| readyText          | `#7FAB6F` | `#407131` |
 | textPrimary        | `#F4F3EE` | `#141413` |
 | textSecondary      | `#B1ADA1` | `#30302E` |
 | textMuted          | `#938F84` | `#68645D` |
 | textDimmed         | `#938F84` | `#68645D` |
 | panelBackground    | `#262624` | `#F4F3EE` |
-| statusIdle         | `#8FAFCD` | `#3D6382` |
+| statusIdle         | `#A6A6A6` | `#5C5C5C` |
 | agentBadge         | `#A256C8` | `#7A3580` |
 | opencodeBadge      | `#5C8AB8` | `#2D5A82` |
 | piBadge            | `#6EAEA8` | `#346B66` |
@@ -125,25 +130,29 @@ working session.
 ### Palette: Codex
 
 Codex pairs neutral charcoal and white surfaces with a pale blue accent in dark mode and a deeper blue in light mode.
-Ready uses the same calm blue role as Idle in every palette; questions and approvals keep their separate attention colors.
-An asynchronous question adds a compact red `?` badge beside Working while the green activity status remains visible, including in compact rows.
+Working and Compacting use blue, Ready uses green, and Idle uses neutral gray in every palette.
+Questions and approvals share the amber/orange attention colors; labels and shapes explain which action is needed.
+An asynchronous question adds a compact amber/orange `?` badge beside Working while the blue activity status remains visible, including in compact rows.
 The header, menubar, and notch show `?` with the unanswered-question chat count; this overlaps activity counts rather than adding sessions to the bar.
 
 | Role               | Dark      | Light     |
 |--------------------|-----------|-----------|
 | accent             | `#B8D5FF` | `#2457A6` |
-| statusPermission   | `#EF8686` | `#B42332` |
+| statusPermission   | `#DEAC70` | `#8A5320` |
 | statusAttention    | `#DEAC70` | `#8A5320` |
 | statusGreen        | `#8FC7A3` | `#2F6D47` |
-| permissionText     | `#EF8686` | `#B42332` |
+| statusReady        | `#8FC7A3` | `#2F6D47` |
+| statusWorking      | `#9BBCE0` | `#3B608B` |
+| permissionText     | `#DEAC70` | `#8A5320` |
 | attentionText      | `#DEAC70` | `#8A5320` |
-| workingText        | `#8FC7A3` | `#2F6D47` |
+| workingText        | `#9BBCE0` | `#3B608B` |
+| readyText          | `#8FC7A3` | `#2F6D47` |
 | textPrimary        | `#F2F2F2` | `#202020` |
 | textSecondary      | `#C0C0C0` | `#4A4A4A` |
 | textMuted          | `#999999` | `#707070` |
 | textDimmed         | `#999999` | `#707070` |
 | panelBackground    | `#1F1F1F` | `#FAFAFA` |
-| statusIdle         | `#9BBCE0` | `#3B608B` |
+| statusIdle         | `#A6A6A6` | `#5C5C5C` |
 | agentBadge         | `#BCA3DE` | `#724C9B` |
 | opencodeBadge      | `#91B7E0` | `#355D8A` |
 | piBadge            | `#7DBFB1` | `#2F6E62` |
@@ -154,18 +163,21 @@ The header, menubar, and notch show `?` with the unanswered-question chat count;
 | Role               | Dark      | Light     |
 |--------------------|-----------|-----------|
 | accent             | `#F7768E` | `#2959AA` |
-| statusPermission   | `#F7768E` | `#C13A57` |
+| statusPermission   | `#FF9E64` | `#A85A17` |
 | statusAttention    | `#FF9E64` | `#A85A17` |
 | statusGreen        | `#9ECE6A` | `#4E7028` |
-| permissionText     | `#F7768E` | `#A8324C` |
+| statusReady        | `#9ECE6A` | `#4E7028` |
+| statusWorking      | `#7AA2D6` | `#365D92` |
+| permissionText     | `#FF9E64` | `#8F4D14` |
 | attentionText      | `#FF9E64` | `#8F4D14` |
-| workingText        | `#9ECE6A` | `#486725` |
+| workingText        | `#7AA2D6` | `#365D92` |
+| readyText          | `#9ECE6A` | `#486725` |
 | textPrimary        | `#C0CAF5` | `#343B59` |
 | textSecondary      | `#8E94AD` | `#363C4D` |
 | textMuted          | `#707895` | `#707280` |
 | textDimmed         | `#69718E` | `#7E828C` |
 | panelBackground    | `#1A1B26` | `#E6E7ED` |
-| statusIdle         | `#7AA2D6` | `#365D92` |
+| statusIdle         | `#A6A6A6` | `#5C5C5C` |
 | agentBadge         | `#BB9AF7` | `#7B43BA` |
 | opencodeBadge      | `#7AA2F7` | `#3A5BA0` |
 | piBadge            | `#5DBFB1` | `#1F6B5D` |
@@ -176,18 +188,21 @@ The header, menubar, and notch show `?` with the unanswered-question chat count;
 | Role               | Dark      | Light     |
 |--------------------|-----------|-----------|
 | accent             | `#FE8019` | `#AF3A03` |
-| statusPermission   | `#FB4934` | `#9D0006` |
+| statusPermission   | `#FABD2F` | `#B57614` |
 | statusAttention    | `#FABD2F` | `#B57614` |
 | statusGreen        | `#B8BB26` | `#427B58` |
-| permissionText     | `#FC6F5F` | `#9D0006` |
+| statusReady        | `#B8BB26` | `#427B58` |
+| statusWorking      | `#83A5B0` | `#3E6470` |
+| permissionText     | `#FABD2F` | `#8B5B0F` |
 | attentionText      | `#FABD2F` | `#8B5B0F` |
-| workingText        | `#B8BB26` | `#3B6F4F` |
+| workingText        | `#86A8B3` | `#3E6470` |
+| readyText          | `#B8BB26` | `#3B6F4F` |
 | textPrimary        | `#EBDBB2` | `#3C3836` |
 | textSecondary      | `#A89984` | `#504945` |
 | textMuted          | `#928374` | `#7C6F64` |
 | textDimmed         | `#887A6E` | `#928374` |
 | panelBackground    | `#282828` | `#FBF1C7` |
-| statusIdle         | `#83A5B0` | `#3E6470` |
+| statusIdle         | `#A6A6A6` | `#5C5C5C` |
 | agentBadge         | `#D3869B` | `#8F3F71` |
 | opencodeBadge      | `#83A598` | `#076678` |
 | piBadge            | `#8EC07C` | `#427B58` |
@@ -198,23 +213,25 @@ The header, menubar, and notch show `?` with the unanswered-question chat count;
 | Role               | Dark      | Light     |
 |--------------------|-----------|-----------|
 | accent             | `#BF616A` | `#BF616A` |
-| statusPermission   | `#BF616A` | `#BF616A` |
+| statusPermission   | `#D08770` | `#D08770` |
 | statusAttention    | `#D08770` | `#D08770` |
 | statusGreen        | `#A3BE8C` | `#4E7A35` |
-| permissionText     | `#D5989E` | `#974D54` |
+| statusReady        | `#A3BE8C` | `#4E7A35` |
+| statusWorking      | `#88ABBD` | `#456477` |
+| permissionText     | `#DAA08E` | `#89594A` |
 | attentionText      | `#DAA08E` | `#89594A` |
-| workingText        | `#A3BE8C` | `#456D2F` |
+| workingText        | `#94B5C7` | `#456477` |
+| readyText          | `#A3BE8C` | `#456D2F` |
 | textPrimary        | `#ECEFF4` | `#2E3440` |
 | textSecondary      | `#D8DEE9` | `#3B4252` |
 | textMuted          | `#8390A8` | `#4C566A` |
 | textDimmed         | `#7F8AA2` | `#4C566A` |
 | panelBackground    | `#2E3440` | `#ECEFF4` |
-| statusIdle         | `#88ABBD` | `#456477` |
+| statusIdle         | `#A6A6A6` | `#5C5C5C` |
 | agentBadge         | `#B48EAD` | `#8B6A86` |
 | opencodeBadge      | `#81A1C1` | `#5E81AC` |
 | piBadge            | `#8FBCBB` | `#4C7271` |
 | codexBadge         | `#EBCB8B` | `#8B6914` |
-
 ### Web tokens (cctop.app — Tokyo Night dark only)
 
 The site is single-theme. CSS custom properties live in
@@ -232,8 +249,9 @@ The site is single-theme. CSS custom properties live in
 --fg-dim:    #858eaf;     /* WCAG-AA-bumped textMuted for prose */
 --idle-seg:  #565d78;     /* hp-idle bar segment */
 --accent:    #ff9e64;     /* attentions.tokyoNight.dark (web hero) */
---danger:    #f7768e;     /* statusPermission */
---status-ok: #9ece6a;     /* statusGreen */
+--danger:    #f7768e;     /* errors/destructive actions */
+--status-ok: #9ece6a;     /* statusReady / statusGreen */
+--working:   #7aa2d6;     /* statusWorking */
 ```
 
 **Why `--fg-mute` and `--fg-dim` differ from the app.** The marketing site
@@ -340,13 +358,13 @@ It applies to Active and Idle session rows without changing the panel height lim
 |---------------------------|----------------------------------------------------------------|
 | Padding                   | 9 px horizontal · 8 px vertical inside an 8 px selection inset |
 | **Row 1 — title**         | 13 px semibold · `textPrimary` (`textSecondary` when idle)     |
-| Navigate chip (row 1 lead)| 16×16 status-colored square, `AppChrome.controlCornerRadius`, white digit (1–9) |
+| Navigate chip (row 1 lead)| 16×16 status-colored square, `AppChrome.controlCornerRadius`, black digit in dark mode, white in light mode (1–9) |
 | Subagent count            | 10 px · `agentBadge` (purple)                                  |
-| Status label              | 10.5 px medium. Idle/Dormant use `textMuted`; Working/Waiting/Compacting use a 6 px live semantic dot plus the matching contrast-safe text token; Permission uses the same split inside a stroke-free 10–13% tint capsule. |
+| Status label              | 10.5 px medium. Idle uses `statusIdle` and Dormant uses `textMuted`; Working/Waiting/Compacting use a 6 px live semantic dot plus the matching contrast-safe text token; Permission uses the same split inside a stroke-free 10–13% tint capsule. |
 | Timestamp                 | 10.5 px · refreshed by the shared 10 s `PopupView` relative-time timer, never by row-local timers. "Just now" (≤ 5 s) → `statusWorkingText`; > 7 d → `textMuted` at 0.55 |
 | **Row 2 — meta (CLI)**    | `folder · branch · source` — folder shown only when `sessionName != projectName`. Branch 10 px monospaced, separators muted dots. |
 | **Row 2 — meta (Desktop)**| `desktopProjectName · source`. Folder + branch are dropped because Desktop sessions often run in auto-generated worktree dirs (`focused-dirac-1baeb9`); project name is 11 px medium `textSecondary`, source is quiet metadata. |
-| **Row 3 — working**       | Monospace command stripe with `›` prompt (`statusGreen` @ 0.7) + `Session.contextLine`; no blinking caret. |
+| **Row 3 — working**       | Monospace command stripe with `›` prompt (`statusWorking` @ 0.7) + `Session.contextLine`; no blinking caret. |
 | **Row 3 — waiting**       | 10.5 px `textSecondary` note: `notificationMessage ?? contextLine ?? "Waiting for input"`. Permission notes are 10.5 px italic `statusAttention`. |
 | Selected / hover          | `cardSelectionStyle` uses a theme-ink 7–7.5% fill, radius 10, and an 8 px horizontal inset. It has no stroke, divider, or left accent bar. |
 | Source badge visibility   | Shown only when `Set(sessions.map(\.agentBadge)).count > 1` (keyed on `agentBadge`, not `sourceLabel`, so CC + Claude Desktop counts as multiple sources) |
@@ -379,10 +397,10 @@ All source labels render as neutral metadata so the project name and session sta
 | Trailing       | Permission → question count → other attention → working → Ready; actual idle sessions stay in the Idle tab |
 | Drag area      | Entire header is a draggable `WindowDragArea` with custom move cursor |
 
-Blocked chats use a red **?** badge and red status text.
-Working chats with unanswered questions retain their working color and show the same red **?** badge.
+Blocked chats use an amber/orange **?** badge and matching status text.
+Working chats with unanswered questions retain their working color and show the same amber/orange **?** badge.
 Blocked chats come first, then working chats with questions, then other chats, with recent activity order within each group.
-The header, menubar, and notch question count is red.
+The header, menubar, and notch question count is amber/orange.
 
 ### Status chip (`StatusChip.swift`)
 
@@ -408,7 +426,7 @@ One horizontal hairline bar is the cctop mark. Do not pair it with the old
   with segment widths 14 / 5 / 3 / 4; larger marketing treatments preserve
   those proportions.
 - Live status contexts (menubar item and notch pill): proportional working /
-  attention / permission / idle segments using real semantic colors. With no
+  attention / permission / Ready segments using real semantic colors. With no
   live sessions, the menubar item becomes a monochrome template hairline.
 
 The Dock/app icon uses the same silhouette on a `#0C0D0F` rounded square. At
@@ -442,7 +460,7 @@ Always black, regardless of theme — it's OS chrome that meets the camera notch
 | Background  | `Color.black` @ 90% opacity                                           |
 | Shape       | `NotchTabShape` — flat top + right, only bottom-left rounded (radius 6) |
 | Brand mark  | One 36×4 capsule; the old 2×2 grid is not part of the refined system   |
-| Status bar  | Live segments in working → attention → blocked question → permission → idle order; monochrome when there are no sessions |
+| Status bar  | Live segments in working → attention → blocked question → permission → Ready order; monochrome when there are no sessions |
 | Padding     | 5 / 2 / 4 / 5 (l / r / t / b)                                         |
 
 ### Segmented picker (`AmberSegmentedPicker`)
@@ -500,7 +518,7 @@ component vocabulary.
 
 The marketing hero pairs a quiet `cctop status` label with the live hairline
 mark at presentation scale. It uses the same fixed 52 / 19 / 12 / 13 geometry
-and working → attention → blocked question → permission → idle order as the app icon.
+and working → attention → blocked question → permission → Ready order as the app icon.
 
 | Property    | Value                                                                 |
 |-------------|-----------------------------------------------------------------------|
@@ -764,10 +782,10 @@ view."
 |--------------------------------------------------------|-----------------------------------------------------|
 | Add emoji to UI text                                   | Use status color + label pairs                      |
 | Use warm- or cool-tinted grays                         | Use neutral grays (`textPrimary`, `textMuted`, …)   |
-| Introduce a fifth status color                         | Map new statuses through the existing 5 roles       |
+| Introduce arbitrary status colors                         | Map new statuses through the documented roles       |
 | Hand-edit version strings                              | Use `scripts/bump-version.sh`                       |
 | Add a new theme without all semantic token roles       | Match the full theme matrix in `AppTheme.swift`     |
-| Use raw `Color.blue`/`.green`/etc. in views            | Use semantic tokens (`textPrimary`, `statusGreen`)  |
+| Use raw `Color.blue`/`.green`/etc. in views            | Use semantic tokens (`textPrimary`, `statusWorking`)  |
 | Drop a custom font into the app bundle                 | Stay on `.system` for the app                       |
 | Override the `--ease-out` curve                        | Reuse it everywhere for consistent motion           |
 | Drop a third-party UI kit into the site                | Hand-rolled CSS, no build step, single HTML file    |
@@ -869,11 +887,13 @@ cctop-consistent UI.
 ### Status colors (Tokyo Night dark — the canonical reference)
 
 ```
-Permission  #F7768E   (red/pink)
-Attention   #FF9E64   (orange)
-Working     #9ECE6A   (green)
-Compacting  #BB9AF7   (purple, shared with subagent badge)
-Ready/Idle  #7AA2D6   (calm blue)
+Permission  #FF9E64   (amber/orange, shared with attention and questions)
+Attention   #FF9E64   (amber/orange)
+Working     #7AA2D6   (blue)
+Compacting  #7AA2D6   (blue, shared with Working)
+Ready       #9ECE6A   (green)
+Idle        #A6A6A6   (neutral gray; #5C5C5C in light mode)
+Subagents   #BB9AF7   (purple)
 ```
 
 ### Default font stacks
@@ -916,8 +936,8 @@ Exceptions: circles, thin status bars, caret, and brand/status marks
 
 > "Use cctop's Tokyo Night dark palette: panel `#1A1B26`, primary text
 > `#C0CAF5`, secondary `#787C99`, accent `#F7768E`. Status colors:
-> permission `#F7768E`, attention `#FF9E64`, working `#9ECE6A`,
-> ready/idle `#7AA2D6`. No drop shadows; hierarchy via 1 px hairline borders
+> permission/attention `#FF9E64`, working/compacting `#7AA2D6`,
+> ready `#9ECE6A`, idle `#A6A6A6`. No drop shadows; hierarchy via 1 px hairline borders
 > at 10–18% alpha and 4 / 6 / 10 px corner radii."
 
 > "Type stack: SF system for the app, IBM Plex Sans / IBM Plex Mono /
@@ -932,7 +952,7 @@ Exceptions: circles, thin status bars, caret, and brand/status marks
 > "Don't add decorative shadows, gradient overlays, custom fonts in the app,
 > or warm/cool-tinted grays. Match the existing 9 / 10 / 11 / 12 / 13 px
 > type ladder; do not introduce new sizes. Status colors come from the
-> five existing roles — never invent a sixth."
+> documented roles; red is reserved for actual errors, and subagent badges stay purple."
 
 ### Where to look in the codebase
 

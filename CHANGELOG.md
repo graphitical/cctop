@@ -4,6 +4,12 @@ Versions follow [Semantic Versioning](https://semver.org/spec/v2.0.0.html), with
 A version entry records the source changes assigned to that version; it does not imply a published binary or GitHub Release.
 Version numbers identify `graphitical/cctop` independently of upstream `st0012/cctop`.
 
+## 0.24.2 — 2026-11-05
+
+- Use blue for Working and Compacting, green for Ready, amber/orange for input and permission requests, and neutral gray for Idle across all five themes.
+- Keep session rows, status summaries, keyboard navigation, and Stream Deck colors aligned while preserving question priority and session lifecycle behavior.
+- Keep successful setup and cleanup indicators green and subagent badges purple.
+
 ## 0.24.1 — 2026-11-05
 
 - Check the event type before reading mouse-only fields during panel resizing, preventing an AppKit exception that can leave the panel unable to reopen.

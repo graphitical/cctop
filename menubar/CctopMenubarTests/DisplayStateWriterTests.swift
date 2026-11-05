@@ -93,7 +93,7 @@ final class DisplayStateWriterTests: XCTestCase {
         )
         XCTAssertEqual(snapshot.sessions.map(\.status), ["waiting_answer", "waiting_input"])
         XCTAssertEqual(snapshot.sessions.map(\.statusLabel), ["Blocked", "Ready"])
-        XCTAssertEqual(snapshot.sessions.map(\.color), ["#DD5353", "#8FAFCD"])
+        XCTAssertEqual(snapshot.sessions.map(\.color), ["#C15F3C", "#7EAA6E"])
     }
 
     func testProjectionCarriesReviewerAwarePermissionLabels() {
@@ -144,7 +144,7 @@ final class DisplayStateWriterTests: XCTestCase {
         XCTAssertTrue(CctopSessionID.isValid(entry["cctop_session_id"] as? String))
         XCTAssertEqual(entry["name"] as? String, "fix panel drift")
         XCTAssertEqual(entry["status"] as? String, "working")
-        XCTAssertEqual(entry["color"] as? String, "#7EAA6E")
+        XCTAssertEqual(entry["color"] as? String, "#8FAFCD")
     }
 
     func testStoppedSnapshotPreservesRecentTargetsButDropsProcessIdentity() {
@@ -224,8 +224,8 @@ final class DisplayStateWriterTests: XCTestCase {
     }
 
     func testHexColorsUseCctopThemeVariants() {
-        XCTAssertEqual(DisplayStateWriter.hexColor(for: .mock(status: .working), theme: .claude), "#7EAA6E")
-        XCTAssertEqual(DisplayStateWriter.hexColor(for: .mock(status: .waitingPermission), theme: .claude), "#DD5353")
+        XCTAssertEqual(DisplayStateWriter.hexColor(for: .mock(status: .working), theme: .claude), "#8FAFCD")
+        XCTAssertEqual(DisplayStateWriter.hexColor(for: .mock(status: .waitingPermission), theme: .claude), "#C15F3C")
         XCTAssertEqual(DisplayStateWriter.hexColor(for: .mock(status: .waitingInput), theme: .gruvbox), "#FABD2F")
         XCTAssertEqual(DisplayStateWriter.hexColor(for: .mock(status: .needsAttention), theme: .gruvbox), "#FABD2F")
     }

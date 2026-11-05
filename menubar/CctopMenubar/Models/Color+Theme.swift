@@ -190,10 +190,31 @@ extension Color {
         })
     }
 
-    /// Working status green.
+    /// Successful setup and cleanup checks.
     static var statusGreen: Color {
         Color(nsColor: NSColor(name: nil) { appearance in
             ThemeManager.shared.current.statusGreen.resolve(appearance)
+        })
+    }
+
+    /// Active work, including context compaction.
+    static var statusWorking: Color {
+        Color(nsColor: NSColor(name: nil) { appearance in
+            ThemeManager.shared.current.statusWorking.resolve(appearance)
+        })
+    }
+
+    /// A finished turn that is ready for the next task.
+    static var statusReady: Color {
+        Color(nsColor: NSColor(name: nil) { appearance in
+            ThemeManager.shared.current.statusReady.resolve(appearance)
+        })
+    }
+
+    /// Ready color adjusted for small text contrast.
+    static var statusReadyText: Color {
+        Color(nsColor: NSColor(name: nil) { appearance in
+            ThemeManager.shared.current.statusReadyText.resolve(appearance)
         })
     }
 

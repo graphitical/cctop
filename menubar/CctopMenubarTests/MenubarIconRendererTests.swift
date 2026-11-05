@@ -7,7 +7,7 @@ final class MenubarIconRendererTests: XCTestCase {
 
     func testZeroSessions_returnsTemplateImage() {
         let image = MenubarIconRenderer.render(
-            counts: StatusCounts(permission: 0, attention: 0, working: 0, idle: 0)
+            counts: StatusCounts(permission: 0, attention: 0, working: 0, ready: 0)
         )
         XCTAssertTrue(image.isTemplate, "Zero-session icon should be a template image")
     }
@@ -16,7 +16,7 @@ final class MenubarIconRendererTests: XCTestCase {
 
     func testIconSize() {
         let image = MenubarIconRenderer.render(
-            counts: StatusCounts(permission: 0, attention: 0, working: 1, idle: 0)
+            counts: StatusCounts(permission: 0, attention: 0, working: 1, ready: 0)
         )
         XCTAssertEqual(image.size.width, 36, "Icon should be 36px wide")
         XCTAssertEqual(image.size.height, 18, "Icon should be 18px tall")
@@ -27,28 +27,28 @@ final class MenubarIconRendererTests: XCTestCase {
 
     func testPermissionSession_notTemplate() {
         let image = MenubarIconRenderer.render(
-            counts: StatusCounts(permission: 1, attention: 0, working: 0, idle: 0)
+            counts: StatusCounts(permission: 1, attention: 0, working: 0, ready: 0)
         )
         XCTAssertFalse(image.isTemplate)
     }
 
     func testAttentionSession_notTemplate() {
         let image = MenubarIconRenderer.render(
-            counts: StatusCounts(permission: 0, attention: 2, working: 0, idle: 0)
+            counts: StatusCounts(permission: 0, attention: 2, working: 0, ready: 0)
         )
         XCTAssertFalse(image.isTemplate)
     }
 
     func testMixedSessions_notTemplate() {
         let image = MenubarIconRenderer.render(
-            counts: StatusCounts(permission: 1, attention: 1, working: 2, idle: 3)
+            counts: StatusCounts(permission: 1, attention: 1, working: 2, ready: 3)
         )
         XCTAssertFalse(image.isTemplate)
     }
 
-    func testIdleOnly_notTemplate() {
+    func testReadyOnly_notTemplate() {
         let image = MenubarIconRenderer.render(
-            counts: StatusCounts(permission: 0, attention: 0, working: 0, idle: 5)
+            counts: StatusCounts(permission: 0, attention: 0, working: 0, ready: 5)
         )
         XCTAssertFalse(image.isTemplate)
     }
@@ -57,7 +57,7 @@ final class MenubarIconRendererTests: XCTestCase {
 
     func testRenderProducesNonEmptyImage() {
         let image = MenubarIconRenderer.render(
-            counts: StatusCounts(permission: 1, attention: 0, working: 2, idle: 1)
+            counts: StatusCounts(permission: 1, attention: 0, working: 2, ready: 1)
         )
         XCTAssertGreaterThan(image.size.width, 0)
         XCTAssertGreaterThan(image.size.height, 0)
@@ -65,7 +65,7 @@ final class MenubarIconRendererTests: XCTestCase {
 
     func testLiveImageResolvesStatusColorForCurrentDrawingAppearance() {
         let image = MenubarIconRenderer.render(
-            counts: StatusCounts(permission: 0, attention: 0, working: 1, idle: 0)
+            counts: StatusCounts(permission: 0, attention: 0, working: 1, ready: 0)
         )
         let darkAppearance = NSAppearance(named: .darkAqua)!
         let lightAppearance = NSAppearance(named: .aqua)!
@@ -82,7 +82,7 @@ final class MenubarIconRendererTests: XCTestCase {
 
     func testSingleWorkingSession_correctSize() {
         let image = MenubarIconRenderer.render(
-            counts: StatusCounts(permission: 0, attention: 0, working: 1, idle: 0)
+            counts: StatusCounts(permission: 0, attention: 0, working: 1, ready: 0)
         )
         XCTAssertEqual(image.size.width, 36)
         XCTAssertEqual(image.size.height, 18)
@@ -91,7 +91,7 @@ final class MenubarIconRendererTests: XCTestCase {
 
     func testSinglePermissionSession_correctSize() {
         let image = MenubarIconRenderer.render(
-            counts: StatusCounts(permission: 1, attention: 0, working: 0, idle: 0)
+            counts: StatusCounts(permission: 1, attention: 0, working: 0, ready: 0)
         )
         XCTAssertEqual(image.size.width, 36)
         XCTAssertEqual(image.size.height, 18)

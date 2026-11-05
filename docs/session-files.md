@@ -30,12 +30,14 @@ The app reads local Codex runtime metadata for tracked sessions in the shared da
 For active daemon sessions, it reads the latest full turn through `thread/turns/list`, since activity flags alone do not identify asynchronous questions and turn summaries omit accepted replies.
 The read keeps the local transport's byte limit and deadline; unsupported or incomplete question history leaves the activity status in place.
 A question that stops the turn displays as **Blocked** (`waiting_answer`); a finished turn displays as **Ready** (`waiting_input`).
-An unanswered asynchronous question keeps the chat **Working** with a red **?** badge until every question receives an accepted answer.
-Both question states use a red **?** badge.
+An unanswered asynchronous question keeps the chat **Working** with an amber **?** badge until every question receives an accepted answer.
+Both question states use an amber **?** badge.
 Blocked chats appear first, followed by working chats with questions, then other chats.
 Each group keeps recent activity order.
-The menubar, notch, and panel header show the red question count separately from activity counts.
-Ready uses the cool idle color in the session row, status bar, keyboard navigation chip, and Stream Deck projection.
+The menubar, notch, and panel header show the amber question count separately from activity counts.
+Working and Compacting use blue, Ready uses green, and Idle uses neutral gray.
+Permission, Blocked, and Waiting use the same amber/orange attention color.
+Ready uses its own green color in the session row, status bar, keyboard navigation chip, and Stream Deck projection.
 Ordinary chat questions are not inferred, and permission requests keep their separate status.
 These runtime observations adjust the display only, without rewriting hook session files.
 Missing or unsupported runtime metadata leaves the hook status in place.

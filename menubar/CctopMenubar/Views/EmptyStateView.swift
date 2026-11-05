@@ -34,10 +34,10 @@ struct EmptyStateView: View {
                 .foregroundStyle(Color.amber)
                 .tracking(0.5)
             HStack(spacing: 0) {
-                Rectangle().fill(Color.statusGreen).frame(width: 26)
+                Rectangle().fill(Color.statusWorking).frame(width: 26)
                 Rectangle().fill(Color.statusAttention).frame(width: 14)
                 Rectangle().fill(Color.statusPermission).frame(width: 8)
-                Rectangle().fill(SessionStatus.idle.color).frame(width: 16)
+                Rectangle().fill(Color.statusReady).frame(width: 16)
             }
             .frame(height: 4)
             .clipShape(Capsule())

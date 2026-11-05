@@ -5,7 +5,7 @@ struct StatusCounts: Equatable {
     /// Semantic identity of a status-bar segment. Renderers resolve the
     /// theme color for a kind at render time (see `StatusColors.color(for:)`).
     enum SegmentKind: Equatable {
-        case permission, question, attention, working, idle
+        case permission, question, attention, working, ready
 
         /// Whether this segment represents sessions needing user action.
         var needsAction: Bool { self == .permission || self == .question || self == .attention }
@@ -14,24 +14,24 @@ struct StatusCounts: Equatable {
     let permission: Int
     let attention: Int
     let working: Int
-    let idle: Int
+    let ready: Int
     let questions: Int
     let blockedQuestions: Int
 
-    static let zero = StatusCounts(permission: 0, attention: 0, working: 0, idle: 0)
+    static let zero = StatusCounts(permission: 0, attention: 0, working: 0, ready: 0)
 
-    init(permission: Int, attention: Int, working: Int, idle: Int, questions: Int = 0, blockedQuestions: Int = 0) {
+    init(permission: Int, attention: Int, working: Int, ready: Int, questions: Int = 0, blockedQuestions: Int = 0) {
         self.permission = permission
         self.attention = attention
         self.working = working
-        self.idle = idle
+        self.ready = ready
         self.questions = questions
         self.blockedQuestions = blockedQuestions
     }
 
     /// Create counts by aggregating user-session statuses.
     init(userSessions: [UserSession]) {
-        var perm = 0, attn = 0, work = 0, idleCount = 0
+        var perm = 0, attn = 0, work = 0, readyCount = 0
         var questions = 0, blockedQuestions = 0
         // Only presentation-active sessions drive the menubar badge. Dormant and idle
         // cards are retained for reachability, not live work, so they never inflate counts.
@@ -40,22 +40,22 @@ struct StatusCounts: Equatable {
             if data.hasPendingQuestion { questions += 1 }
             if data.status == .waitingAnswer { blockedQuestions += 1 }
             switch userSession.status {
-            case .idle: idleCount += 1
+            case .idle: break
             case .working, .compacting: work += 1
             case .waitingPermission: perm += 1
-            case .waitingInput where data.isCodex: idleCount += 1
+            case .waitingInput where data.isCodex: readyCount += 1
             case .waitingAnswer, .waitingInput, .needsAttention: attn += 1
             }
         }
         self.permission = perm
         self.attention = attn
         self.working = work
-        self.idle = idleCount
+        self.ready = readyCount
         self.questions = questions
         self.blockedQuestions = blockedQuestions
     }
 
-    var total: Int { permission + attention + working + idle }
+    var total: Int { permission + attention + working + ready }
     var needsAction: Int { permission + attention + questions - blockedQuestions }
     var questionLabel: String? { questions > 0 ? "? \(questions)" : nil }
 
@@ -76,8 +76,8 @@ struct StatusCounts: Equatable {
         if permission > 0 {
             segs.append((Double(permission) / Double(total), .permission))
         }
-        if idle > 0 {
-            segs.append((Double(idle) / Double(total), .idle))
+        if ready > 0 {
+            segs.append((Double(ready) / Double(total), .ready))
         }
         return segs
     }
@@ -86,7 +86,7 @@ struct StatusCounts: Equatable {
     private static let minActionWidth: Double = 5
 
     /// Bar segments with minimum width enforcement for action-needing segments.
-    /// Steals space proportionally from non-action segments (working, idle).
+    /// Steals space proportionally from non-action segments (working, ready).
     func barSegments(forWidth barWidth: Double) -> [(proportion: Double, kind: SegmentKind)] {
         let raw = barSegments
         guard !raw.isEmpty, barWidth > 0 else { return raw }
@@ -142,7 +142,7 @@ struct StatusCounts: Equatable {
             parts.append("\(attention) \(attention == 1 ? "needs" : "need") attention")
         }
         if working > 0 { parts.append("\(working) working") }
-        if idle > 0 { parts.append("\(idle) idle") }
+        if ready > 0 { parts.append("\(ready) ready") }
         if questions > 0 { parts.append("\(questions) with unanswered questions") }
         return "cctop, " + parts.joined(separator: ", ")
     }

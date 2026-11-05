@@ -21,7 +21,7 @@ enum StatusColors {
         case .permission, .question: return theme.statusPermission
         case .attention: return theme.statusAttention
         case .working: return theme.statusWorking
-        case .idle: return theme.statusIdle
+        case .ready: return theme.statusReady
         }
     }
 }

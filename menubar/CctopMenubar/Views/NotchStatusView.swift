@@ -80,43 +80,43 @@ private struct NotchTabShape: Shape {
 }
 
 #Preview("Mixed") {
-    NotchStatusView(counts: StatusCounts(permission: 1, attention: 1, working: 2, idle: 1))
+    NotchStatusView(counts: StatusCounts(permission: 1, attention: 1, working: 2, ready: 1))
         .padding()
         .background(Color.black)
 }
 
 #Preview("Needs permission") {
-    NotchStatusView(counts: StatusCounts(permission: 2, attention: 0, working: 1, idle: 0))
+    NotchStatusView(counts: StatusCounts(permission: 2, attention: 0, working: 1, ready: 0))
         .padding()
         .background(Color.black)
 }
 
 #Preview("All working") {
-    NotchStatusView(counts: StatusCounts(permission: 0, attention: 0, working: 4, idle: 0))
+    NotchStatusView(counts: StatusCounts(permission: 0, attention: 0, working: 4, ready: 0))
         .padding()
         .background(Color.black)
 }
 
-#Preview("All idle") {
-    NotchStatusView(counts: StatusCounts(permission: 0, attention: 0, working: 0, idle: 3))
+#Preview("All ready") {
+    NotchStatusView(counts: StatusCounts(permission: 0, attention: 0, working: 0, ready: 3))
         .padding()
         .background(Color.black)
 }
 
 #Preview("1 attention in 10 (min width)") {
-    NotchStatusView(counts: StatusCounts(permission: 0, attention: 1, working: 7, idle: 2))
+    NotchStatusView(counts: StatusCounts(permission: 0, attention: 1, working: 7, ready: 2))
         .padding()
         .background(Color.black)
 }
 
 #Preview("1 permission in 20 (extreme squeeze)") {
-    NotchStatusView(counts: StatusCounts(permission: 1, attention: 0, working: 19, idle: 0))
+    NotchStatusView(counts: StatusCounts(permission: 1, attention: 0, working: 19, ready: 0))
         .padding()
         .background(Color.black)
 }
 
 #Preview("No sessions") {
-    NotchStatusView(counts: StatusCounts(permission: 0, attention: 0, working: 0, idle: 0))
+    NotchStatusView(counts: StatusCounts(permission: 0, attention: 0, working: 0, ready: 0))
         .padding()
         .background(Color.black)
 }
