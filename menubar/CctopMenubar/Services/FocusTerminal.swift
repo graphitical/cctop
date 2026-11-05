@@ -30,6 +30,7 @@ struct GhosttyFocusTarget: Equatable {
     let tty: String?
     let matchDirectory: String
     let restoreDirectory: String?
+    var requiresExactPane = false
 }
 
 /// Resolve which strategy to use for jumping to a session.
@@ -115,11 +116,12 @@ func focusTerminal(session: SessionData) {
         let verifiedHostApp: HostApp? = CodexDesktopRuntimeProbe().isCurrentDesktopAppServer(for: session)
             ? .codexDesktop
             : nil
-        let strategy = resolveFocusStrategy(
+        let hostStrategy = resolveFocusStrategy(
             session: session,
             multiplexerOverride: multiplexerOverride,
             verifiedHostApp: verifiedHostApp
         )
+        let strategy = GhosttyCLIRuntimeProbe().resolve(session: session, strategy: hostStrategy)
         let muxStrategy = resolveMultiplexerFocus(session: session, multiplexerOverride: multiplexerOverride,
                                                   primaryStrategy: strategy)
         let shouldDeactivate = executeFocusStrategy(strategy)
@@ -321,8 +323,11 @@ func buildOSC7CWD(host: String, workingDirectory: String) -> String {
     return "\u{1B}]7;file://\(host)\(encoded)\u{07}"
 }
 
-func ghosttyFocusTarget(for session: SessionData, temporaryDirectory: String = NSTemporaryDirectory()) -> GhosttyFocusTarget {
-    guard let tty = session.terminal?.tty,
+func ghosttyFocusTarget(
+    for session: SessionData, temporaryDirectory: String = NSTemporaryDirectory(),
+    ttyOverride: String? = nil, restoreDirectoryOverride: String? = nil
+) -> GhosttyFocusTarget {
+    guard let tty = ttyOverride ?? session.terminal?.tty,
           tty.range(of: #"^/dev/ttys\d+$"#, options: .regularExpression) != nil else {
         return GhosttyFocusTarget(tty: nil, matchDirectory: session.projectPath, restoreDirectory: nil)
     }
@@ -332,7 +337,7 @@ func ghosttyFocusTarget(for session: SessionData, temporaryDirectory: String = N
     let marker = URL(fileURLWithPath: temporaryDirectory, isDirectory: true)
         .appendingPathComponent(markerName, isDirectory: true)
         .path
-    return GhosttyFocusTarget(tty: tty, matchDirectory: marker, restoreDirectory: session.projectPath)
+    return GhosttyFocusTarget(tty: tty, matchDirectory: marker, restoreDirectory: restoreDirectoryOverride ?? session.projectPath)
 }
 
 private func sanitizedGhosttyFocusComponent(_ value: String) -> String {
@@ -380,6 +385,7 @@ private func executeGhosttyFocus(target: GhosttyFocusTarget) {
 }
 
 func ghosttyFocusCandidateDirectories(target: GhosttyFocusTarget, markerPrimed: Bool) -> [String] {
+    if target.requiresExactPane { return markerPrimed ? [target.matchDirectory] : [] }
     guard let restoreDirectory = target.restoreDirectory else {
         return [target.matchDirectory]
     }

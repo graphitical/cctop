@@ -226,6 +226,14 @@ and other persisted preferences keep their separate contracts.
 
 ## Terminal Focus Metadata
 
+### Ghostty CLI focus
+
+When a Codex session names Ghostty but has no valid recorded TTY, navigation checks foreground Codex processes under the running Ghostty app.
+A unique pane in the session's project directory wins; if no directory matches, a single available Codex pane can serve chats from other projects.
+Multiple matching panes remain ambiguous, and missing or stale process evidence falls back to app activation.
+Recovered panes use exact TTY marker targeting without a directory-match fallback, so an editor sharing the project directory is not selected accidentally.
+Discovery does not rewrite session records or change which chat the CLI displays.
+
 ### `terminal.multiplexer`
 
 Type: `object`

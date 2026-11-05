@@ -4,6 +4,12 @@ Versions follow [Semantic Versioning](https://semver.org/spec/v2.0.0.html), with
 A version entry records the source changes assigned to that version; it does not imply a published binary or GitHub Release.
 Version numbers identify `graphitical/cctop` independently of upstream `st0012/cctop`.
 
+## 0.24.5 — 2026-11-05
+
+- Recover the live Codex pane in Ghostty when daemon-backed chats have no recorded TTY, so navigation does not select an editor pane sharing the project directory.
+- Prefer a unique project match or the only available Codex pane, recheck its process identity, and use app activation when exact pane targeting is unavailable or ambiguous.
+- Keep session records, hook provenance, and the CLI's displayed chat unchanged.
+
 ## 0.24.4 — 2026-11-05
 
 - Keep Working and Compacting tasks above Ready tasks, even when a Ready task has more recent activity.

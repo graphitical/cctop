@@ -7,6 +7,8 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		GCLI00010000000000000001 /* GhosttyCLIRuntimeProbe.swift in Sources */ = {isa = PBXBuildFile; fileRef = GCLI00020000000000000001 /* GhosttyCLIRuntimeProbe.swift */; };
+		GCLI00010000000000000002 /* GhosttyCLIFocusTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = GCLI00020000000000000002 /* GhosttyCLIFocusTests.swift */; };
 		D27A920CE5204C9C8E7D8E21 /* CodexLocalSocket.swift in Sources */ = {isa = PBXBuildFile; fileRef = D27A920CE5204C9C8E7D8E31 /* CodexLocalSocket.swift */; };
 		D27A920CE5204C9C8E7D8E22 /* CodexDesktopStatusReader.swift in Sources */ = {isa = PBXBuildFile; fileRef = D27A920CE5204C9C8E7D8E32 /* CodexDesktopStatusReader.swift */; };
 		D27A920CE5204C9C8E7D8E41 /* CodexQuestionStatus.swift in Sources */ = {isa = PBXBuildFile; fileRef = D27A920CE5204C9C8E7D8E51 /* CodexQuestionStatus.swift */; };
@@ -212,6 +214,8 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		GCLI00020000000000000001 /* GhosttyCLIRuntimeProbe.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GhosttyCLIRuntimeProbe.swift; sourceTree = "<group>"; };
+		GCLI00020000000000000002 /* GhosttyCLIFocusTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GhosttyCLIFocusTests.swift; sourceTree = "<group>"; };
 		D27A920CE5204C9C8E7D8E31 /* CodexLocalSocket.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CodexLocalSocket.swift; sourceTree = "<group>"; };
 		D27A920CE5204C9C8E7D8E32 /* CodexDesktopStatusReader.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CodexDesktopStatusReader.swift; sourceTree = "<group>"; };
 		D27A920CE5204C9C8E7D8E51 /* CodexQuestionStatus.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CodexQuestionStatus.swift; sourceTree = "<group>"; };
@@ -448,6 +452,7 @@
 				E10000020000000000000001 /* FocusTerminal.swift */,
 				EAPPRESTORE0020000000001 /* FocusTerminal+AppRestore.swift */,
 				EPANEFOCUS00200000000001 /* FocusTerminal+PaneFocus.swift */,
+				GCLI00020000000000000001 /* GhosttyCLIRuntimeProbe.swift */,
 				ECMUX002000000000000001 /* FocusTerminal+Cmux.swift */,
 				EMUX0020000000000000001 /* FocusTerminal+Multiplexer.swift */,
 				ERCT00020000000000000001 /* FocusTerminal+Recent.swift */,
@@ -643,6 +648,7 @@
 				PLT000020000000000000001 /* PanelLifecycleTests.swift */,
 				PPT000020000000000000001 /* PanelPositioningTests.swift */,
 				FST000020000000000000001 /* FocusStrategyTests.swift */,
+				GCLI00020000000000000002 /* GhosttyCLIFocusTests.swift */,
 				MFT000020000000000000001 /* MultiplexerFocusTests.swift */,
 				TMT000020000000000000001 /* ThemeManagerTests.swift */,
 				WCT000020000000000000001 /* WorktreeCleanupTests.swift */,
@@ -809,6 +815,7 @@
 				E10000010000000000000001 /* FocusTerminal.swift in Sources */,
 				EAPPRESTORE0010000000001 /* FocusTerminal+AppRestore.swift in Sources */,
 				EPANEFOCUS00100000000001 /* FocusTerminal+PaneFocus.swift in Sources */,
+				GCLI00010000000000000001 /* GhosttyCLIRuntimeProbe.swift in Sources */,
 				ECMUX001000000000000001 /* FocusTerminal+Cmux.swift in Sources */,
 				EMUX0010000000000000001 /* FocusTerminal+Multiplexer.swift in Sources */,
 				ERCT00010000000000000001 /* FocusTerminal+Recent.swift in Sources */,
@@ -963,6 +970,7 @@
 				PLT000010000000000000001 /* PanelLifecycleTests.swift in Sources */,
 				PPT000010000000000000001 /* PanelPositioningTests.swift in Sources */,
 				FST000010000000000000001 /* FocusStrategyTests.swift in Sources */,
+				GCLI00010000000000000002 /* GhosttyCLIFocusTests.swift in Sources */,
 				MFT000010000000000000001 /* MultiplexerFocusTests.swift in Sources */,
 				TMT000010000000000000001 /* ThemeManagerTests.swift in Sources */,
 				WCT000010000000000000001 /* WorktreeCleanupTests.swift in Sources */,
@@ -1053,7 +1061,7 @@
 				CODE_SIGN_ENTITLEMENTS = CctopMenubar/CctopMenubar.entitlements;
 				CODE_SIGN_STYLE = Manual;
 				COMBINE_HIDPI_IMAGES = YES;
-				CURRENT_PROJECT_VERSION = 2404;
+				CURRENT_PROJECT_VERSION = 2405;
 				ENABLE_HARDENED_RUNTIME = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = CctopMenubar/Info.plist;
@@ -1062,7 +1070,7 @@
 				INFOPLIST_KEY_NSHumanReadableCopyright = "";
 				INFOPLIST_KEY_NSMainStoryboardFile = "";
 				LD_RUNPATH_SEARCH_PATHS = "@executable_path/../Frameworks";
-				MARKETING_VERSION = 0.24.4;
+				MARKETING_VERSION = 0.24.5;
 				OTHER_LDFLAGS = "-lsqlite3";
 				PRODUCT_BUNDLE_IDENTIFIER = com.st0012.CctopMenubar;
 				PRODUCT_NAME = "$(TARGET_NAME)";
@@ -1079,7 +1087,7 @@
 				CODE_SIGN_ENTITLEMENTS = CctopMenubar/CctopMenubar.entitlements;
 				CODE_SIGN_STYLE = Manual;
 				COMBINE_HIDPI_IMAGES = YES;
-				CURRENT_PROJECT_VERSION = 2404;
+				CURRENT_PROJECT_VERSION = 2405;
 				ENABLE_HARDENED_RUNTIME = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = CctopMenubar/Info.plist;
@@ -1088,7 +1096,7 @@
 				INFOPLIST_KEY_NSHumanReadableCopyright = "";
 				INFOPLIST_KEY_NSMainStoryboardFile = "";
 				LD_RUNPATH_SEARCH_PATHS = "@executable_path/../Frameworks";
-				MARKETING_VERSION = 0.24.4;
+				MARKETING_VERSION = 0.24.5;
 				OTHER_LDFLAGS = "-lsqlite3";
 				PRODUCT_BUNDLE_IDENTIFIER = com.st0012.CctopMenubar;
 				PRODUCT_NAME = "$(TARGET_NAME)";
@@ -1102,9 +1110,9 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				CODE_SIGN_STYLE = Manual;
-				CURRENT_PROJECT_VERSION = 2404;
+				CURRENT_PROJECT_VERSION = 2405;
 				MACOSX_DEPLOYMENT_TARGET = 13.0;
-				MARKETING_VERSION = 0.24.4;
+				MARKETING_VERSION = 0.24.5;
 				PRODUCT_NAME = "cctop-hook";
 				SWIFT_VERSION = 5.0;
 			};
@@ -1114,9 +1122,9 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				CODE_SIGN_STYLE = Manual;
-				CURRENT_PROJECT_VERSION = 2404;
+				CURRENT_PROJECT_VERSION = 2405;
 				MACOSX_DEPLOYMENT_TARGET = 13.0;
-				MARKETING_VERSION = 0.24.4;
+				MARKETING_VERSION = 0.24.5;
 				PRODUCT_NAME = "cctop-hook";
 				SWIFT_VERSION = 5.0;
 			};
@@ -1127,10 +1135,10 @@
 			buildSettings = {
 				BUNDLE_LOADER = "$(TEST_HOST)";
 				CODE_SIGN_STYLE = Manual;
-				CURRENT_PROJECT_VERSION = 2404;
+				CURRENT_PROJECT_VERSION = 2405;
 				GENERATE_INFOPLIST_FILE = YES;
 				MACOSX_DEPLOYMENT_TARGET = 13.0;
-				MARKETING_VERSION = 0.24.4;
+				MARKETING_VERSION = 0.24.5;
 				PRODUCT_BUNDLE_IDENTIFIER = com.st0012.CctopMenubarTests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_EMIT_LOC_STRINGS = NO;
@@ -1144,10 +1152,10 @@
 			buildSettings = {
 				BUNDLE_LOADER = "$(TEST_HOST)";
 				CODE_SIGN_STYLE = Manual;
-				CURRENT_PROJECT_VERSION = 2404;
+				CURRENT_PROJECT_VERSION = 2405;
 				GENERATE_INFOPLIST_FILE = YES;
 				MACOSX_DEPLOYMENT_TARGET = 13.0;
-				MARKETING_VERSION = 0.24.4;
+				MARKETING_VERSION = 0.24.5;
 				PRODUCT_BUNDLE_IDENTIFIER = com.st0012.CctopMenubarTests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_EMIT_LOC_STRINGS = NO;
