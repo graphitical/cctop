@@ -27,6 +27,8 @@ Codex's transcript format is not a stable API, so the hook never substitutes glo
 ## Codex question display status
 
 The app reads local Codex runtime metadata for tracked sessions in the shared daemon and Desktop IPC cache.
+For active daemon sessions, it reads the latest full turn through `thread/turns/list`, since activity flags alone do not identify asynchronous questions and turn summaries omit accepted replies.
+The read keeps the local transport's byte limit and deadline; unsupported or incomplete question history leaves the activity status in place.
 A question that stops the turn displays as **Blocked** (`waiting_answer`); a finished turn displays as **Ready** (`waiting_input`).
 An unanswered asynchronous question keeps the chat **Working** with an orange **?** badge until every question receives an accepted answer.
 The menubar, notch, and panel header show the number of chats with unanswered questions separately from activity counts.

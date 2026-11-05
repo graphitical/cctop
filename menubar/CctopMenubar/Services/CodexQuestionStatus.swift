@@ -3,7 +3,8 @@ import Foundation
 enum CodexQuestionStatus: Equatable, Sendable {
     case blocked, ready, running, runningWithQuestion
 
-    init?(runtime: CodexRuntimeStatus, hasPendingQuestion: Bool = false, isWaitingForAnswer: Bool = false) {
+    init?(runtime: CodexRuntimeStatus, hasPendingQuestion: Bool? = nil, isWaitingForAnswer: Bool = false) {
+        let hasPendingQuestion = hasPendingQuestion ?? runtime.hasPendingQuestion
         if isWaitingForAnswer || runtime.activeFlags.contains("waitingOnUserInput") {
             self = .blocked
         } else if runtime.state == .idle {
@@ -41,6 +42,57 @@ enum CodexQuestionStatus: Equatable, Sendable {
             }
         }
         return statuses
+    }
+}
+
+/// Shared question identity and accepted-answer rules for daemon and Desktop turn items.
+enum CodexAsyncQuestions {
+    static func hasPending(in turns: [[String: Any]]) -> Bool? {
+        let active = turns.filter { $0["status"] as? String == "inProgress" }
+        guard active.count <= 1 else { return nil }
+        guard let turn = active.first else { return false }
+        guard let items = turn["items"] as? [[String: Any]] else { return nil }
+        var asked: Set<String> = []
+        var answered: Set<String> = []
+        for item in items {
+            if item["type"] as? String == "agentMessage", let field = item["questions"], !(field is NSNull) {
+                guard let questions = field as? [[String: Any]], questions.allSatisfy({ $0["title"] is String }),
+                      let id = item["id"] as? String else { return nil }
+                for index in questions.indices {
+                    guard let data = try? JSONSerialization.data(withJSONObject: ["request_user_input_async", id, index],
+                                                                 options: [.withoutEscapingSlashes]),
+                          let key = String(data: data, encoding: .utf8) else { return nil }
+                    asked.insert(key)
+                }
+            }
+            answered.formUnion(answeredQuestions(in: item))
+        }
+        return !asked.subtracting(answered).isEmpty
+    }
+
+    private static func answeredQuestions(in item: [String: Any]) -> [String] {
+        let content: [[String: Any]]?
+        switch item["type"] as? String {
+        case "userMessage": content = item["content"] as? [[String: Any]]
+        case "steeringUserMessage" where item["status"] as? String == "accepted": content = item["input"] as? [[String: Any]]
+        default: return []
+        }
+        let text = (content ?? []).compactMap { $0["type"] as? String == "text" ? $0["text"] as? String : nil }
+            .joined(separator: "\n").trimmingCharacters(in: .whitespacesAndNewlines)
+        let start = "<send_user_message_question_reply>"
+        let end = "</send_user_message_question_reply>"
+        guard text.hasPrefix(start), text.hasSuffix(end) else { return [] }
+        let data = Data(text.dropFirst(start.count).dropLast(end.count).utf8)
+        let decoder = JSONDecoder()
+        let replies = (try? decoder.decode([QuestionReply].self, from: data))
+            ?? (try? decoder.decode(QuestionReply.self, from: data)).map { [$0] } ?? []
+        return replies.map(\.questionItemId)
+    }
+
+    private struct QuestionReply: Decodable {
+        let questionItemId: String
+        let question: String
+        let answer: String
     }
 }
 
