@@ -39,8 +39,9 @@ class FloatingPanel: NSPanel {
     }
 
     func isUserResizeEvent(_ event: NSEvent?) -> Bool {
-        guard let event, event.window === self, event.clickCount < 2,
-              event.type == .leftMouseDown || event.type == .leftMouseDragged else { return false }
+        guard let event, event.window === self,
+              event.type == .leftMouseDown || event.type == .leftMouseDragged,
+              event.clickCount < 2 else { return false }
         let interior = NSRect(origin: .zero, size: frame.size).insetBy(dx: 6, dy: 6)
         return !interior.contains(event.locationInWindow)
     }

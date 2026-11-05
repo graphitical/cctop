@@ -4,6 +4,10 @@ Versions follow [Semantic Versioning](https://semver.org/spec/v2.0.0.html), with
 A version entry records the source changes assigned to that version; it does not imply a published binary or GitHub Release.
 Version numbers identify `graphitical/cctop` independently of upstream `st0012/cctop`.
 
+## 0.24.1 — 2026-11-05
+
+- Check the event type before reading mouse-only fields during panel resizing, preventing an AppKit exception that can leave the panel unable to reopen.
+
 ## 0.24.0 — 2026-11-05
 
 - Put blocked chats first and working chats with unanswered questions next, preserving recent activity order within each group.

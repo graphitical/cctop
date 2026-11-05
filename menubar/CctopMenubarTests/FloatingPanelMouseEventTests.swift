@@ -41,6 +41,18 @@ final class FloatingPanelMouseEventTests: XCTestCase {
     }
 
     @MainActor
+    func testAppKitResizeEventsAreNotManualMouseResizing() throws {
+        let panel = FloatingPanel(
+            contentRect: NSRect(x: 0, y: 0, width: 320, height: 500), styleMask: [], backing: .buffered, defer: false
+        )
+        let event = try XCTUnwrap(NSEvent.otherEvent(
+            with: .appKitDefined, location: .zero, modifierFlags: [], timestamp: 0,
+            windowNumber: panel.windowNumber, context: nil, subtype: 4, data1: 0, data2: 0
+        ))
+        XCTAssertFalse(panel.isUserResizeEvent(event))
+    }
+
+    @MainActor
     func testOnlySingleEdgeDragsCountAsManualResizing() throws {
         let panel = FloatingPanel(
             contentRect: NSRect(x: 0, y: 0, width: 320, height: 500), styleMask: [], backing: .buffered, defer: false
