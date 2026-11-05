@@ -2,6 +2,7 @@ import Foundation
 @preconcurrency import UserNotifications
 
 struct SessionNotificationClient {
+    var authorize: (@escaping (Bool) -> Void) -> Void
     var add: (UNNotificationRequest, @escaping (Error?) -> Void) -> Void
     var removePending: ([String]) -> Void
     var removeDelivered: ([String]) -> Void
@@ -11,8 +12,10 @@ struct SessionNotificationClient {
         add: @escaping (UNNotificationRequest, @escaping (Error?) -> Void) -> Void,
         removePending: @escaping ([String]) -> Void,
         removeDelivered: @escaping ([String]) -> Void,
-        removeByCctopSessionID: @escaping (String) -> Void = { _ in }
+        removeByCctopSessionID: @escaping (String) -> Void = { _ in },
+        authorize: @escaping (@escaping (Bool) -> Void) -> Void = { $0(false) }
     ) {
+        self.authorize = authorize
         self.add = add
         self.removePending = removePending
         self.removeDelivered = removeDelivered
@@ -61,6 +64,22 @@ struct SessionNotificationClient {
                     )
                 )
             }
+        },
+        authorize: { completion in
+            let center = UNUserNotificationCenter.current()
+            center.getNotificationSettings { settings in
+                switch settings.authorizationStatus {
+                case .notDetermined:
+                    center.requestAuthorization(options: [.alert, .sound]) { granted, error in
+                        if let error {
+                            sessionManagerLogger.error("Notification permission error: \(error, privacy: .public)")
+                        }
+                        completion(granted)
+                    }
+                case .authorized, .provisional, .ephemeral: completion(true)
+                default: completion(false)
+                }
+            }
         }
     )
 }
@@ -68,6 +87,11 @@ struct SessionNotificationClient {
 enum SessionNotificationAction: Equatable {
     case remove(cctopSessionID: String)
     case post(cctopSessionID: String)
+}
+
+struct CodexQuestionNotificationHistory {
+    let turnID: String?
+    var notifiedIDs: Set<String> = []
 }
 
 @MainActor
@@ -104,24 +128,49 @@ extension SessionManager {
         for newUserSessions: [UserSession],
         oldUserSessions: [UserSession]
     ) {
-        for action in Self.notificationActions(
-            newUserSessions: newUserSessions,
-            oldUserSessions: oldUserSessions,
-            notificationsEnabled: dataSources.notificationsEnabled()
-        ) {
+        for action in transitionNotificationActions(newUserSessions: newUserSessions, oldUserSessions: oldUserSessions) {
             switch action {
             case .remove(let cctopSessionID):
                 let oldRecords = oldUserSessions.first {
                     $0.identity.cctopSessionID == cctopSessionID
                 }?.records ?? []
-                removeNotification(
-                    cctopSessionID: cctopSessionID,
-                    matching: oldRecords
-                )
+                removeNotification(cctopSessionID: cctopSessionID, matching: oldRecords)
             case .post(let cctopSessionID):
                 sendNotification(forCctopSessionID: cctopSessionID)
             }
         }
+    }
+
+    func transitionNotificationActions(
+        newUserSessions: [UserSession], oldUserSessions: [UserSession]
+    ) -> [SessionNotificationAction] {
+        let enabled = dataSources.notificationsEnabled()
+        var actions = Self.notificationActions(
+            newUserSessions: newUserSessions,
+            oldUserSessions: oldUserSessions,
+            notificationsEnabled: enabled
+        )
+        let visibleIDs = Set(newUserSessions.compactMap { $0.identity.cctopSessionID })
+        codexQuestionNotifications = codexQuestionNotifications.filter { visibleIDs.contains($0.key) }
+        for userSession in newUserSessions {
+            let data = userSession.displayRecord.data
+            guard data.isCodex, let id = userSession.identity.cctopSessionID,
+                  let observation = codexQuestionObservations[data.sessionId], let questions = observation.questions else { continue }
+            var history = codexQuestionNotifications[id] ?? CodexQuestionNotificationHistory(turnID: questions.turnID)
+            if history.turnID != questions.turnID { history = CodexQuestionNotificationHistory(turnID: questions.turnID) }
+            // Blocking requests have their own authoritative lifecycle, independent of async questions.
+            if !observation.isWaitingForAnswer, data.lifecycle == .active,
+               data.hasPendingQuestion, !questions.pendingIDs.isEmpty {
+                actions.removeAll { $0 == .post(cctopSessionID: id) }
+                if enabled, oldUserSessions.contains(where: { $0.identity.cctopSessionID == id }),
+                   !questions.pendingIDs.isSubset(of: history.notifiedIDs) {
+                    actions.append(.post(cctopSessionID: id))
+                    history.notifiedIDs.formUnion(questions.pendingIDs)
+                }
+            }
+            codexQuestionNotifications[id] = history
+        }
+        return actions
     }
 
     nonisolated static func notificationActions(
@@ -217,23 +266,8 @@ extension SessionManager {
     }
 
     private func sendNotification(forCctopSessionID cctopSessionID: String) {
-        let center = UNUserNotificationCenter.current()
-        center.getNotificationSettings { settings in
-            switch settings.authorizationStatus {
-            case .notDetermined:
-                center.requestAuthorization(options: [.alert, .sound]) { granted, error in
-                    if let error {
-                        sessionManagerLogger.error("Notification permission error: \(error, privacy: .public)")
-                    }
-                    if granted {
-                        self.postNotification(forCctopSessionID: cctopSessionID)
-                    }
-                }
-            case .authorized, .provisional, .ephemeral:
-                self.postNotification(forCctopSessionID: cctopSessionID)
-            default:
-                break
-            }
+        dataSources.notificationClient.authorize { granted in
+            if granted { self.postNotification(forCctopSessionID: cctopSessionID) }
         }
     }
 

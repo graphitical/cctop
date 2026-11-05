@@ -2,6 +2,22 @@ import XCTest
 @testable import CctopMenubar
 
 final class CodexDesktopStatusReaderTests: XCTestCase {
+    func testPlainRepliesHandleEarlierQuestionsButNotLaterQuestions() throws {
+        let question: [String: Any] = ["type": "agentMessage", "id": "shipping", "questions": [["title": "One shipping amount?"]]]
+        let reply: [String: Any] = ["type": "userMessage", "content": [["type": "text", "text": "One expedited amount"]]]
+        let followup: [String: Any] = ["type": "agentMessage", "id": "split", "questions": [["title": "Split the changes?"]]]
+        let accepted: [String: Any] = ["type": "steeringUserMessage", "status": "accepted",
+                                     "input": [["type": "text", "text": "keep them together"]]]
+        XCTAssertFalse(try status([question, reply]).hasPendingQuestion)
+        XCTAssertTrue(try status([question, reply, followup]).hasPendingQuestion)
+        XCTAssertFalse(try status([question, reply, followup, accepted]).hasPendingQuestion)
+        for state in ["queued", "rejected"] {
+            var pendingReply = accepted
+            pendingReply["status"] = state
+            XCTAssertTrue(try status([question, pendingReply]).hasPendingQuestion)
+        }
+    }
+
     func testQuestionAndApprovalFactsStayDistinct() throws {
         var value = snapshot()
         value["threadRuntimeStatus"] = ["type": "active", "activeFlags": ["waitingOnApproval"]]
@@ -20,7 +36,7 @@ final class CodexDesktopStatusReaderTests: XCTestCase {
         var items = [question]
         XCTAssertTrue(try status(items).hasPendingQuestion)
         XCTAssertFalse(try status(items).isWaitingForAnswer)
-        items.append(["type": "userMessage", "content": [["type": "text", "text": "Continue working"]]])
+        items.append(["type": "steeringUserMessage", "status": "queued", "input": [["type": "text", "text": "Continue working"]]])
         XCTAssertTrue(try status(items).hasPendingQuestion)
         items.append(try answer(index: 0))
         XCTAssertTrue(try status(items).hasPendingQuestion)
@@ -38,6 +54,7 @@ final class CodexDesktopStatusReaderTests: XCTestCase {
             "status": "inProgress", "items": [["type": "agentMessage", "id": "q", "questions": [["title": "Choose?"]]]]
         ]]]]
         XCTAssertTrue(try XCTUnwrap(CodexDesktopStatus(snapshot: value)).hasPendingQuestion)
+        XCTAssertEqual(CodexDesktopStatus(snapshot: value)?.questions.turnID, "turn:a")
         value["turnHistory"] = ["kind": "canonical", "history": [:]]
         XCTAssertNil(CodexDesktopStatus(snapshot: value))
         value = snapshot()

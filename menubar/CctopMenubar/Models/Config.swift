@@ -16,7 +16,7 @@ private struct CodexConfigFile: Decodable {
 }
 
 enum Config {
-    static let hookVersion = "0.24.2"
+    static let hookVersion = "0.24.3"
     private static let codexStateDatabaseFilename = "state_5.sqlite"
 
     static func sessionsDir() -> String {

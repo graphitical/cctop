@@ -1,5 +1,11 @@
 import Foundation
 
+struct CodexQuestionRead: Sendable {
+    var status: CodexQuestionStatus?
+    var questions: CodexAsyncQuestions.State?
+    var isWaitingForAnswer = false
+}
+
 enum CodexQuestionStatus: Equatable, Sendable {
     case blocked, ready, running, runningWithQuestion
 
@@ -16,7 +22,7 @@ enum CodexQuestionStatus: Equatable, Sendable {
         }
     }
 
-    static func read(matching ids: Set<String>, codexHome: String) async -> [String: Self] {
+    static func read(matching ids: Set<String>, codexHome: String) async -> [String: CodexQuestionRead] {
         guard !ids.isEmpty else { return [:] }
         let daemonPath = (codexHome as NSString).appendingPathComponent("app-server-control/app-server-control.sock")
         let desktopPath = (codexHome as NSString).appendingPathComponent("ipc/ipc.sock")
@@ -27,19 +33,30 @@ enum CodexQuestionStatus: Equatable, Sendable {
             try? CodexDesktopStatusReader.read(matching: ids, socketPath: desktopPath)
         }.value
         let (daemonStatuses, desktopStatuses) = await (daemon, desktop)
-        var statuses = (daemonStatuses ?? [:]).compactMapValues { Self(runtime: $0) }
-        for (id, status) in desktopStatuses ?? [:] {
-            guard let observed = Self(runtime: status.runtime, hasPendingQuestion: status.hasPendingQuestion,
-                                      isWaitingForAnswer: status.isWaitingForAnswer) else { continue }
-            if observed == .blocked || statuses[id] == .blocked {
-                statuses[id] = .blocked
-            } else if observed == .runningWithQuestion || statuses[id] == .runningWithQuestion {
-                statuses[id] = .runningWithQuestion
-            } else if observed == .running || statuses[id] == .running {
-                statuses[id] = .running
+        return merging(daemon: daemonStatuses ?? [:], desktop: desktopStatuses ?? [:])
+    }
+
+    static func merging(daemon: [String: CodexRuntimeStatus], desktop: [String: CodexDesktopStatus]) -> [String: CodexQuestionRead] {
+        var statuses = daemon.mapValues {
+            CodexQuestionRead(status: Self(runtime: $0), questions: $0.state == .idle ? .empty : $0.questions,
+                              isWaitingForAnswer: $0.activeFlags.contains("waitingOnUserInput"))
+        }
+        for (id, status) in desktop {
+            guard Self(runtime: status.runtime, hasPendingQuestion: status.hasPendingQuestion,
+                       isWaitingForAnswer: status.isWaitingForAnswer) != nil else { continue }
+            let activeDaemon = daemon[id].flatMap { $0.state == .active ? $0 : nil }
+            let questions: CodexAsyncQuestions.State?
+            if let activeDaemon {
+                questions = activeDaemon.questions ?? (status.runtime.state == .active ? status.questions : nil)
             } else {
-                statuses[id] = .ready
+                questions = status.questions
             }
+            let waiting = statuses[id]?.isWaitingForAnswer == true || status.isWaitingForAnswer
+            statuses[id] = CodexQuestionRead(
+                status: Self(runtime: activeDaemon ?? status.runtime, hasPendingQuestion: questions?.pendingIDs.isEmpty == false,
+                             isWaitingForAnswer: waiting),
+                questions: questions, isWaitingForAnswer: waiting
+            )
         }
         return statuses
     }
@@ -47,13 +64,18 @@ enum CodexQuestionStatus: Equatable, Sendable {
 
 /// Shared question identity and accepted-answer rules for daemon and Desktop turn items.
 enum CodexAsyncQuestions {
-    static func hasPending(in turns: [[String: Any]]) -> Bool? {
+    struct State: Equatable, Sendable {
+        let turnID: String?
+        let pendingIDs: Set<String>
+        static let empty = Self(turnID: nil, pendingIDs: [])
+    }
+
+    static func read(in turns: [[String: Any]]) -> State? {
         let active = turns.filter { $0["status"] as? String == "inProgress" }
         guard active.count <= 1 else { return nil }
-        guard let turn = active.first else { return false }
+        guard let turn = active.first else { return .empty }
         guard let items = turn["items"] as? [[String: Any]] else { return nil }
         var asked: Set<String> = []
-        var answered: Set<String> = []
         for item in items {
             if item["type"] as? String == "agentMessage", let field = item["questions"], !(field is NSNull) {
                 guard let questions = field as? [[String: Any]], questions.allSatisfy({ $0["title"] is String }),
@@ -65,23 +87,32 @@ enum CodexAsyncQuestions {
                     asked.insert(key)
                 }
             }
-            answered.formUnion(answeredQuestions(in: item))
+            if let content = acceptedContent(in: item) {
+                if let answered = answeredQuestions(in: content) {
+                    asked.subtract(answered)
+                } else {
+                    asked.removeAll()
+                }
+            }
         }
-        return !asked.subtracting(answered).isEmpty
+        return State(turnID: turn["id"] as? String ?? turn["turnId"] as? String, pendingIDs: asked)
     }
 
-    private static func answeredQuestions(in item: [String: Any]) -> [String] {
-        let content: [[String: Any]]?
+    private static func acceptedContent(in item: [String: Any]) -> [[String: Any]]? {
         switch item["type"] as? String {
-        case "userMessage": content = item["content"] as? [[String: Any]]
-        case "steeringUserMessage" where item["status"] as? String == "accepted": content = item["input"] as? [[String: Any]]
-        default: return []
+        case "userMessage": return item["content"] as? [[String: Any]]
+        case "steeringUserMessage" where item["status"] as? String == "accepted": return item["input"] as? [[String: Any]]
+        default: return nil
         }
-        let text = (content ?? []).compactMap { $0["type"] as? String == "text" ? $0["text"] as? String : nil }
+    }
+
+    private static func answeredQuestions(in content: [[String: Any]]) -> [String]? {
+        let text = content.compactMap { $0["type"] as? String == "text" ? $0["text"] as? String : nil }
             .joined(separator: "\n").trimmingCharacters(in: .whitespacesAndNewlines)
         let start = "<send_user_message_question_reply>"
         let end = "</send_user_message_question_reply>"
-        guard text.hasPrefix(start), text.hasSuffix(end) else { return [] }
+        guard text.hasPrefix(start) else { return nil }
+        guard text.hasSuffix(end) else { return [] }
         let data = Data(text.dropFirst(start.count).dropLast(end.count).utf8)
         let decoder = JSONDecoder()
         let replies = (try? decoder.decode([QuestionReply].self, from: data))
@@ -98,7 +129,9 @@ enum CodexAsyncQuestions {
 
 struct CodexQuestionObservation {
     let activity: Date
-    let status: CodexQuestionStatus
+    let status: CodexQuestionStatus?
+    var questions: CodexAsyncQuestions.State?
+    var isWaitingForAnswer = false
 }
 
 extension SessionManager {
@@ -111,18 +144,27 @@ extension SessionManager {
             guard data.isCodex, data.lifecycle == .active else { continue }
             activity[data.sessionId] = data.lastActivity
         }
-        guard !activity.isEmpty else { codexQuestionObservations = [:]; return }
+        codexQuestionObservations = codexQuestionObservations.filter { activity[$0.key] != nil }
+        guard !activity.isEmpty else { return }
         codexQuestionReadAfter = dataSources.now().addingTimeInterval(2)
         let requestedActivity = activity
         codexQuestionReadTask = Task { [weak self] in
             let statuses = await read(Set(requestedActivity.keys))
             guard !Task.isCancelled, let self else { return }
             self.codexQuestionReadTask = nil
-            self.codexQuestionObservations = statuses.reduce(into: [:]) { observations, entry in
-                guard let activity = requestedActivity[entry.key] else { return }
-                observations[entry.key] = CodexQuestionObservation(activity: activity, status: entry.value)
-            }
+            self.recordCodexQuestionReads(statuses, activity: requestedActivity)
             self.loadSessions()
+        }
+    }
+
+    func recordCodexQuestionReads(_ reads: [String: CodexQuestionRead], activity: [String: Date]) {
+        for (id, read) in reads {
+            guard let activity = activity[id] else { continue }
+            codexQuestionObservations[id] = CodexQuestionObservation(
+                activity: activity, status: read.status,
+                questions: read.questions ?? codexQuestionObservations[id]?.questions,
+                isWaitingForAnswer: read.isWaitingForAnswer
+            )
         }
     }
 

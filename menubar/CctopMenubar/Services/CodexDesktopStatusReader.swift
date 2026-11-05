@@ -4,29 +4,35 @@ struct CodexDesktopStatus: Equatable, Sendable {
     let runtime: CodexRuntimeStatus
     let hasPendingQuestion: Bool
     let isWaitingForAnswer: Bool
+    let questions: CodexAsyncQuestions.State
 
     init?(snapshot: [String: Any]) {
         guard let runtimeJSON = snapshot["threadRuntimeStatus"] as? [String: Any],
               let runtime = CodexRuntimeStatus(json: runtimeJSON),
               let requests = snapshot["requests"] as? [[String: Any]],
-              let hasAsyncQuestion = Self.hasAsyncQuestion(in: snapshot) else { return nil }
+              let questions = Self.questions(in: snapshot) else { return nil }
         self.runtime = runtime
+        self.questions = questions
         isWaitingForAnswer = runtime.activeFlags.contains("waitingOnUserInput")
             || requests.contains { $0["method"] as? String == "item/tool/requestUserInput" }
-        hasPendingQuestion = isWaitingForAnswer || hasAsyncQuestion
+        hasPendingQuestion = isWaitingForAnswer || !questions.pendingIDs.isEmpty
     }
 
-    private static func hasAsyncQuestion(in snapshot: [String: Any]) -> Bool? {
+    private static func questions(in snapshot: [String: Any]) -> CodexAsyncQuestions.State? {
         let turns: [[String: Any]]
         if let history = snapshot["turnHistory"] as? [String: Any], history["kind"] as? String == "canonical" {
             guard let canonical = history["history"] as? [String: Any],
                   let entities = canonical["entitiesByKey"] as? [String: [String: Any]] else { return nil }
-            turns = Array(entities.values)
+            turns = entities.map { key, value in
+                var turn = value
+                if turn["id"] == nil && turn["turnId"] == nil { turn["id"] = key }
+                return turn
+            }
         } else {
             guard let legacy = snapshot["turns"] as? [[String: Any]] else { return nil }
             turns = legacy
         }
-        return CodexAsyncQuestions.hasPending(in: turns)
+        return CodexAsyncQuestions.read(in: turns)
     }
 }
 

@@ -75,7 +75,7 @@ final class CodexRuntimeStatusReaderTests: XCTestCase {
         ]]
         let first = try answer(index: 0)
         let second = try answer(index: 1)
-        let unrelated: [String: Any] = ["type": "userMessage", "content": [["type": "text", "text": "Keep working"]]]
+        let unrelated: [String: Any] = ["type": "steeringUserMessage", "status": "queued", "input": [["type": "text", "text": "Keep working"]]]
         XCTAssertEqual(try cliStatus(items: [question, unrelated, first]), .runningWithQuestion)
         XCTAssertEqual(try cliStatus(items: [question, first, second]), .running)
         XCTAssertEqual(try cliStatus(items: [question], turnStatus: "completed"), .running)

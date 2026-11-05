@@ -129,6 +129,27 @@ final class QASnapshotTests: XCTestCase {
         try renderPanelScreenshot(view: bars, colorScheme: .dark, directoryName: "cctop-qa", filename: "question-bars.png")
     }
 
+    func testAnsweredCodexQuestionHasNoQuestionBadge() throws {
+        let sources = try isolatedSessionDataSources(prefix: "answered-question-snapshot")
+        let session = SessionData.mock(id: "factory", sessionName: "factory quoting", status: .working,
+                                       pid: UInt32(ProcessInfo.processInfo.processIdentifier), source: "codex")
+        try session.writeToFile(path: sources.sessionsDir.appendingPathComponent("factory.json").path)
+        let manager = SessionManager(
+            historyManager: HistoryManager(historyDir: sources.sessionsDir.appendingPathComponent("history")),
+            dataSources: sources, startMonitoring: false
+        )
+        let questions = try XCTUnwrap(CodexAsyncQuestions.read(in: [["id": "turn", "status": "inProgress", "items": [
+            ["type": "agentMessage", "id": "split", "questions": [["title": "Split the changes?"]]],
+            ["type": "userMessage", "content": [["type": "text", "text": "keep them together"]]]
+        ]]]))
+        manager.recordCodexQuestionReads(["factory": CodexQuestionRead(status: .running, questions: questions)],
+                                        activity: ["factory": session.lastActivity])
+        manager.loadSessions()
+        XCTAssertFalse(try XCTUnwrap(manager.userSessions.first).displayRecord.data.hasPendingQuestion)
+        let view = PopupView(userSessions: manager.userSessions, updater: DisabledUpdater(), pluginManager: inertPluginManager())
+        try renderPanelScreenshot(view: view, colorScheme: .dark, directoryName: "cctop-qa", filename: "answered-codex-question.png")
+    }
+
     func testCodexPermissionReviewerLabels() throws {
         let sources = try isolatedSessionDataSources(prefix: "permission-review-snapshot")
         let sessions = ([CodexPermissionReviewer.autoReview, .user, nil] as [CodexPermissionReviewer?])

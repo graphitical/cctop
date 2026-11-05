@@ -16,14 +16,14 @@ struct SessionDataSources {
     var idleTimeout: () -> TimeInterval
     var notificationClient: SessionNotificationClient = .live
     var manualSessionVisibility: ManualSessionVisibilityStore = .live
-    var readCodexQuestions: (@Sendable (Set<String>) async -> [String: CodexQuestionStatus])?
+    var readCodexQuestions: (@Sendable (Set<String>) async -> [String: CodexQuestionRead])?
     var now: () -> Date
 
     /// A function rather than a stored constant so `Config.sessionsDir()` is resolved
     /// when the caller constructs its sources. The live metadata stores resolve their
     /// own paths as needed, with short internal caches for repeated reads in one pass.
     static func live() -> SessionDataSources {
-        var readCodexQuestions: (@Sendable (Set<String>) async -> [String: CodexQuestionStatus])?
+        var readCodexQuestions: (@Sendable (Set<String>) async -> [String: CodexQuestionRead])?
         if ProcessInfo.processInfo.environment["CCTOP_XCODE_TEST_HOST"] != "1" {
             readCodexQuestions = { ids in
                 await CodexQuestionStatus.read(matching: ids, codexHome: Config.codexHome())

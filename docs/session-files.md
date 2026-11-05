@@ -30,7 +30,11 @@ The app reads local Codex runtime metadata for tracked sessions in the shared da
 For active daemon sessions, it reads the latest full turn through `thread/turns/list`, since activity flags alone do not identify asynchronous questions and turn summaries omit accepted replies.
 The read keeps the local transport's byte limit and deadline; unsupported or incomplete question history leaves the activity status in place.
 A question that stops the turn displays as **Blocked** (`waiting_answer`); a finished turn displays as **Ready** (`waiting_input`).
-An unanswered asynchronous question keeps the chat **Working** with an amber **?** badge until every question receives an accepted answer.
+An unanswered asynchronous question keeps the chat **Working** with an amber **?** badge.
+Structured answers clear their referenced questions; an ordinary accepted user message handles every earlier asynchronous question in that turn.
+Queued or rejected steering messages do not clear questions, and questions asked after an accepted reply remain pending.
+Question identities and notification history stay in memory for the current turn, so tool activity, automatic permission review, and temporary read failures do not repeat an alert for the same question.
+A new question can notify even when the chat already has a pending question.
 Both question states use an amber **?** badge.
 Blocked chats appear first, followed by working chats with questions, then other chats.
 Each group keeps recent activity order.

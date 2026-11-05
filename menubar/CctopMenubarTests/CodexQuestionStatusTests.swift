@@ -3,6 +3,150 @@ import XCTest
 @testable import CctopMenubar
 
 final class CodexQuestionStatusTests: XCTestCase {
+    func testActiveQuestionSourceWinsOverIdleCopies() throws {
+        let idle = try XCTUnwrap(CodexRuntimeStatus(json: ["type": "idle"]))
+        let snapshot: [String: Any] = ["threadRuntimeStatus": ["type": "active", "activeFlags": []], "requests": [], "turns": [
+            ["id": "turn", "status": "inProgress", "items": [
+                ["type": "agentMessage", "id": "question", "questions": [["title": "Choose?"]]]
+            ]]
+        ]]
+        let desktop = try XCTUnwrap(CodexDesktopStatus(snapshot: snapshot))
+        let result = try XCTUnwrap(CodexQuestionStatus.merging(daemon: ["factory": idle], desktop: ["factory": desktop])["factory"])
+        XCTAssertEqual(result.status, .runningWithQuestion)
+        XCTAssertEqual(result.questions?.pendingIDs.count, 1)
+
+        var active = try XCTUnwrap(CodexRuntimeStatus(json: ["type": "active", "activeFlags": []]))
+        active.questions = .init(turnID: "turn", pendingIDs: [])
+        var idleSnapshot = snapshot
+        idleSnapshot["threadRuntimeStatus"] = ["type": "idle"]
+        let idleDesktop = try XCTUnwrap(CodexDesktopStatus(snapshot: idleSnapshot))
+        let answered = try XCTUnwrap(CodexQuestionStatus.merging(daemon: ["factory": active], desktop: ["factory": idleDesktop])["factory"])
+        XCTAssertEqual(answered.status, .running)
+        XCTAssertEqual(answered.questions?.pendingIDs, [])
+    }
+
+    @MainActor
+    func testASecondQuestionNotifiesEvenWhenTheDisplayedSessionHasNotChanged() throws {
+        final class Notifications {
+            var added: [String] = []
+            var removed: [String] = []
+        }
+        let notifications = Notifications()
+        var sources = try isolatedSessionDataSources(prefix: "question-delivery")
+        sources.notificationsEnabled = { true }
+        sources.notificationClient = SessionNotificationClient(
+            add: { request, completion in notifications.added.append(request.identifier); completion(nil) },
+            removePending: { _ in }, removeDelivered: { notifications.removed += $0 }, authorize: { $0(true) }
+        )
+        let session = SessionData.mock(id: "factory", status: .working,
+                                       pid: UInt32(ProcessInfo.processInfo.processIdentifier), source: "codex")
+        try session.writeToFile(path: sources.sessionsDir.appendingPathComponent("factory.json").path)
+        let manager = SessionManager(
+            historyManager: HistoryManager(historyDir: sources.sessionsDir.appendingPathComponent("history")),
+            dataSources: sources, startMonitoring: false
+        )
+        func observe(_ ids: Set<String>) {
+            manager.recordCodexQuestionReads([
+                "factory": CodexQuestionRead(status: .runningWithQuestion, questions: .init(turnID: "turn", pendingIDs: ids))
+            ], activity: ["factory": session.lastActivity])
+            manager.loadSessions()
+        }
+        observe(["shipping"])
+        let displayed = manager.userSessions
+        observe(["shipping", "split"])
+        XCTAssertEqual(manager.userSessions, displayed)
+        XCTAssertEqual(notifications.added.count, 2)
+        observe(["shipping", "split"])
+        XCTAssertEqual(notifications.added.count, 2)
+        let removedBeforeReply = notifications.removed.count
+        observe([])
+        XCTAssertFalse(try XCTUnwrap(manager.userSessions.first).displayRecord.data.hasPendingQuestion)
+        XCTAssertTrue(notifications.removed.dropFirst(removedBeforeReply).contains(try XCTUnwrap(notifications.added.last)))
+    }
+
+    @MainActor
+    func testEachQuestionNotifiesOnceAcrossRefreshesAndNewQuestionsStillNotify() throws {
+        var sources = try isolatedSessionDataSources(prefix: "question-notifications")
+        sources.notificationsEnabled = { true }
+        let manager = SessionManager(
+            historyManager: HistoryManager(historyDir: sources.sessionsDir.appendingPathComponent("history")),
+            dataSources: sources, startMonitoring: false
+        )
+        let working = SessionData.mock(id: "factory", status: .working, source: "codex")
+        let sessionID = try XCTUnwrap(working.cctopSessionId)
+        var pending = working
+        pending.hasPendingAsyncQuestion = true
+        func observe(_ ids: Set<String>, turn: String = "turn") {
+            manager.recordCodexQuestionReads([
+                "factory": CodexQuestionRead(status: .running, questions: .init(turnID: turn, pendingIDs: ids))
+            ], activity: ["factory": working.lastActivity])
+        }
+        func actions(from source: SessionData, to target: SessionData) -> [SessionNotificationAction] {
+            manager.transitionNotificationActions(
+                newUserSessions: userSessions(fromDataFixtures: [target]),
+                oldUserSessions: userSessions(fromDataFixtures: [source])
+            )
+        }
+        observe(["shipping"])
+        XCTAssertEqual(actions(from: working, to: pending), [.post(cctopSessionID: sessionID)])
+        XCTAssertEqual(actions(from: pending, to: working), [.remove(cctopSessionID: sessionID)])
+        manager.recordCodexQuestionReads([:], activity: ["factory": working.lastActivity])
+        XCTAssertEqual(actions(from: working, to: pending), [])
+        observe(["shipping", "split"])
+        XCTAssertEqual(actions(from: pending, to: pending), [.post(cctopSessionID: sessionID)])
+        XCTAssertEqual(actions(from: pending, to: pending), [])
+        observe([])
+        XCTAssertEqual(actions(from: pending, to: working), [.remove(cctopSessionID: sessionID)])
+        observe(["shipping"], turn: "next-turn")
+        XCTAssertEqual(actions(from: working, to: pending), [.post(cctopSessionID: sessionID)])
+        manager.recordCodexQuestionReads([
+            "factory": CodexQuestionRead(status: .blocked, isWaitingForAnswer: true)
+        ], activity: ["factory": working.lastActivity])
+        var blocked = working
+        blocked.status = .waitingAnswer
+        XCTAssertEqual(actions(from: working, to: blocked), [.post(cctopSessionID: sessionID)])
+    }
+
+    @MainActor
+    func testQuestionEvidenceSurvivesToolActivityAndUnknownReadsUntilResolved() throws {
+        let sources = try isolatedSessionDataSources(prefix: "question-refresh")
+        var session = SessionData.mock(id: "factory", status: .working,
+                                       pid: UInt32(ProcessInfo.processInfo.processIdentifier), source: "codex")
+        let file = sources.sessionsDir.appendingPathComponent("factory.json")
+        try session.writeToFile(path: file.path)
+        let manager = SessionManager(
+            historyManager: HistoryManager(historyDir: sources.sessionsDir.appendingPathComponent("history")),
+            dataSources: sources, startMonitoring: false
+        )
+        let pending = CodexAsyncQuestions.State(turnID: "turn", pendingIDs: ["shipping"])
+        manager.recordCodexQuestionReads([
+            "factory": CodexQuestionRead(status: .runningWithQuestion, questions: pending)
+        ], activity: ["factory": session.lastActivity])
+        manager.loadSessions()
+        XCTAssertTrue(try XCTUnwrap(manager.userSessions.first).displayRecord.data.hasPendingAsyncQuestion)
+
+        session.lastActivity.addTimeInterval(1)
+        session.status = .waitingPermission
+        session.codexPermissionReviewer = .autoReview
+        try session.writeToFile(path: file.path)
+        let persisted = try Data(contentsOf: file)
+        manager.loadSessions()
+        XCTAssertEqual(manager.userSessions.first?.status, .working)
+        XCTAssertTrue(try XCTUnwrap(manager.userSessions.first).displayRecord.data.hasPendingAsyncQuestion)
+        manager.recordCodexQuestionReads([:], activity: ["factory": session.lastActivity])
+        manager.recordCodexQuestionReads(["factory": CodexQuestionRead(status: .running)],
+                                        activity: ["factory": session.lastActivity])
+        manager.loadSessions()
+        XCTAssertTrue(try XCTUnwrap(manager.userSessions.first).displayRecord.data.hasPendingAsyncQuestion)
+
+        manager.recordCodexQuestionReads([
+            "factory": CodexQuestionRead(status: .running, questions: .init(turnID: "turn", pendingIDs: []))
+        ], activity: ["factory": session.lastActivity])
+        manager.loadSessions()
+        XCTAssertFalse(try XCTUnwrap(manager.userSessions.first).displayRecord.data.hasPendingQuestion)
+        XCTAssertEqual(try Data(contentsOf: file), persisted)
+    }
+
     func testRuntimeFactsDistinguishQuestionsFromFinishedAndRunningTurns() throws {
         func status(_ type: String, flags: [String] = [], pending: Bool = false) throws -> CodexQuestionStatus? {
             let runtime = try XCTUnwrap(CodexRuntimeStatus(json: ["type": type, "activeFlags": flags]))
@@ -124,7 +268,7 @@ final class CodexQuestionStatusTests: XCTestCase {
         let persisted = try Data(contentsOf: URL(fileURLWithPath: path))
         sources.readCodexQuestions = { ids in
             XCTAssertEqual(ids, [id])
-            return [id: .runningWithQuestion]
+            return [id: CodexQuestionRead(status: .runningWithQuestion)]
         }
         let manager = SessionManager(
             historyManager: HistoryManager(historyDir: sources.sessionsDir.appendingPathComponent("history")),

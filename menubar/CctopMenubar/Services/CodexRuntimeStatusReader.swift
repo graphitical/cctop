@@ -8,7 +8,8 @@ struct CodexRuntimeStatus: Equatable, Sendable {
 
     let state: State
     let activeFlags: Set<String>
-    var hasPendingQuestion = false
+    var questions: CodexAsyncQuestions.State?
+    var hasPendingQuestion: Bool { questions?.pendingIDs.isEmpty == false }
 
     init?(json: [String: Any]) {
         guard let type = json["type"] as? String, let state = State(rawValue: type) else { return nil }
@@ -67,7 +68,7 @@ enum CodexRuntimeStatusReader {
                 // Summaries omit accepted replies, so only full turns can clear questions.
                 if let turns = page?["data"] as? [[String: Any]], turns.count <= 1,
                    turns.allSatisfy({ $0["itemsView"] as? String == "full" }) {
-                    statuses[threadID]?.hasPendingQuestion = CodexAsyncQuestions.hasPending(in: turns) ?? false
+                    statuses[threadID]?.questions = CodexAsyncQuestions.read(in: turns)
                 }
             } catch { break }
         }

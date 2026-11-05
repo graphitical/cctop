@@ -37,6 +37,7 @@ class SessionManager: ObservableObject {
     var codexQuestionObservations: [String: CodexQuestionObservation] = [:]
     var codexQuestionReadTask: Task<Void, Never>?
     var codexQuestionReadAfter = Date.distantPast
+    var codexQuestionNotifications: [String: CodexQuestionNotificationHistory] = [:]
     /// Lifecycle windows: `active` is the recent-activity connection fallback; `retention`
     /// is Codex's absolute inactivity cap and the dormant non-Codex desktop cleanup window.
     nonisolated static let lifecycleWindows = LifecycleWindows(active: 600, retention: 1_209_600)
@@ -192,14 +193,13 @@ class SessionManager: ObservableObject {
     ) {
         let oldCount = userSessions.count
         let displayChanged = displaySignature.map { $0 != lastDisplaySignature } ?? false
-        guard newUserSessions != userSessions || displayChanged else { return }
-        if newUserSessions.count != oldCount {
-            sessionManagerLogger.info("loadSessions: session count \(oldCount) -> \(newUserSessions.count)")
+        if newUserSessions != userSessions || displayChanged {
+            if newUserSessions.count != oldCount {
+                sessionManagerLogger.info("loadSessions: session count \(oldCount) -> \(newUserSessions.count)")
+            }
+            if let displaySignature { lastDisplaySignature = displaySignature }
+            userSessions = newUserSessions
         }
-        if let displaySignature {
-            lastDisplaySignature = displaySignature
-        }
-        userSessions = newUserSessions
         if let oldUserSessions {
             syncTransitionNotifications(for: newUserSessions, oldUserSessions: oldUserSessions)
         }
@@ -344,14 +344,17 @@ class SessionManager: ObservableObject {
             result.status = .idle
             return result
         }
-        if session.isCodex, session.status == .waitingPermission, session.codexPermissionReviewer == .autoReview {
-            var result = session
-            result.status = .working
-            return result
-        }
         var result = adjustPermissionStatus(session)
+        if session.isCodex, session.status == .waitingPermission, session.codexPermissionReviewer == .autoReview {
+            result.status = .working
+        }
         if let observation = codexQuestionObservations[session.sessionId], observation.activity == session.lastActivity {
             result = Self.applyingCodexQuestionStatus(observation.status, to: result)
+        }
+        if result.isCodex, result.status != .waitingPermission,
+           let observation = codexQuestionObservations[session.sessionId], let questions = observation.questions {
+            result.hasPendingAsyncQuestion = !questions.pendingIDs.isEmpty && result.status != .waitingAnswer
+                && !observation.isWaitingForAnswer
         }
         result = Self.adjustIdleTimeout(result, now: dataSources.now(), timeout: dataSources.idleTimeout())
         return result

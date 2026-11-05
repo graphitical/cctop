@@ -4,6 +4,12 @@ Versions follow [Semantic Versioning](https://semver.org/spec/v2.0.0.html), with
 A version entry records the source changes assigned to that version; it does not imply a published binary or GitHub Release.
 Version numbers identify `graphitical/cctop` independently of upstream `st0012/cctop`.
 
+## 0.24.3 — 2026-11-05
+
+- Clear earlier asynchronous question badges when Codex accepts an ordinary chat reply, while keeping structured answers specific to their questions.
+- Notify once per question during a turn, including new questions in an already waiting chat, without repeating alerts during tool activity, automatic permission review, or temporary read failures.
+- Keep question evidence separate from runtime freshness and leave persisted session files and hook contracts unchanged.
+
 ## 0.24.2 — 2026-11-05
 
 - Use blue for Working and Compacting, green for Ready, amber/orange for input and permission requests, and neutral gray for Idle across all five themes.
