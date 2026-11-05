@@ -27,6 +27,9 @@ As soon as a session's displayed status becomes Idle, it moves to the Idle tab w
 Dormant sessions also appear in the Idle tab.
 Fresh work or a status that needs attention returns a connected session to Active.
 These tab rules do not change lifecycle retention or archive behavior.
+Active rows put Blocked questions first, followed by Working questions, permission requests and other attention-needed sessions, Working and Compacting sessions, then Ready sessions.
+Each group uses recent activity order, preserving prior identity order for equal timestamps.
+Idle and dormant rows remain ordered by recent activity regardless of their stored status.
 
 Settings → General → **Idle after** controls how long a session can wait for the next prompt before its displayed status becomes Idle.
 The delay defaults to 60 minutes and accepts a positive whole number of minutes.
@@ -52,7 +55,7 @@ flowchart TD
     H -->|active| I["Group current records into UserSession<br/>using the winner's cctop ID or legacy fallback"]
     H -->|dormant| I
     I --> J["Choose displayRecord<br/>and apply the existing display-only status adjustment"]
-    J --> K["Reconcile UserSession order<br/>by latest activity, then prior LogicalIdentity order"]
+    J --> K["Reconcile UserSession order<br/>by status priority, latest activity,<br/>then prior LogicalIdentity order"]
     K --> N["Publish SessionManager.userSessions"]
     N --> P["At presentation boundaries, derive SessionData<br/>from each displayRecord.data"]
 ```

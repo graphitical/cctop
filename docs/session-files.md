@@ -36,7 +36,7 @@ Queued or rejected steering messages do not clear questions, and questions asked
 Question identities and notification history stay in memory for the current turn, so tool activity, automatic permission review, and temporary read failures do not repeat an alert for the same question.
 A new question can notify even when the chat already has a pending question.
 Both question states use an amber **?** badge.
-Blocked chats appear first, followed by working chats with questions, then other chats.
+Blocked chats appear first, followed by working chats with questions, permission requests and other attention-needed chats, Working and Compacting chats, then Ready chats.
 Each group keeps recent activity order.
 The menubar, notch, and panel header show the amber question count separately from activity counts.
 Working and Compacting use blue, Ready uses green, and Idle uses neutral gray.
@@ -167,7 +167,9 @@ conversation. That record sets the group identity. Older related records remain
 attached as evidence, even when their identity data is stale.
 
 `SessionManager.userSessions` owns the canonical visible identity and row order.
-It orders active blocked questions first, then active working questions, then other sessions, with `displayRecord.data.lastActivity` newest first within each group.
+It orders active blocked questions first, followed by active working questions, permission requests and other attention-needed sessions, Working and Compacting sessions, then Ready sessions (`waiting_input`).
+Each group uses `displayRecord.data.lastActivity` newest first.
+Idle and dormant sessions stay in the Idle tab and share one recency-ordered group regardless of their stored status.
 Equal timestamps preserve prior `UserSession` order by `LogicalIdentity`, followed by newly seen sessions in their supplied order.
 A presentation or direct-action leaf can read `UserSession.displayRecord.data`, but it must not use that value to assign identity, control order, or rebuild a `UserSession`.
 
@@ -195,8 +197,8 @@ a privacy-safe stale-state diagnostic. It performs one canonical reload and one
 re-resolution, then fails closed if the target is still missing. It never falls
 back to a client conversation reference, PID, or display slot.
 
-`SessionManager` collapses visible records with the same logical identity into one `UserSession` before applying newest-first activity ordering.
-Prior identity order breaks ties between equal activity timestamps.
+`SessionManager` collapses visible records with the same logical identity into one `UserSession` before applying status priority and newest-first activity ordering within each group.
+Prior identity order breaks ties between equal activity timestamps within the same group.
 The existing lifecycle preference chooses `displayRecord`; it does not choose row identity or order.
 Panel navigation, URL focus, notifications, hiding, and `DisplayStateWriter` consume the ordered groups.
 Presentation code derives `SessionData` only from `displayRecord.data`.

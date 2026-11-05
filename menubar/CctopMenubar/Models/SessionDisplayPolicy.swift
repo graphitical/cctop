@@ -24,7 +24,7 @@ enum SessionDisplayPolicy {
         }
     }
 
-    /// Shows blocked questions first, then working questions, then other sessions.
+    /// Shows questions first, then attention, work, ready, and idle sessions.
     /// Each group uses recent activity, preserving canonical identity order for ties.
     static func reconcilingOrder(
         in userSessions: [UserSession],
@@ -42,8 +42,8 @@ enum SessionDisplayPolicy {
             priorRank[matched.identity] = rank
         }
         return userSessions.enumerated().sorted { left, right in
-            let leftPriority = questionPriority(for: left.element)
-            let rightPriority = questionPriority(for: right.element)
+            let leftPriority = displayPriority(for: left.element)
+            let rightPriority = displayPriority(for: right.element)
             if leftPriority != rightPriority { return leftPriority < rightPriority }
             let leftActivity = left.element.displayRecord.data.lastActivity
             let rightActivity = right.element.displayRecord.data.lastActivity
@@ -54,10 +54,17 @@ enum SessionDisplayPolicy {
         }.map(\.element)
     }
 
-    private static func questionPriority(for userSession: UserSession) -> Int {
+    private static func displayPriority(for userSession: UserSession) -> Int {
         let data = userSession.displayRecord.data
-        guard data.lifecycle == .active, data.hasPendingQuestion else { return 2 }
-        return data.status == .waitingAnswer ? 0 : 1
+        guard data.lifecycle == .active, data.status != .idle else { return 5 }
+        if data.hasPendingQuestion { return data.status == .waitingAnswer ? 0 : 1 }
+        switch data.status {
+        case .waitingAnswer: return 0
+        case .waitingPermission, .needsAttention: return 2
+        case .working, .compacting: return 3
+        case .waitingInput: return 4
+        case .idle: return 5
+        }
     }
 
     static func signature(for userSessions: [UserSession]) -> Signature {

@@ -4,6 +4,12 @@ Versions follow [Semantic Versioning](https://semver.org/spec/v2.0.0.html), with
 A version entry records the source changes assigned to that version; it does not imply a published binary or GitHub Release.
 Version numbers identify `graphitical/cctop` independently of upstream `st0012/cctop`.
 
+## 0.24.4 — 2026-11-05
+
+- Keep Working and Compacting tasks above Ready tasks, even when a Ready task has more recent activity.
+- Preserve question priority, put permission requests and other attention-needed tasks above ordinary work, and keep recency and stable identity order within each group.
+- Share the same order across the panel, keyboard navigation, and Stream Deck while keeping Idle and dormant tasks ordered by recency in the Idle tab.
+
 ## 0.24.3 — 2026-11-05
 
 - Clear earlier asynchronous question badges when Codex accepts an ordinary chat reply, while keeping structured answers specific to their questions.

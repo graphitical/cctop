@@ -1980,7 +1980,7 @@ final class SessionManagerVisibilityTests: XCTestCase {
     }
 
     @MainActor
-    func testSessionManagerPublishesRecencyOrderThroughRealisticFileUpdates() throws {
+    func testSessionManagerPublishesPriorityAndRecencyOrderThroughRealisticFileUpdates() throws {
         let root = NSTemporaryDirectory() + "cctop-recency-order-\(UUID().uuidString)"
         let sessionsDir = (root as NSString).appendingPathComponent("sessions")
         let historyDir = (root as NSString).appendingPathComponent("history")
@@ -2020,7 +2020,7 @@ final class SessionManagerVisibilityTests: XCTestCase {
         manager.loadSessions()
         XCTAssertEqual(
             SessionDisplayPolicy.activeSessions(from: manager.userSessions).map(\.displayRecord.data.id),
-            ["202", "404", "303", "101"]
+            ["202", "101", "404", "303"]
         )
 
         alpha.status = .waitingInput
@@ -2032,10 +2032,12 @@ final class SessionManagerVisibilityTests: XCTestCase {
         beta.lastToolDetail = "make test"
         try alpha.writeToFile(path: alphaPath)
         try beta.writeToFile(path: betaPath)
+        gamma.status = .working
+        try gamma.writeToFile(path: gammaPath)
         manager.loadSessions()
 
         let activeAfterUpdates = SessionDisplayPolicy.activeSessions(from: manager.userSessions)
-        XCTAssertEqual(activeAfterUpdates.map(\.displayRecord.data.id), ["101", "404", "303"])
+        XCTAssertEqual(activeAfterUpdates.map(\.displayRecord.data.id), ["303", "101", "404"])
         XCTAssertEqual(
             SessionDisplayPolicy.idleSessions(from: manager.userSessions).map(\.displayRecord.data.id),
             ["202"]
@@ -2053,6 +2055,14 @@ final class SessionManagerVisibilityTests: XCTestCase {
         )
         XCTAssertEqual(snapshot.sessions.count, activeAfterUpdates.count)
         XCTAssertTrue(activeAfterUpdates.allSatisfy { CctopSessionID.isValid($0.identity.cctopSessionID) })
+
+        gamma.status = .waitingInput
+        try gamma.writeToFile(path: gammaPath)
+        manager.loadSessions()
+        XCTAssertEqual(
+            SessionDisplayPolicy.activeSessions(from: manager.userSessions).map(\.displayRecord.data.id),
+            ["101", "404", "303"]
+        )
 
         alpha.hidden = true
         try alpha.writeToFile(path: alphaPath)

@@ -399,7 +399,8 @@ All source labels render as neutral metadata so the project name and session sta
 
 Blocked chats use an amber/orange **?** badge and matching status text.
 Working chats with unanswered questions retain their working color and show the same amber/orange **?** badge.
-Blocked chats come first, then working chats with questions, then other chats, with recent activity order within each group.
+Blocked chats come first, followed by working chats with questions, permission requests and other attention-needed chats, Working and Compacting chats, then Ready chats.
+Each group keeps recent activity order, with the existing identity order breaking equal-time ties.
 The header, menubar, and notch question count is amber/orange.
 
 ### Status chip (`StatusChip.swift`)

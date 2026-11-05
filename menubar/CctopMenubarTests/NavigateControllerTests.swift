@@ -54,12 +54,13 @@ final class NavigateControllerTests: XCTestCase {
         let userSessions = SessionDisplayPolicy.reconcilingOrder(
             in: userSessions(fromDataFixtures: [waiting, workingOld, workingNew, idle]), preserving: []
         )
-        sut.activate(userSessions: userSessions)
-        XCTAssertEqual(userSessions.map(\.displayRecord.data.id), ["3", "1", "4", "2"])
+        let active = SessionDisplayPolicy.activeSessions(from: userSessions)
+        sut.activate(userSessions: active)
+        XCTAssertEqual(active.map(\.displayRecord.data.id), ["3", "2", "1"])
 
         XCTAssertEqual(
             sut.frozenSessionIdentities,
-            userSessions.map(\.identity)
+            active.map(\.identity)
         )
     }
 

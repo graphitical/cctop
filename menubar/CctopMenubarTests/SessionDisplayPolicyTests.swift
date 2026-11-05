@@ -90,23 +90,48 @@ final class SessionDisplayPolicyTests: XCTestCase {
         )
     }
 
-    func testReconciledOrderUsesRecencyAcrossAllStatuses() {
+    func testWorkingAndCompactingStayAboveNewerReadyTasksAcrossSources() {
+        let now = Date(timeIntervalSince1970: 9_000)
+        for source in [SessionData.ccSource, SessionData.codexSource, SessionData.opencodeSource, SessionData.piSource] {
+            for status in [SessionStatus.working, .compacting] {
+                var working = SessionData.mock(id: "working", status: status, source: source)
+                working.lastActivity = now.addingTimeInterval(-600)
+                var ready = SessionData.mock(id: "ready", status: .waitingInput, source: source)
+                ready.lastActivity = now
+
+                let input = userSessions(fromDataFixtures: [ready, working])
+                let result = SessionDisplayPolicy.reconcilingOrder(in: input, preserving: input)
+
+                XCTAssertEqual(result.map(\.displayRecord.data.sessionId), ["working", "ready"], "\(source): \(status)")
+            }
+        }
+    }
+
+    func testReconciledOrderUsesStatusPriorityThenRecency() {
         let now = Date(timeIntervalSince1970: 10_000)
         let fixtures: [(String, SessionStatus, TimeInterval)] = [
+            ("blocked", .waitingAnswer, 1_200),
+            ("pending", .working, 900),
             ("permission", .waitingPermission, 600),
-            ("waiting", .waitingInput, 300),
-            ("working", .working, 60),
+            ("attention", .needsAttention, 500),
+            ("working", .working, 400),
+            ("compacting", .compacting, 300),
+            ("ready", .waitingInput, 200),
+            ("ready-recent", .waitingInput, 100),
             ("idle", .idle, 10),
         ]
         let sessions = fixtures.map { id, status, age in
             var session = SessionData.mock(id: id, status: status)
+            session.hasPendingAsyncQuestion = id == "pending"
             session.lastActivity = now.addingTimeInterval(-age)
             return session
         }
         let result = SessionDisplayPolicy.reconcilingOrder(
             in: userSessions(fromDataFixtures: sessions), preserving: []
         )
-        XCTAssertEqual(result.map(\.displayRecord.data.id), ["idle", "working", "waiting", "permission"])
+        XCTAssertEqual(result.map(\.displayRecord.data.id), [
+            "blocked", "pending", "attention", "permission", "compacting", "working", "ready-recent", "ready", "idle",
+        ])
     }
 
     func testQuestionsComeFirstWithoutChangingIdentityOrIdleMembership() {
@@ -132,38 +157,38 @@ final class SessionDisplayPolicyTests: XCTestCase {
         pending.hasPendingAsyncQuestion = false
         let answered = userSessions(fromDataFixtures: [working, pending, blocked, asleep, otherBlocked])
         let updated = SessionDisplayPolicy.reconcilingOrder(in: answered, preserving: result)
-        XCTAssertEqual(updated.map(\.displayRecord.data.sessionId), ["other-blocked", "blocked", "working", "dormant", "pending"])
+        XCTAssertEqual(updated.map(\.displayRecord.data.sessionId), ["other-blocked", "blocked", "working", "pending", "dormant"])
     }
 
-    func testReconciledOrderMovesNewActivityAheadOfPriorRows() {
+    func testReconciledOrderMovesNewActivityAheadOfPriorRowsWithinAGroup() {
         let now = Date(timeIntervalSince1970: 20_000)
-        var waiting = SessionData.mock(id: "waiting", status: .waitingInput)
-        waiting.lastActivity = now.addingTimeInterval(-600)
+        var peer = SessionData.mock(id: "peer", status: .working)
+        peer.lastActivity = now.addingTimeInterval(-600)
         var working = SessionData.mock(id: "working", status: .working)
         working.lastActivity = now.addingTimeInterval(-60)
-        let previous = [working, waiting]
-        waiting.lastActivity = now
+        let previous = [working, peer]
+        peer.lastActivity = now
 
         let result = SessionDisplayPolicy.reconcilingOrder(
-            in: userSessions(fromDataFixtures: [working, waiting]),
+            in: userSessions(fromDataFixtures: [working, peer]),
             preserving: userSessions(fromDataFixtures: previous)
         )
-        XCTAssertEqual(result.map(\.displayRecord.data.id), ["waiting", "working"])
+        XCTAssertEqual(result.map(\.displayRecord.data.id), ["peer", "working"])
     }
 
-    func testEqualActivityKeepsPriorOrderAcrossStatusChangesAndAppendsNewcomers() {
+    func testEqualActivityKeepsPriorOrderWithinAGroupAndAppendsNewcomers() {
         let now = Date(timeIntervalSince1970: 30_000)
         var first = SessionData.mock(id: "first", status: .working)
-        var second = SessionData.mock(id: "second", status: .idle)
-        var newcomer = SessionData.mock(id: "newcomer", status: .waitingPermission)
+        var second = SessionData.mock(id: "second", status: .compacting)
+        var newcomer = SessionData.mock(id: "newcomer", status: .working)
         first.lastActivity = now
         second.lastActivity = now
         newcomer.lastActivity = now
         let previous = [first, second].map {
             userSession(identity: SessionIdentityPolicy.logicalIdentity(for: $0), display: $0, records: [$0])
         }
-        first.status = .idle
-        second.status = .waitingPermission
+        first.status = .compacting
+        second.status = .working
 
         let input = [newcomer, second, first].map {
             userSession(identity: SessionIdentityPolicy.logicalIdentity(for: $0), display: $0, records: [$0])
@@ -189,7 +214,7 @@ final class SessionDisplayPolicyTests: XCTestCase {
         let result = SessionDisplayPolicy.reconcilingOrder(
             in: userSessions(fromDataFixtures: [stale, waiting, working, asleep]), preserving: []
         )
-        XCTAssertEqual(result.map(\.displayRecord.data.id), ["dormant", "working", "waiting", "stale"])
+        XCTAssertEqual(result.map(\.displayRecord.data.id), ["working", "waiting", "dormant", "stale"])
         XCTAssertEqual(SessionDisplayPolicy.activeSessions(from: result).map(\.displayRecord.data.id), ["working", "waiting"])
         XCTAssertEqual(SessionDisplayPolicy.idleSessions(from: result).map(\.displayRecord.data.id), ["dormant", "stale"])
     }
@@ -249,12 +274,12 @@ final class SessionDisplayPolicyTests: XCTestCase {
             preserving: userSessions(fromDataFixtures: previous)
         )
 
-        XCTAssertEqual(result.map(\.displayRecord.data.pid), [300, 200])
+        XCTAssertEqual(result.map(\.displayRecord.data.pid), [200, 300])
         XCTAssertEqual(
             result.map(\.identity),
             [
-                SessionIdentityPolicy.logicalIdentity(for: userSession),
                 SessionIdentityPolicy.logicalIdentity(for: workingPeer),
+                SessionIdentityPolicy.logicalIdentity(for: userSession),
             ]
         )
     }
