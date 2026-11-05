@@ -10,6 +10,7 @@ Use this file for rules that apply to most cctop work. Use these sources for det
 - Read [DESIGN.md](DESIGN.md) for visual design rules.
 - Read [docs/session-files.md](docs/session-files.md) for session identity, visibility, and focus-routing contracts.
 - Read [docs/session-lifecycle.md](docs/session-lifecycle.md) for lifecycle, persistence, archive, and cleanup rules.
+- Read [CHANGELOG.md](CHANGELOG.md) for the fork's version history and changes assigned to each version.
 - Read [site/README.md](site/README.md) for website deployment and synchronization rules.
 - Read [video/framework.md](video/framework.md) for the video build, quality verification, and publication workflow.
 
@@ -28,6 +29,30 @@ Follow the instructions and commands documented here directly.
 - For every version change, run `scripts/bump-version.sh <version>`. Do not edit version values separately.
 - Preserve canonical identity and order in `SessionManager.userSessions`. Derive `SessionData` only at the final presentation or direct-action boundary. A direct row action must use the exact `SessionData` value that the row shows.
 - Keep Stream Deck downstream of the app. It reads `~/.cctop/display-state.json` and must not recreate session policy.
+
+## Semantic Versioning
+
+- Version numbers identify this fork, `graphitical/cctop`, independently of upstream `st0012/cctop`.
+  Keep the fork's identity clear and preserve upstream credit and license notices.
+- Track versions as part of each independent change, before merging and reporting completion.
+  Choose the appropriate bump without asking the developer to choose the number, and explain the choice briefly in the completion reply.
+- Use [Semantic Versioning](https://semver.org/spec/v2.0.0.html): increment PATCH for backward-compatible fixes, performance improvements, and internal runtime or packaging changes; increment MINOR and reset PATCH for backward-compatible features.
+  Choose the largest applicable bump when a change includes both features and fixes.
+- The fork remains in initial development at `0.y.z`.
+  An intentional compatibility break requires a MINOR bump during this period; after `1.0.0`, it requires a MAJOR bump.
+  Treat `1.0.0` as a deliberate stable-compatibility commitment, not a reward for accumulating features.
+  A version bump never waives the running-session compatibility rules above.
+- Assess compatibility across the hook CLI and event contract, persisted session and preference formats, display-state consumers, URL routing, and documented integrations.
+- For each independent change to shipped app, hook, integration, or packaging code, bump once from the version on the updated base branch and update `CHANGELOG.md` in the same change.
+  Documentation-only, test-only, and development-tooling-only changes do not need a bump unless they change a shipped artifact or its compatibility contract.
+  Multiple commits for one change share its version; a published tag is not required before the next change gets its own version.
+- Always run `scripts/bump-version.sh <version>` so the app, hook, plugins, packaging, and source version badges stay synchronized, then run `scripts/validate-release-version.sh v<version>` and the checks required for the affected code.
+  Preserve historical hook provenance; never relabel existing session records to match a retrospective version assignment.
+- `0.22.0` is the catch-up baseline for changes since the fork's upstream `0.21.4` base.
+  Keep that retrospective history in `CHANGELOG.md`; do not rewrite commits, move existing tags, or manufacture historical releases.
+- Version tracking and public release publication are separate actions.
+  Do not push a `v*` tag merely to record a version: it starts the release workflow.
+  Before the fork's first public release, review its upstream download and update URLs, signing identity, Sparkle keys/feed, and Homebrew destination.
 
 ## Driver Workflow
 

@@ -92,13 +92,16 @@ The plugin runs inside opencode's Bun runtime — no separate Node.js or Bun ins
 
 ### Version Bumping
 
-When releasing a new version, use the bump script to update all version references at once:
+Follow the [versioning policy in AGENTS.md](AGENTS.md#semantic-versioning) for each independent change to shipped code, and record its behavior in [CHANGELOG.md](CHANGELOG.md).
+Use the bump script to update all version references together, then check that the intended version matches:
 
 ```bash
-./scripts/bump-version.sh 0.3.0
+./scripts/bump-version.sh <version>
+./scripts/validate-release-version.sh v<version>
 ```
 
-This updates `packaging/homebrew-cask.rb`, both plugin manifests (Claude Code and opencode), and the Xcode project.
+This synchronizes the app, hook, plugin manifests, packaging, and source version badges.
+Recording a version does not require a release tag; pushing a `v*` tag starts public release publication.
 
 ## Reporting Issues
 
