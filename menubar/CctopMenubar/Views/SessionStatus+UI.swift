@@ -2,18 +2,18 @@ import SwiftUI
 
 extension SessionStatus {
     var color: Color {
+        Color(nsColor: NSColor(name: nil) { appearance in
+            colorPair(in: ThemeManager.shared.current).resolve(appearance)
+        })
+    }
+
+    func colorPair(in theme: AppTheme) -> AppTheme.ColorPair {
         switch self {
-        case .waitingPermission: return Color.statusPermission
-        case .waitingAnswer, .waitingInput, .needsAttention: return Color.statusAttention
-        case .working: return Color.statusGreen
-        case .compacting:
-            return Color(nsColor: NSColor(name: nil) { appearance in
-                ThemeManager.shared.current.agentBadge.resolve(appearance)
-            })
-        case .idle:
-            return Color(nsColor: NSColor(name: nil) { appearance in
-                ThemeManager.shared.current.statusIdle.resolve(appearance)
-            })
+        case .waitingPermission: return theme.statusPermission
+        case .waitingAnswer, .waitingInput, .needsAttention: return theme.statusAttention
+        case .working: return theme.statusWorking
+        case .compacting: return theme.agentBadge
+        case .idle: return theme.statusIdle
         }
     }
 
@@ -42,17 +42,29 @@ extension SessionStatus {
 }
 
 extension SessionData {
+    var isReadyForNextTask: Bool { isCodex && status == .waitingInput }
+
+    func statusColorPair(in theme: AppTheme) -> AppTheme.ColorPair {
+        isReadyForNextTask ? theme.statusIdle : status.colorPair(in: theme)
+    }
+
+    var statusColor: Color {
+        Color(nsColor: NSColor(name: nil) { appearance in
+            statusColorPair(in: ThemeManager.shared.current).resolve(appearance)
+        })
+    }
+
     private var usesGenericPermissionLabel: Bool {
         isCodex && status == .waitingPermission && codexPermissionReviewer != .user
     }
 
     var statusLabel: String {
         if usesGenericPermissionLabel { return "Waiting" }
-        return isCodex && status == .waitingInput ? "Ready" : status.label.capitalized
+        return isReadyForNextTask ? "Ready" : status.label.capitalized
     }
 
     var statusAccessibilityDescription: String {
         if usesGenericPermissionLabel { return "waiting for permission review" }
-        return isCodex && status == .waitingInput ? "ready for your next task" : status.accessibilityDescription
+        return isReadyForNextTask ? "ready for your next task" : status.accessibilityDescription
     }
 }

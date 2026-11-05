@@ -210,7 +210,8 @@ Restart any running sessions to pick up newly installed hooks or plugins.
 
 ## Themes
 
-Four palettes inspired by developer tools, each with light and dark variants.
+Five palettes inspired by developer tools, each with light and dark variants.
+The Codex theme pairs neutral surfaces with cool blue accents.
 Switch themes in **Settings > Appearance > Color**.
 
 <table>

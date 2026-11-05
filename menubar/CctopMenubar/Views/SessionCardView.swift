@@ -150,13 +150,15 @@ struct SessionCardView: View {
         } else {
             switch session.status {
             case .idle:
-                statusText("Idle", color: Color.textMuted)
+                statusText("Idle", color: Color.statusIdle)
             case .working:
                 statusDotLabel("Working", dotColor: Color.statusGreen, textColor: Color.statusWorkingText)
             case .compacting:
                 statusDotLabel("Compacting", dotColor: Color.agentBadge)
             case .waitingPermission:
                 permissionStatusLabel
+            case .waitingInput where session.isReadyForNextTask:
+                statusDotLabel(session.statusLabel, dotColor: session.statusColor)
             case .waitingAnswer, .waitingInput, .needsAttention:
                 statusDotLabel(session.statusLabel, dotColor: Color.statusAttention, textColor: Color.statusAttentionText)
             }
@@ -207,11 +209,11 @@ struct SessionCardView: View {
     private func navigateChip(_ idx: Int) -> some View {
         ZStack {
             RoundedRectangle(cornerRadius: AppChrome.controlCornerRadius, style: .continuous)
-                .fill(session.status.color)
+                .fill(session.statusColor)
                 .frame(width: 16, height: 16)
             Text("\(idx)")
                 .font(.system(size: 10, weight: .bold))
-                .foregroundStyle(.white)
+                .foregroundStyle(session.isReadyForNextTask ? Color.panelBackground : Color.white)
         }
         .accessibilityLabel("Press \(idx) to jump")
     }

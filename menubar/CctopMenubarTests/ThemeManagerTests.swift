@@ -41,11 +41,11 @@ final class ThemeManagerTests: XCTestCase {
 
     func testPersistedThemeSurvivesReinitialization() {
         let manager = ThemeManager(defaults: defaults)
-        manager.setTheme(.tokyoNight)
+        manager.setTheme(.codex)
 
         // Create a new manager reading from the same defaults — simulates app relaunch
         let manager2 = ThemeManager(defaults: defaults)
-        XCTAssertEqual(manager2.current, .tokyoNight)
+        XCTAssertEqual(manager2.current, .codex)
     }
 
     func testUnknownStoredValueFallsToClaude() {
@@ -91,8 +91,8 @@ final class ThemeManagerTests: XCTestCase {
                     "\(theme.displayName) dimmed text should stay usable in \(appearance.name.rawValue)"
                 )
                 XCTAssertGreaterThanOrEqual(
-                    idle.contrastRatio(against: panel), 3.0,
-                    "\(theme.displayName) idle status should stay usable in \(appearance.name.rawValue)"
+                    idle.contrastRatio(against: panel), 4.5,
+                    "\(theme.displayName) ready and idle labels should stay readable in \(appearance.name.rawValue)"
                 )
                 let capsuleAlpha: CGFloat = appearance.bestMatch(from: [.darkAqua, .aqua]) == .darkAqua ? 0.13 : 0.10
                 for (semanticTextColor, liveColor) in semanticTextColors {

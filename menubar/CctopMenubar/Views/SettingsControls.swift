@@ -56,6 +56,23 @@ struct PluginRemoveButton: View {
     }
 }
 
+struct ThemePicker: View {
+    @ObservedObject private var themeManager = ThemeManager.shared
+
+    var body: some View {
+        let selection = Binding(get: { themeManager.current }, set: { themeManager.setTheme($0) })
+        Picker("Color", selection: selection) {
+            ForEach(AppTheme.allCases) { theme in
+                Text(theme.displayName).tag(theme)
+            }
+        }
+        .labelsHidden()
+        .pickerStyle(.menu)
+        .controlSize(.small)
+        .fixedSize()
+    }
+}
+
 struct AmberSegmentedPicker<Value: Hashable>: View {
     let options: [(value: Value, label: String)]
     @Binding var selection: Value

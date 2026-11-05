@@ -529,7 +529,7 @@ final class SnapshotTests: XCTestCase {
         XCTAssertLessThanOrEqual(reviewSize.height, 430)
     }
 
-    /// Generates theme showcase screenshots for all 4 themes in both dark and light modes.
+    /// Generates theme showcase screenshots for every theme in both dark and light modes.
     ///
     /// Run with:
     ///   make snapshots

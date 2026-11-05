@@ -135,7 +135,7 @@ final class DisplayStateWriter {
                     name: data.displayName,
                     status: userSession.status.rawValue,
                     statusLabel: data.statusLabel,
-                    color: hexColor(for: userSession.status, theme: theme)
+                    color: hexColor(for: data, theme: theme)
                 )
             }
         )
@@ -157,15 +157,8 @@ final class DisplayStateWriter {
 
     /// Hardware keys always use the same dark status palette as cctop's other
     /// persistent surfaces, including the compacting badge color.
-    static func hexColor(for status: SessionStatus, theme: AppTheme) -> String {
-        let color: NSColor
-        switch status {
-        case .waitingPermission: color = theme.statusPermission.dark
-        case .waitingAnswer, .waitingInput, .needsAttention: color = theme.statusAttention.dark
-        case .working: color = theme.statusWorking.dark
-        case .compacting: color = theme.agentBadge.dark
-        case .idle: color = theme.statusIdle.dark
-        }
+    static func hexColor(for session: SessionData, theme: AppTheme) -> String {
+        let color = session.statusColorPair(in: theme).dark
         let srgb = color.usingColorSpace(.sRGB) ?? color
         func component(_ value: CGFloat) -> Int { Int((value * 255).rounded()) }
         return String(

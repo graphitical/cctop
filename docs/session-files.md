@@ -28,6 +28,7 @@ Codex's transcript format is not a stable API, so the hook never substitutes glo
 
 The app reads local Codex runtime metadata for tracked sessions in the shared daemon and Desktop IPC cache.
 An unanswered structured question displays as **Blocked** (`waiting_answer`); a finished turn displays as **Ready** (`waiting_input`).
+Ready uses the cool idle color in the session row, keyboard navigation chip, and Stream Deck projection.
 Ordinary chat questions are not inferred, and permission requests keep their separate status.
 These runtime observations adjust the display only, without rewriting hook session files.
 Missing or unsupported runtime metadata leaves the hook status in place.

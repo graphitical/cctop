@@ -93,11 +93,24 @@ final class QASnapshotTests: XCTestCase {
                              status: .working, source: "codex")
         ]
         sessions[2].codexPermissionReviewer = .user
-        for colorScheme in [ColorScheme.light, .dark] {
-            let view = PopupView(userSessions: userSessions(fromDataFixtures: sessions),
-                                 updater: DisabledUpdater(), pluginManager: inertPluginManager())
-            try renderPanelScreenshot(view: view, colorScheme: colorScheme, directoryName: "cctop-qa",
-                                      filename: "codex-question-status-\(colorScheme).png")
+        let selectedTheme = ThemeManager.shared.current
+        defer { ThemeManager.shared.setTheme(selectedTheme) }
+        for theme in AppTheme.allCases {
+            ThemeManager.shared.setTheme(theme)
+            for colorScheme in [ColorScheme.light, .dark] {
+                let view = PopupView(userSessions: userSessions(fromDataFixtures: sessions),
+                                     updater: DisabledUpdater(), pluginManager: inertPluginManager())
+                try renderPanelScreenshot(view: view, colorScheme: colorScheme, directoryName: "cctop-qa",
+                                          filename: "codex-question-status-\(theme.rawValue)-\(colorScheme).png")
+                let navigationView = VStack(spacing: 0) {
+                    ForEach(Array(sessions.enumerated()), id: \.element.sessionId) { entry in
+                        SessionCardView(session: entry.element, navigateIndex: entry.offset + 1)
+                    }
+                }
+                .padding(.vertical, 8)
+                try renderPanelScreenshot(view: navigationView, colorScheme: colorScheme, directoryName: "cctop-qa",
+                                          filename: "codex-question-status-\(theme.rawValue)-navigate-\(colorScheme).png")
+            }
         }
     }
 

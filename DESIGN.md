@@ -51,14 +51,14 @@ padding's sake.
 
 | Surface         | Theme               | Atmosphere                                                  |
 |-----------------|---------------------|-------------------------------------------------------------|
-| Menubar app     | Themed (4 palettes) | Quiet glance-tool that lives next to the clock              |
+| Menubar app     | Themed (5 palettes) | Quiet glance-tool that lives next to the clock              |
 | Notch pill      | Always black        | OS-level chrome — blends with the camera notch              |
 | Marketing site  | Tokyo Night dark    | Editor-feeling page — same mood as the menubar in dark mode |
 
 ## 2. Color Palette & Roles
 
-cctop ships **four named palettes** — each with explicit dark and light
-variants. The Swift app exposes them via the semantic token API in
+cctop ships **five named palettes**, each with explicit dark and light variants.
+The Swift app exposes them via the semantic token API in
 `menubar/CctopMenubar/Models/Color+Theme.swift`; the site mirrors the
 **Tokyo Night dark** palette via CSS custom properties in `site/index.html`.
 
@@ -70,7 +70,7 @@ variants. The Swift app exposes them via the semantic token API in
 | Permission         | `statusPermission`                                         | Urgent — needs approval (red family)             |
 | Attention          | `statusAttention`                                          | Waiting for user input (orange family)           |
 | Working            | `statusGreen`                                              | Tool is running (green family)                   |
-| Idle               | `statusIdle`                                               | Quiet / dimmed (muted family)                    |
+| Ready / Idle       | `statusIdle`                                               | Quiet, available (cool blue family)              |
 | Compacting         | (reuses `agentBadge`)                                      | Context compaction in progress (purple family)   |
 | Subagent badge     | `agentBadge`                                               | Active subagent count (purple family)            |
 | Session source     | `textMuted`                                                | Quiet harness/source metadata                    |
@@ -115,13 +115,38 @@ working session.
 | textMuted          | `#938F84` | `#68645D` |
 | textDimmed         | `#938F84` | `#68645D` |
 | panelBackground    | `#262624` | `#F4F3EE` |
-| statusIdle         | `#B1ADA1` | `#68645D` |
+| statusIdle         | `#8FAFCD` | `#3D6382` |
 | agentBadge         | `#A256C8` | `#7A3580` |
 | opencodeBadge      | `#5C8AB8` | `#2D5A82` |
 | piBadge            | `#6EAEA8` | `#346B66` |
 | codexBadge         | `#D4A84A` | `#8B6914` |
 
-### Palette: Tokyo Night _(default; mirrored on cctop.app)_
+### Palette: Codex
+
+Codex pairs neutral charcoal and white surfaces with a pale blue accent in dark mode and a deeper blue in light mode.
+Ready uses the same calm blue role as Idle in every palette; questions and approvals keep their separate attention colors.
+
+| Role               | Dark      | Light     |
+|--------------------|-----------|-----------|
+| accent             | `#B8D5FF` | `#2457A6` |
+| statusPermission   | `#EF8686` | `#B42332` |
+| statusAttention    | `#DEAC70` | `#8A5320` |
+| statusGreen        | `#8FC7A3` | `#2F6D47` |
+| permissionText     | `#EF8686` | `#B42332` |
+| attentionText      | `#DEAC70` | `#8A5320` |
+| workingText        | `#8FC7A3` | `#2F6D47` |
+| textPrimary        | `#F2F2F2` | `#202020` |
+| textSecondary      | `#C0C0C0` | `#4A4A4A` |
+| textMuted          | `#999999` | `#707070` |
+| textDimmed         | `#999999` | `#707070` |
+| panelBackground    | `#1F1F1F` | `#FAFAFA` |
+| statusIdle         | `#9BBCE0` | `#3B608B` |
+| agentBadge         | `#BCA3DE` | `#724C9B` |
+| opencodeBadge      | `#91B7E0` | `#355D8A` |
+| piBadge            | `#7DBFB1` | `#2F6E62` |
+| codexBadge         | `#D4B473` | `#7E6023` |
+
+### Palette: Tokyo Night _(mirrored on cctop.app)_
 
 | Role               | Dark      | Light     |
 |--------------------|-----------|-----------|
@@ -137,7 +162,7 @@ working session.
 | textMuted          | `#707895` | `#707280` |
 | textDimmed         | `#69718E` | `#7E828C` |
 | panelBackground    | `#1A1B26` | `#E6E7ED` |
-| statusIdle         | `#69718E` | `#707280` |
+| statusIdle         | `#7AA2D6` | `#365D92` |
 | agentBadge         | `#BB9AF7` | `#7B43BA` |
 | opencodeBadge      | `#7AA2F7` | `#3A5BA0` |
 | piBadge            | `#5DBFB1` | `#1F6B5D` |
@@ -159,7 +184,7 @@ working session.
 | textMuted          | `#928374` | `#7C6F64` |
 | textDimmed         | `#887A6E` | `#928374` |
 | panelBackground    | `#282828` | `#FBF1C7` |
-| statusIdle         | `#887A6E` | `#928374` |
+| statusIdle         | `#83A5B0` | `#3E6470` |
 | agentBadge         | `#D3869B` | `#8F3F71` |
 | opencodeBadge      | `#83A598` | `#076678` |
 | piBadge            | `#8EC07C` | `#427B58` |
@@ -181,7 +206,7 @@ working session.
 | textMuted          | `#8390A8` | `#4C566A` |
 | textDimmed         | `#7F8AA2` | `#4C566A` |
 | panelBackground    | `#2E3440` | `#ECEFF4` |
-| statusIdle         | `#7F8AA2` | `#4C566A` |
+| statusIdle         | `#88ABBD` | `#456477` |
 | agentBadge         | `#B48EAD` | `#8B6A86` |
 | opencodeBadge      | `#81A1C1` | `#5E81AC` |
 | piBadge            | `#8FBCBB` | `#4C7271` |
@@ -223,7 +248,7 @@ the Tokyo Night blue family.
 All panel chrome alphas derive from each palette's own `textPrimary` ink.
 The segmented track uses 6%; panel controls use 3.5% dark / 2.6% light;
 selection uses 7.5% dark / 7% light; the Settings well uses 3.5%; grouped
-rows use 5.5%; and inner separators use 7%. This keeps the four themes
+rows use 5.5%; and inner separators use 7%. This keeps all five themes
 chromatically coherent instead of imposing a shared gray.
 
 ## 3. Typography Rules
@@ -733,7 +758,7 @@ view."
 | Use warm- or cool-tinted grays                         | Use neutral grays (`textPrimary`, `textMuted`, …)   |
 | Introduce a fifth status color                         | Map new statuses through the existing 5 roles       |
 | Hand-edit version strings                              | Use `scripts/bump-version.sh`                       |
-| Add a new theme without all semantic token roles       | Match the four-theme matrix in `AppTheme.swift`     |
+| Add a new theme without all semantic token roles       | Match the full theme matrix in `AppTheme.swift`     |
 | Use raw `Color.blue`/`.green`/etc. in views            | Use semantic tokens (`textPrimary`, `statusGreen`)  |
 | Drop a custom font into the app bundle                 | Stay on `.system` for the app                       |
 | Override the `--ease-out` curve                        | Reuse it everywhere for consistent motion           |
@@ -803,7 +828,7 @@ Both surfaces respect `prefers-reduced-motion: reduce`:
 
 App: tracks system Light/Dark via `NSAppearance` — every token in
 `Color+Theme.swift` is a dynamic `NSColor(name:)` that re-resolves on
-appearance change. Theme choice (Claude / Tokyo Night / Gruvbox / Nord) is
+appearance change. Theme choice (Claude / Codex / Tokyo Night / Gruvbox / Nord) is
 orthogonal and user-controlled.
 
 Site: dark-only. Tokyo Night palette is hard-coded; there is no
@@ -828,6 +853,7 @@ cctop-consistent UI.
 | Theme        | Dark accent | Dark bg   | Dark fg   | Light accent | Light bg  | Light fg  |
 |--------------|-------------|-----------|-----------|--------------|-----------|-----------|
 | Claude       | `#C15F3C`   | `#262624` | `#F4F3EE` | `#C15F3C`    | `#F4F3EE` | `#141413` |
+| Codex        | `#B8D5FF`   | `#1F1F1F` | `#F2F2F2` | `#2457A6`    | `#FAFAFA` | `#202020` |
 | Tokyo Night  | `#F7768E`   | `#1A1B26` | `#C0CAF5` | `#2959AA`    | `#E6E7ED` | `#343B59` |
 | Gruvbox      | `#FE8019`   | `#282828` | `#EBDBB2` | `#AF3A03`    | `#FBF1C7` | `#3C3836` |
 | Nord         | `#BF616A`   | `#2E3440` | `#ECEFF4` | `#BF616A`    | `#ECEFF4` | `#2E3440` |
@@ -839,7 +865,7 @@ Permission  #F7768E   (red/pink)
 Attention   #FF9E64   (orange)
 Working     #9ECE6A   (green)
 Compacting  #BB9AF7   (purple, shared with subagent badge)
-Idle        #565D78   (muted blue-gray)
+Ready/Idle  #7AA2D6   (calm blue)
 ```
 
 ### Default font stacks
@@ -883,7 +909,7 @@ Exceptions: circles, thin status bars, caret, and brand/status marks
 > "Use cctop's Tokyo Night dark palette: panel `#1A1B26`, primary text
 > `#C0CAF5`, secondary `#787C99`, accent `#F7768E`. Status colors:
 > permission `#F7768E`, attention `#FF9E64`, working `#9ECE6A`,
-> idle `#565D78`. No drop shadows; hierarchy via 1 px hairline borders
+> ready/idle `#7AA2D6`. No drop shadows; hierarchy via 1 px hairline borders
 > at 10–18% alpha and 4 / 6 / 10 px corner radii."
 
 > "Type stack: SF system for the app, IBM Plex Sans / IBM Plex Mono /

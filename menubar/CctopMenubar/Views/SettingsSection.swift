@@ -6,7 +6,6 @@ struct SettingsSection: View {
     @ObservedObject var updater: UpdaterBase
     @ObservedObject var pluginManager: PluginManager
     var onOpenUpdater: (() -> Void)?
-    @ObservedObject private var themeManager = ThemeManager.shared
     @StateObject private var notificationPermission: NotificationPermissionController
     @AppStorage("compactSessionRows") private var compactSessionRows = false
     @AppStorage("appearanceMode") private var appearanceMode = "system"
@@ -56,8 +55,7 @@ struct SettingsSection: View {
             sectionHeader("Appearance")
             settingsGroup {
                 settingsRow("Color") {
-                    let binding = Binding(get: { themeManager.current }, set: { themeManager.setTheme($0) })
-                    AmberSegmentedPicker(options: AppTheme.allCases.map { ($0, $0.displayName) }, selection: binding)
+                    ThemePicker()
                 }
                 groupedDivider
                 settingsRow("Mode") {
