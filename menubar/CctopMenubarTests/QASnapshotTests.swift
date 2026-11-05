@@ -96,12 +96,14 @@ final class QASnapshotTests: XCTestCase {
                              status: .working, source: "codex")
         ]
         sessions[3].codexPermissionReviewer = .user
+        let ordered = SessionDisplayPolicy.reconcilingOrder(in: userSessions(fromDataFixtures: sessions), preserving: [])
+        sessions = ordered.map(\.displayRecord.data)
         let selectedTheme = ThemeManager.shared.current
         defer { ThemeManager.shared.setTheme(selectedTheme) }
         for theme in AppTheme.allCases {
             ThemeManager.shared.setTheme(theme)
             for colorScheme in [ColorScheme.light, .dark] {
-                let view = PopupView(userSessions: userSessions(fromDataFixtures: sessions),
+                let view = PopupView(userSessions: ordered,
                                      updater: DisabledUpdater(), pluginManager: inertPluginManager())
                 try renderPanelScreenshot(view: view, colorScheme: colorScheme, directoryName: "cctop-qa",
                                           filename: "codex-question-status-\(theme.rawValue)-\(colorScheme).png")

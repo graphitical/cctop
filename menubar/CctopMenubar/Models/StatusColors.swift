@@ -18,7 +18,7 @@ enum StatusColors {
     private static func colorPair(for kind: StatusCounts.SegmentKind) -> AppTheme.ColorPair {
         let theme = ThemeManager.shared.current
         switch kind {
-        case .permission: return theme.statusPermission
+        case .permission, .question: return theme.statusPermission
         case .attention: return theme.statusAttention
         case .working: return theme.statusWorking
         case .idle: return theme.statusIdle

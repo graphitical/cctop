@@ -1,6 +1,6 @@
 {
   "name": "cctop-streamdeck",
-  "version": "0.23.1",
+  "version": "0.24.0",
   "description": "cctop session controls for Elgato Stream Deck",
   "private": true,
   "type": "module",

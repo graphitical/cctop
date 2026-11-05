@@ -250,6 +250,7 @@ final class StatusCountsTests: XCTestCase {
     @MainActor
     func testStatusColorsResolveEachSegmentKind() {
         let appearance = NSAppearance(named: .darkAqua)!
+        assertColor(StatusColors.color(for: .question, appearance: appearance), equals: ThemeManager.shared.current.statusPermission.dark)
         let permission = StatusColors.color(for: .permission, appearance: appearance)
         assertColor(permission, equals: ThemeManager.shared.current.statusPermission.dark)
         assertColor(

@@ -59,6 +59,19 @@ final class CodexQuestionStatusTests: XCTestCase {
         XCTAssertEqual(StatusCounts(userSessions: userSessions(fromDataFixtures: [dormant])).questions, 0)
     }
 
+    func testBlockedQuestionsHaveRedStatusAndTheirOwnBarSegment() {
+        let blocked = SessionData.mock(id: "blocked", status: .waitingAnswer, source: "codex")
+        let counts = StatusCounts(userSessions: userSessions(fromDataFixtures: [blocked]))
+        XCTAssertEqual(counts.permission, 0)
+        XCTAssertEqual(counts.attention, 1)
+        XCTAssertEqual(counts.needsAction, 1)
+        XCTAssertEqual(counts.barSegments.map(\.kind), [.question])
+        for theme in AppTheme.allCases {
+            XCTAssertEqual(blocked.statusColorPair(in: theme).dark, theme.statusPermission.dark)
+            XCTAssertEqual(blocked.statusColorPair(in: theme).light, theme.statusPermission.light)
+        }
+    }
+
     func testOverlayPreservesPermissionLifecycleAndOtherClients() {
         let working = SessionData.mock(status: .working, source: "codex")
         let blocked = SessionManager.applyingCodexQuestionStatus(.blocked, to: working)

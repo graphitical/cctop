@@ -68,7 +68,7 @@ The Swift app exposes them via the semantic token API in
 | Role               | Token                                                      | Meaning                                          |
 |--------------------|------------------------------------------------------------|--------------------------------------------------|
 | Brand accent       | `accent` / `--accent`                                      | Themed identity color (per-palette)              |
-| Permission         | `statusPermission`                                         | Urgent — needs approval (red family)             |
+| Permission / Blocked question | `statusPermission`                                 | Urgent — needs approval or an answer (red family) |
 | Attention          | `statusAttention`                                          | Waiting for user input (orange family)           |
 | Working            | `statusGreen`                                              | Tool is running (green family)                   |
 | Ready / Idle       | `statusIdle`                                               | Quiet, available (cool blue family)              |
@@ -126,7 +126,7 @@ working session.
 
 Codex pairs neutral charcoal and white surfaces with a pale blue accent in dark mode and a deeper blue in light mode.
 Ready uses the same calm blue role as Idle in every palette; questions and approvals keep their separate attention colors.
-An asynchronous question adds a compact orange `?` badge beside Working while the green activity status remains visible, including in compact rows.
+An asynchronous question adds a compact red `?` badge beside Working while the green activity status remains visible, including in compact rows.
 The header, menubar, and notch show `?` with the unanswered-question chat count; this overlaps activity counts rather than adding sessions to the bar.
 
 | Role               | Dark      | Light     |
@@ -379,6 +379,11 @@ All source labels render as neutral metadata so the project name and session sta
 | Trailing       | Permission → question count → other attention → working → Ready; actual idle sessions stay in the Idle tab |
 | Drag area      | Entire header is a draggable `WindowDragArea` with custom move cursor |
 
+Blocked chats use a red **?** badge and red status text.
+Working chats with unanswered questions retain their working color and show the same red **?** badge.
+Blocked chats come first, then working chats with questions, then other chats, with recent activity order within each group.
+The header, menubar, and notch question count is red.
+
 ### Status chip (`StatusChip.swift`)
 
 | Property      | Value                                                |
@@ -437,7 +442,7 @@ Always black, regardless of theme — it's OS chrome that meets the camera notch
 | Background  | `Color.black` @ 90% opacity                                           |
 | Shape       | `NotchTabShape` — flat top + right, only bottom-left rounded (radius 6) |
 | Brand mark  | One 36×4 capsule; the old 2×2 grid is not part of the refined system   |
-| Status bar  | Live segments in working → attention → permission → idle order; monochrome when there are no sessions |
+| Status bar  | Live segments in working → attention → blocked question → permission → idle order; monochrome when there are no sessions |
 | Padding     | 5 / 2 / 4 / 5 (l / r / t / b)                                         |
 
 ### Segmented picker (`AmberSegmentedPicker`)
@@ -495,7 +500,7 @@ component vocabulary.
 
 The marketing hero pairs a quiet `cctop status` label with the live hairline
 mark at presentation scale. It uses the same fixed 52 / 19 / 12 / 13 geometry
-and working → attention → permission → idle order as the app icon.
+and working → attention → blocked question → permission → idle order as the app icon.
 
 | Property    | Value                                                                 |
 |-------------|-----------------------------------------------------------------------|

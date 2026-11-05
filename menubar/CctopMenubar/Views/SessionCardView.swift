@@ -55,7 +55,7 @@ struct SessionCardView: View {
             }
 
             statusLabel
-            if session.hasPendingAsyncQuestion { QuestionBadge() }
+            if session.hasPendingQuestion { QuestionBadge() }
 
         }
         .frame(height: 18)
@@ -160,7 +160,9 @@ struct SessionCardView: View {
                 permissionStatusLabel
             case .waitingInput where session.isReadyForNextTask:
                 statusDotLabel(session.statusLabel, dotColor: session.statusColor)
-            case .waitingAnswer, .waitingInput, .needsAttention:
+            case .waitingAnswer:
+                statusText(session.statusLabel, color: Color.statusPermissionText)
+            case .waitingInput, .needsAttention:
                 statusDotLabel(session.statusLabel, dotColor: Color.statusAttention, textColor: Color.statusAttentionText)
             }
         }

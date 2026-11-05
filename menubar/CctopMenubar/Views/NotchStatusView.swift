@@ -18,7 +18,7 @@ struct NotchStatusView: View {
                 Text(label)
                     .font(.system(size: 10, weight: .semibold))
                     .monospacedDigit()
-                    .foregroundStyle(StatusColors.notchColor(for: .attention))
+                    .foregroundStyle(StatusColors.notchColor(for: .question))
                     .fixedSize()
             }
         }

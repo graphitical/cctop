@@ -5,10 +5,10 @@ struct StatusCounts: Equatable {
     /// Semantic identity of a status-bar segment. Renderers resolve the
     /// theme color for a kind at render time (see `StatusColors.color(for:)`).
     enum SegmentKind: Equatable {
-        case permission, attention, working, idle
+        case permission, question, attention, working, idle
 
         /// Whether this segment represents sessions needing user action.
-        var needsAction: Bool { self == .permission || self == .attention }
+        var needsAction: Bool { self == .permission || self == .question || self == .attention }
     }
 
     let permission: Int
@@ -67,8 +67,11 @@ struct StatusCounts: Equatable {
         if working > 0 {
             segs.append((Double(working) / Double(total), .working))
         }
-        if attention > 0 {
-            segs.append((Double(attention) / Double(total), .attention))
+        if attention > blockedQuestions {
+            segs.append((Double(attention - blockedQuestions) / Double(total), .attention))
+        }
+        if blockedQuestions > 0 {
+            segs.append((Double(blockedQuestions) / Double(total), .question))
         }
         if permission > 0 {
             segs.append((Double(permission) / Double(total), .permission))
@@ -79,7 +82,7 @@ struct StatusCounts: Equatable {
         return segs
     }
 
-    /// Minimum width in points for action-needing segments (permission, attention).
+    /// Minimum width in points for action-needing segments (permission, question, attention).
     private static let minActionWidth: Double = 5
 
     /// Bar segments with minimum width enforcement for action-needing segments.

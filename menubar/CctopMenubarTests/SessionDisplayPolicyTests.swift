@@ -109,6 +109,32 @@ final class SessionDisplayPolicyTests: XCTestCase {
         XCTAssertEqual(result.map(\.displayRecord.data.id), ["idle", "working", "waiting", "permission"])
     }
 
+    func testQuestionsComeFirstWithoutChangingIdentityOrIdleMembership() {
+        let now = Date(timeIntervalSince1970: 15_000)
+        var working = SessionData.mock(id: "working", status: .working)
+        working.lastActivity = now
+        var pending = SessionData.mock(id: "pending", status: .working, source: "codex")
+        pending.hasPendingAsyncQuestion = true
+        pending.lastActivity = now.addingTimeInterval(-60)
+        var blocked = SessionData.mock(id: "blocked", status: .waitingAnswer, source: "codex")
+        blocked.lastActivity = now.addingTimeInterval(-600)
+        var otherBlocked = SessionData.mock(id: "other-blocked", status: .waitingAnswer, source: "codex")
+        otherBlocked.lastActivity = now.addingTimeInterval(-300)
+        var asleep = dormant(id: "dormant")
+        asleep.status = .waitingAnswer
+        asleep.lastActivity = now.addingTimeInterval(-10)
+        let input = userSessions(fromDataFixtures: [working, pending, blocked, asleep, otherBlocked])
+        let result = SessionDisplayPolicy.reconcilingOrder(in: input, preserving: input)
+        XCTAssertEqual(result.map(\.displayRecord.data.sessionId), ["other-blocked", "blocked", "pending", "working", "dormant"])
+        XCTAssertEqual(Set(result.map(\.identity)), Set(input.map(\.identity)))
+        XCTAssertEqual(SessionDisplayPolicy.idleSessions(from: result).map(\.displayRecord.data.sessionId), ["dormant"])
+
+        pending.hasPendingAsyncQuestion = false
+        let answered = userSessions(fromDataFixtures: [working, pending, blocked, asleep, otherBlocked])
+        let updated = SessionDisplayPolicy.reconcilingOrder(in: answered, preserving: result)
+        XCTAssertEqual(updated.map(\.displayRecord.data.sessionId), ["other-blocked", "blocked", "working", "dormant", "pending"])
+    }
+
     func testReconciledOrderMovesNewActivityAheadOfPriorRows() {
         let now = Date(timeIntervalSince1970: 20_000)
         var waiting = SessionData.mock(id: "waiting", status: .waitingInput)

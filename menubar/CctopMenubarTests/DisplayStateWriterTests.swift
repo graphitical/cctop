@@ -93,7 +93,7 @@ final class DisplayStateWriterTests: XCTestCase {
         )
         XCTAssertEqual(snapshot.sessions.map(\.status), ["waiting_answer", "waiting_input"])
         XCTAssertEqual(snapshot.sessions.map(\.statusLabel), ["Blocked", "Ready"])
-        XCTAssertEqual(snapshot.sessions.map(\.color), ["#C15F3C", "#8FAFCD"])
+        XCTAssertEqual(snapshot.sessions.map(\.color), ["#DD5353", "#8FAFCD"])
     }
 
     func testProjectionCarriesReviewerAwarePermissionLabels() {

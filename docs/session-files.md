@@ -30,8 +30,11 @@ The app reads local Codex runtime metadata for tracked sessions in the shared da
 For active daemon sessions, it reads the latest full turn through `thread/turns/list`, since activity flags alone do not identify asynchronous questions and turn summaries omit accepted replies.
 The read keeps the local transport's byte limit and deadline; unsupported or incomplete question history leaves the activity status in place.
 A question that stops the turn displays as **Blocked** (`waiting_answer`); a finished turn displays as **Ready** (`waiting_input`).
-An unanswered asynchronous question keeps the chat **Working** with an orange **?** badge until every question receives an accepted answer.
-The menubar, notch, and panel header show the number of chats with unanswered questions separately from activity counts.
+An unanswered asynchronous question keeps the chat **Working** with a red **?** badge until every question receives an accepted answer.
+Both question states use a red **?** badge.
+Blocked chats appear first, followed by working chats with questions, then other chats.
+Each group keeps recent activity order.
+The menubar, notch, and panel header show the red question count separately from activity counts.
 Ready uses the cool idle color in the session row, status bar, keyboard navigation chip, and Stream Deck projection.
 Ordinary chat questions are not inferred, and permission requests keep their separate status.
 These runtime observations adjust the display only, without rewriting hook session files.
@@ -158,7 +161,7 @@ conversation. That record sets the group identity. Older related records remain
 attached as evidence, even when their identity data is stale.
 
 `SessionManager.userSessions` owns the canonical visible identity and row order.
-It orders sessions by `displayRecord.data.lastActivity`, newest first across all statuses.
+It orders active blocked questions first, then active working questions, then other sessions, with `displayRecord.data.lastActivity` newest first within each group.
 Equal timestamps preserve prior `UserSession` order by `LogicalIdentity`, followed by newly seen sessions in their supplied order.
 A presentation or direct-action leaf can read `UserSession.displayRecord.data`, but it must not use that value to assign identity, control order, or rebuild a `UserSession`.
 

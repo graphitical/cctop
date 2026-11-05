@@ -66,6 +66,7 @@ Follow the instructions and commands documented here directly.
 - Make the smallest change that satisfies the approved behavior.
 - Keep unrelated lifecycle, UI, release, and documentation work separate.
 - Do not add flags, configuration, abstractions, or explicit default values without a current need.
+- Use Playwright only for debugging, not for routine development or verification.
 - The developer has given standing authorization to implement requested work, run the required checks, commit the changes, squash-merge them into `main`, and push `main` to GitHub without separate publication approval.
 - Continue through those steps unless the developer explicitly asks for a review checkpoint or tells you to stop.
 - For a UI change, show a screenshot or rendered preview before merging.

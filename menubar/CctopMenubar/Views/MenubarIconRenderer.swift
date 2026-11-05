@@ -30,7 +30,7 @@ enum MenubarIconRenderer {
             }
             if let text = counts.questionLabel {
                 (text as NSString).draw(at: NSPoint(x: barRect.maxX + 4, y: 2), withAttributes: [
-                    .font: font, .foregroundColor: StatusColors.color(for: .attention, appearance: NSAppearance.current)
+                    .font: font, .foregroundColor: StatusColors.color(for: .question, appearance: NSAppearance.current)
                 ])
             }
             return true

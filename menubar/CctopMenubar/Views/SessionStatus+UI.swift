@@ -9,8 +9,8 @@ extension SessionStatus {
 
     func colorPair(in theme: AppTheme) -> AppTheme.ColorPair {
         switch self {
-        case .waitingPermission: return theme.statusPermission
-        case .waitingAnswer, .waitingInput, .needsAttention: return theme.statusAttention
+        case .waitingPermission, .waitingAnswer: return theme.statusPermission
+        case .waitingInput, .needsAttention: return theme.statusAttention
         case .working: return theme.statusWorking
         case .compacting: return theme.agentBadge
         case .idle: return theme.statusIdle

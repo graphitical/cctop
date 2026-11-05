@@ -4,6 +4,12 @@ Versions follow [Semantic Versioning](https://semver.org/spec/v2.0.0.html), with
 A version entry records the source changes assigned to that version; it does not imply a published binary or GitHub Release.
 Version numbers identify `graphitical/cctop` independently of upstream `st0012/cctop`.
 
+## 0.24.0 — 2026-11-05
+
+- Put blocked chats first and working chats with unanswered questions next, preserving recent activity order within each group.
+- Show red question marks for both states across session rows, the header, menubar, and notch, and make Blocked status red.
+- Keep the same canonical order and resolved Blocked color in keyboard navigation and Stream Deck.
+
 ## 0.23.1 — 2026-11-05
 
 - Read unanswered asynchronous questions from the Codex CLI daemon's latest turn so CLI chats show the same question badge as Desktop chats.

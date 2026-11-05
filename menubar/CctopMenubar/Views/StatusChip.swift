@@ -34,12 +34,12 @@ struct QuestionBadge: View {
         Text(count.map { "? \($0)" } ?? "?")
             .font(.system(size: 10.5, weight: .semibold))
             .monospacedDigit()
-            .foregroundStyle(Color.statusAttentionText)
+            .foregroundStyle(Color.statusPermissionText)
             .padding(.horizontal, 5)
             .padding(.vertical, 2)
-            .background(Color.statusAttention.opacity(0.13))
+            .background(Color.statusPermission.opacity(0.13))
             .clipShape(RoundedRectangle(cornerRadius: 4))
             .fixedSize()
-            .accessibilityLabel(count.map { "\($0) with unanswered questions" } ?? "Unanswered question, still working")
+            .accessibilityLabel(count.map { "\($0) with unanswered questions" } ?? "Unanswered question")
     }
 }
