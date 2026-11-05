@@ -148,6 +148,13 @@ extension PopupView {
                 Label("Copy Project Path", systemImage: "doc.on.doc")
             }
             Divider()
+            if row.session.lifecycle == .active && row.session.status != .idle {
+                Button { onMarkSessionIdle(row.session) } label: {
+                    Label("Mark Idle", systemImage: "moon")
+                }
+                .disabled(row.userSession.identity.cctopSessionID == nil)
+                .help("Move to Idle until the next session activity.")
+            }
             Button { requestHideSession(row) } label: {
                 Label("Hide Session", systemImage: "eye.slash")
             }
@@ -155,6 +162,10 @@ extension PopupView {
         }
         .help(focusActionTitle)
         .accessibilityActions {
+            if row.session.lifecycle == .active && row.session.status != .idle {
+                Button("Mark Idle") { onMarkSessionIdle(row.session) }
+                    .disabled(row.userSession.identity.cctopSessionID == nil)
+            }
             Button("Hide Session") { requestHideSession(row) }
                 .disabled(row.userSession.identity.cctopSessionID == nil)
         }

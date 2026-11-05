@@ -342,6 +342,7 @@ struct PanelContentView: View {
             panelHeight: panelHeightModel.height,
             onOpenUpdater: onOpenUpdater,
             onHideSession: { sessionManager.hideSession($0) },
+            onMarkSessionIdle: { sessionManager.markSessionIdle($0) },
             onSelectCleanupRemovalAction: onSelectCleanupRemovalAction,
             onExecuteCleanupRemovalAction: onExecuteCleanupRemovalAction,
             onCleanupTabVisible: onCleanupTabVisible,

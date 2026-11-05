@@ -72,6 +72,16 @@ enum SessionNotificationAction: Equatable {
 
 @MainActor
 extension SessionManager {
+    func markSessionIdle(_ displayedSession: SessionData) {
+        guard displayedSession.lifecycle == .active, displayedSession.status != .idle,
+              let sessionID = displayedSession.cctopSessionId, CctopSessionID.isValid(sessionID) else { return }
+        loadSessions()
+        guard let userSession = FocusTargetResolver.currentUserSession(forCctopSessionID: sessionID, in: userSessions),
+              userSession.displayRecord.data == displayedSession else { return }
+        dataSources.manualSessionVisibility.markIdle(displayedSession)
+        loadSessions()
+    }
+
     func hideSession(_ identity: SessionIdentityPolicy.LogicalIdentity) {
         guard let cctopSessionID = identity.cctopSessionID,
               let hiddenUserSession = userSessions.first(where: { $0.identity == identity }) else { return }

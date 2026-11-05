@@ -122,7 +122,8 @@ class SessionManager: ObservableObject {
         )
         scheduleCodexQuestionRead(for: groupedUserSessions)
         let loadedUserSessions = groupedUserSessions.map {
-            $0.replacingDisplayData(adjustDisplayStatus($0.displayRecord.data))
+            let display = adjustDisplayStatus($0.displayRecord.data)
+            return $0.replacingDisplayData(dataSources.manualSessionVisibility.applyingManualIdle(to: display))
         }
         let newUserSessions = SessionDisplayPolicy.reconcilingOrder(
             in: loadedUserSessions,

@@ -21,6 +21,7 @@ struct PopupView: View {
     var panelHeight: CGFloat?
     var onOpenUpdater: (() -> Void)?
     var onHideSession: (SessionIdentityPolicy.LogicalIdentity) -> Void = { _ in }
+    var onMarkSessionIdle: (SessionData) -> Void = { _ in }
     var onSelectCleanupRemovalAction: ((WorktreeCleanupCandidate) async -> WorktreeRemovalService.RemovalAction)?
     var onExecuteCleanupRemovalAction: ((WorktreeRemovalService.RemovalAction) async -> WorktreeRemovalService.RemovalResult)?
     var onCleanupTabVisible: () -> Void = {}

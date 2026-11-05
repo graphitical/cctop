@@ -128,9 +128,10 @@ struct ManualHideEvidence {
 }
 
 /// Persists manual visibility preferences independently from hook-owned session files.
-/// The stored payload is intentionally limited to opaque cctop-owned session IDs.
+/// Stores opaque cctop-owned session IDs and activity timestamps, without session content.
 struct ManualSessionVisibilityStore {
     static let defaultsKey = "manuallyHiddenCctopSessionIDs"
+    static let idleActivitiesKey = "manuallyIdleCctopSessionActivities"
     static let live = ManualSessionVisibilityStore(defaults: .standard)
 
     private let defaults: UserDefaults
@@ -164,12 +165,47 @@ struct ManualSessionVisibilityStore {
         save(sessionIDs)
     }
 
+    func markIdle(_ session: SessionData) {
+        guard let sessionID = session.cctopSessionId, CctopSessionID.isValid(sessionID) else { return }
+        var activities = idleActivities
+        activities[sessionID] = session.lastActivity.timeIntervalSince1970
+        saveIdleActivities(activities)
+    }
+
+    func applyingManualIdle(to session: SessionData) -> SessionData {
+        var activities = idleActivities
+        guard let sessionID = session.cctopSessionId, let activity = activities[sessionID] else { return session }
+        guard session.lastActivity.timeIntervalSince1970 == activity else {
+            activities.removeValue(forKey: sessionID)
+            saveIdleActivities(activities)
+            return session
+        }
+        var display = session
+        display.status = .idle
+        return display
+    }
+
     /// Remove IDs only after the caller has completed an authoritative local inventory.
     func prune(retaining validSessionIDs: Set<String>) {
         let current = hiddenSessionIDs
         let retained = current.intersection(validSessionIDs)
-        guard retained != current else { return }
-        save(retained)
+        if retained != current { save(retained) }
+        let activities = idleActivities
+        let retainedActivities = activities.filter { validSessionIDs.contains($0.key) }
+        if retainedActivities != activities { saveIdleActivities(retainedActivities) }
+    }
+
+    private var idleActivities: [String: Double] {
+        let activities = defaults.dictionary(forKey: Self.idleActivitiesKey) as? [String: Double] ?? [:]
+        return activities.filter { CctopSessionID.isValid($0.key) }
+    }
+
+    private func saveIdleActivities(_ activities: [String: Double]) {
+        if activities.isEmpty {
+            defaults.removeObject(forKey: Self.idleActivitiesKey)
+        } else {
+            defaults.set(activities, forKey: Self.idleActivitiesKey)
+        }
     }
 
     private func save(_ sessionIDs: Set<String>) {

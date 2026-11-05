@@ -298,6 +298,14 @@ Use `hidden` for real session records that should remain on disk for liveness, d
 
 Do not use file deletion as the hiding signal. Delete a session file only when the session is genuinely obsolete and no longer useful as state.
 
+### Mark Idle
+
+The row's **Mark Idle** action moves the displayed conversation into the Idle tab until its next activity.
+cctop saves only its permanent session ID and the activity timestamp in local preferences, so the choice survives an app restart.
+The action leaves hook-owned session JSON, connection evidence, lifecycle, and Cleanup protection unchanged.
+Fresh activity clears the preference and restores the agent's displayed status.
+If the conversation changes after its menu opens, cctop leaves that fresh state alone.
+
 ### Manual hiding
 
 The app's user-triggered **Hide Session** action is separate from the session

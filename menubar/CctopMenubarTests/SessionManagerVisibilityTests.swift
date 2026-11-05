@@ -19,6 +19,84 @@ final class SessionManagerVisibilityTests: XCTestCase {
     // MARK: - Manual session visibility
 
     @MainActor
+    func testMarkIdlePersistsWithoutChangingSessionDataAndFreshActivityRestoresAttention() throws {
+        let root = NSTemporaryDirectory() + "cctop-mark-idle-\(UUID().uuidString)"
+        let sessionsDir = (root as NSString).appendingPathComponent("sessions")
+        let historyDir = (root as NSString).appendingPathComponent("history")
+        try FileManager.default.createDirectory(atPath: sessionsDir, withIntermediateDirectories: true)
+        try FileManager.default.createDirectory(atPath: historyDir, withIntermediateDirectories: true)
+        defer { try? FileManager.default.removeItem(atPath: root) }
+        let visibility = isolatedManualSessionVisibility(prefix: "cctop-mark-idle")
+        let now = Date(timeIntervalSince1970: 1_900_000_000)
+        let path = (sessionsDir as NSString).appendingPathComponent("101.json")
+        var session = SessionData.mock(id: "conversation", status: .working, pid: 101, source: SessionData.opencodeSource)
+        session.lastActivity = now
+        try session.writeToFile(path: path)
+        let originalData = try Data(contentsOf: URL(fileURLWithPath: path))
+        let manager = makeManager(
+            sessionsDir: sessionsDir, historyDir: historyDir, processAlive: { _ in true },
+            manualSessionVisibility: visibility, now: { now }
+        )
+
+        manager.markSessionIdle(try XCTUnwrap(manager.userSessions.first?.displayRecord.data))
+
+        XCTAssertTrue(SessionDisplayPolicy.activeSessions(from: manager.userSessions).isEmpty)
+        XCTAssertEqual(SessionDisplayPolicy.idleSessions(from: manager.userSessions).count, 1)
+        XCTAssertEqual(manager.userSessions.first?.displayRecord.data.lifecycle, .active)
+        XCTAssertEqual(try Data(contentsOf: URL(fileURLWithPath: path)), originalData)
+        XCTAssertEqual(StatusCounts(userSessions: manager.userSessions).total, 0)
+        XCTAssertTrue(DisplayStateWriter.snapshot(
+            userSessions: manager.userSessions, theme: .claude,
+            appRunning: true, appIdentity: nil, now: now
+        ).sessions.isEmpty)
+
+        let restored = makeManager(
+            sessionsDir: sessionsDir, historyDir: historyDir, processAlive: { _ in true },
+            manualSessionVisibility: visibility, now: { now }
+        )
+        XCTAssertEqual(restored.userSessions.first?.status, .idle)
+        session.status = .waitingPermission
+        session.lastActivity = now.addingTimeInterval(1)
+        try session.writeToFile(path: path)
+        restored.loadSessions()
+        XCTAssertEqual(SessionDisplayPolicy.activeSessions(from: restored.userSessions).count, 1)
+        XCTAssertEqual(restored.userSessions.first?.status, .waitingPermission)
+
+        session.lastActivity = now
+        try session.writeToFile(path: path)
+        restored.loadSessions()
+        XCTAssertEqual(restored.userSessions.first?.status, .waitingPermission)
+    }
+
+    @MainActor
+    func testMarkIdleDoesNotOverrideActivityReceivedAfterTheRowWasPresented() throws {
+        let root = NSTemporaryDirectory() + "cctop-mark-idle-stale-\(UUID().uuidString)"
+        let sessionsDir = (root as NSString).appendingPathComponent("sessions")
+        let historyDir = (root as NSString).appendingPathComponent("history")
+        try FileManager.default.createDirectory(atPath: sessionsDir, withIntermediateDirectories: true)
+        try FileManager.default.createDirectory(atPath: historyDir, withIntermediateDirectories: true)
+        defer { try? FileManager.default.removeItem(atPath: root) }
+        let now = Date(timeIntervalSince1970: 1_900_000_000)
+        let path = (sessionsDir as NSString).appendingPathComponent("101.json")
+        var session = SessionData.mock(id: "conversation", status: .working, pid: 101, source: SessionData.opencodeSource)
+        session.lastActivity = now
+        try session.writeToFile(path: path)
+        let manager = makeManager(
+            sessionsDir: sessionsDir, historyDir: historyDir, processAlive: { _ in true }, now: { now }
+        )
+        let presentedSession = try XCTUnwrap(manager.userSessions.first?.displayRecord.data)
+
+        session.status = .waitingInput
+        session.lastActivity = now.addingTimeInterval(1)
+        try session.writeToFile(path: path)
+        manager.markSessionIdle(presentedSession)
+
+        XCTAssertEqual(manager.userSessions.first?.status, .waitingInput)
+        XCTAssertEqual(SessionDisplayPolicy.activeSessions(from: manager.userSessions).count, 1)
+        XCTAssertTrue(SessionDisplayPolicy.idleSessions(from: manager.userSessions).isEmpty)
+    }
+
+    @MainActor
     func testManualHideIsImmediatePersistentAndLeavesTrackingIntact() throws {
         let root = NSTemporaryDirectory() + "cctop-manual-hide-\(UUID().uuidString)"
         let sessionsDir = (root as NSString).appendingPathComponent("sessions")

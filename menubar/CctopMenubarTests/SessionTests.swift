@@ -780,6 +780,26 @@ final class SessionTests: XCTestCase {
         XCTAssertEqual(store.hiddenSessionIDs, [secondID])
     }
 
+    func testManualIdlePreferenceStoresOnlyIdentityAndActivityAndPrunesMissingSessions() throws {
+        let suiteName = "cctop-manual-idle-\(UUID().uuidString)"
+        let defaults = try XCTUnwrap(UserDefaults(suiteName: suiteName))
+        defer { defaults.removePersistentDomain(forName: suiteName) }
+        let store = ManualSessionVisibilityStore(defaults: defaults)
+        var session = SessionData.mock(id: "private-conversation", sessionName: "Private title", status: .working)
+        session.lastActivity = Date(timeIntervalSince1970: 1_900_000_000)
+
+        store.markIdle(session)
+
+        let values = try XCTUnwrap(defaults.dictionary(forKey: ManualSessionVisibilityStore.idleActivitiesKey) as? [String: Double])
+        XCTAssertEqual(values, [try XCTUnwrap(session.cctopSessionId): 1_900_000_000])
+        XCTAssertTrue(store.hiddenSessionIDs.isEmpty)
+        store.prune(retaining: [try XCTUnwrap(session.cctopSessionId)])
+        XCTAssertEqual(store.applyingManualIdle(to: session).status, .idle)
+        store.prune(retaining: [])
+        XCTAssertNil(defaults.object(forKey: ManualSessionVisibilityStore.idleActivitiesKey))
+        XCTAssertEqual(store.applyingManualIdle(to: session).status, .working)
+    }
+
     func testManualSessionVisibilityIgnoresRowsWithoutPermanentIdentity() {
         let suiteName = "cctop-manual-visibility-legacy-\(UUID().uuidString)"
         let defaults = UserDefaults(suiteName: suiteName)!
