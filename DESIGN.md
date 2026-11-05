@@ -126,6 +126,8 @@ working session.
 
 Codex pairs neutral charcoal and white surfaces with a pale blue accent in dark mode and a deeper blue in light mode.
 Ready uses the same calm blue role as Idle in every palette; questions and approvals keep their separate attention colors.
+An asynchronous question adds a compact orange `?` badge beside Working while the green activity status remains visible, including in compact rows.
+The header, menubar, and notch show `?` with the unanswered-question chat count; this overlaps activity counts rather than adding sessions to the bar.
 
 | Role               | Dark      | Light     |
 |--------------------|-----------|-----------|
@@ -374,7 +376,7 @@ All source labels render as neutral metadata so the project name and session sta
 | Padding        | 16 / 14 / 14 / 10 px (left / top / right / bottom)                |
 | Brand mark     | 26×5 hairline in a 16 px line box with a 2 px downward optical offset to align with the title ink, segment widths 14 / 5 / 3 / 4, with mode-resolved brand colors |
 | Title          | 13 px semibold · -0.1 px tracking · 16 px line box · `textPrimary` ("cctop") |
-| Trailing       | `StatusChip` row for permission → attention → working; idle stays available in the Idle tab but is omitted from the header |
+| Trailing       | Permission → question count → other attention → working → Ready; actual idle sessions stay in the Idle tab |
 | Drag area      | Entire header is a draggable `WindowDragArea` with custom move cursor |
 
 ### Status chip (`StatusChip.swift`)
@@ -422,9 +424,9 @@ Deck's action picker. The bundled Claude Code,
 Codex, opencode, and pi integrations do not expose logo fields in their current
 direct hook/extension formats; do not invent unsupported manifest metadata.
 
-The menubar status item is 36×18 with a centered 36×6 live hairline. It
-resolves semantic colors against the status button's effective light/dark
-appearance. It contains no separate glyph.
+The menubar status item starts at 36×18 with a centered 36×6 live hairline and expands to show `?` plus the chat count when questions are pending.
+It resolves semantic colors against the status button's effective light/dark appearance.
+The hairline contains no separate glyph.
 
 ### Notch pill (`NotchStatusView.swift`)
 

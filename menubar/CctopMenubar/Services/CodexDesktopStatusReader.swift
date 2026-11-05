@@ -3,6 +3,7 @@ import Foundation
 struct CodexDesktopStatus: Equatable, Sendable {
     let runtime: CodexRuntimeStatus
     let hasPendingQuestion: Bool
+    let isWaitingForAnswer: Bool
 
     init?(snapshot: [String: Any]) {
         guard let runtimeJSON = snapshot["threadRuntimeStatus"] as? [String: Any],
@@ -10,8 +11,9 @@ struct CodexDesktopStatus: Equatable, Sendable {
               let requests = snapshot["requests"] as? [[String: Any]],
               let hasAsyncQuestion = Self.hasAsyncQuestion(in: snapshot) else { return nil }
         self.runtime = runtime
-        hasPendingQuestion = runtime.activeFlags.contains("waitingOnUserInput") || hasAsyncQuestion
+        isWaitingForAnswer = runtime.activeFlags.contains("waitingOnUserInput")
             || requests.contains { $0["method"] as? String == "item/tool/requestUserInput" }
+        hasPendingQuestion = isWaitingForAnswer || hasAsyncQuestion
     }
 
     private static func hasAsyncQuestion(in snapshot: [String: Any]) -> Bool? {

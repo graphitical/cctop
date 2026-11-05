@@ -26,3 +26,20 @@ struct StatusChip: View {
         }
     }
 }
+
+struct QuestionBadge: View {
+    var count: Int?
+
+    var body: some View {
+        Text(count.map { "? \($0)" } ?? "?")
+            .font(.system(size: 10.5, weight: .semibold))
+            .monospacedDigit()
+            .foregroundStyle(Color.statusAttentionText)
+            .padding(.horizontal, 5)
+            .padding(.vertical, 2)
+            .background(Color.statusAttention.opacity(0.13))
+            .clipShape(RoundedRectangle(cornerRadius: 4))
+            .fixedSize()
+            .accessibilityLabel(count.map { "\($0) with unanswered questions" } ?? "Unanswered question, still working")
+    }
+}

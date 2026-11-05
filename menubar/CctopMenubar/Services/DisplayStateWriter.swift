@@ -134,7 +134,7 @@ final class DisplayStateWriter {
                     cctopSessionId: cctopSessionId,
                     name: data.displayName,
                     status: userSession.status.rawValue,
-                    statusLabel: data.statusLabel,
+                    statusLabel: data.hasPendingAsyncQuestion ? "\(data.statusLabel) ?" : data.statusLabel,
                     color: hexColor(for: data, theme: theme)
                 )
             }

@@ -21,8 +21,9 @@ struct HeaderView: View {
                     textColor: Color.statusPermissionText,
                     categoryLabel: "need permission"
                 )
+                if counts.questions > 0 { QuestionBadge(count: counts.questions) }
                 StatusChip(
-                    count: counts.attention,
+                    count: counts.attention - counts.blockedQuestions,
                     color: Color.statusAttention,
                     textColor: Color.statusAttentionText,
                     categoryLabel: "need attention"
@@ -33,6 +34,7 @@ struct HeaderView: View {
                     textColor: Color.statusWorkingText,
                     categoryLabel: "working"
                 )
+                StatusChip(count: counts.idle, color: Color.statusIdle, textColor: Color.statusIdle, categoryLabel: "ready")
             }
         }
         .padding(.leading, 16)

@@ -8,15 +8,18 @@ final class CodexDesktopStatusReaderTests: XCTestCase {
         XCTAssertFalse(try XCTUnwrap(CodexDesktopStatus(snapshot: value)).hasPendingQuestion)
         value["threadRuntimeStatus"] = ["type": "active", "activeFlags": ["waitingOnUserInput"]]
         XCTAssertTrue(try XCTUnwrap(CodexDesktopStatus(snapshot: value)).hasPendingQuestion)
+        XCTAssertTrue(try XCTUnwrap(CodexDesktopStatus(snapshot: value)).isWaitingForAnswer)
         value["threadRuntimeStatus"] = ["type": "active", "activeFlags": []]
         value["requests"] = [["method": "item/tool/requestUserInput"]]
         XCTAssertTrue(try XCTUnwrap(CodexDesktopStatus(snapshot: value)).hasPendingQuestion)
+        XCTAssertTrue(try XCTUnwrap(CodexDesktopStatus(snapshot: value)).isWaitingForAnswer)
     }
 
     func testAsyncQuestionNeedsEveryAnswerFromAnAcceptedReply() throws {
         let question: [String: Any] = ["type": "agentMessage", "id": "call-1", "questions": [["title": "First?"], ["title": "Second?"]]]
         var items = [question]
         XCTAssertTrue(try status(items).hasPendingQuestion)
+        XCTAssertFalse(try status(items).isWaitingForAnswer)
         items.append(["type": "userMessage", "content": [["type": "text", "text": "Continue working"]]])
         XCTAssertTrue(try status(items).hasPendingQuestion)
         items.append(try answer(index: 0))

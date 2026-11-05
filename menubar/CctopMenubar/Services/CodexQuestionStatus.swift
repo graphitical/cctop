@@ -1,15 +1,15 @@
 import Foundation
 
 enum CodexQuestionStatus: Equatable, Sendable {
-    case blocked, ready, running
+    case blocked, ready, running, runningWithQuestion
 
-    init?(runtime: CodexRuntimeStatus, hasPendingQuestion: Bool = false) {
-        if hasPendingQuestion || runtime.activeFlags.contains("waitingOnUserInput") {
+    init?(runtime: CodexRuntimeStatus, hasPendingQuestion: Bool = false, isWaitingForAnswer: Bool = false) {
+        if isWaitingForAnswer || runtime.activeFlags.contains("waitingOnUserInput") {
             self = .blocked
         } else if runtime.state == .idle {
-            self = .ready
+            self = hasPendingQuestion ? .blocked : .ready
         } else if runtime.state == .active, runtime.activeFlags.isEmpty {
-            self = .running
+            self = hasPendingQuestion ? .runningWithQuestion : .running
         } else {
             return nil
         }
@@ -28,9 +28,12 @@ enum CodexQuestionStatus: Equatable, Sendable {
         let (daemonStatuses, desktopStatuses) = await (daemon, desktop)
         var statuses = (daemonStatuses ?? [:]).compactMapValues { Self(runtime: $0) }
         for (id, status) in desktopStatuses ?? [:] {
-            guard let observed = Self(runtime: status.runtime, hasPendingQuestion: status.hasPendingQuestion) else { continue }
+            guard let observed = Self(runtime: status.runtime, hasPendingQuestion: status.hasPendingQuestion,
+                                      isWaitingForAnswer: status.isWaitingForAnswer) else { continue }
             if observed == .blocked || statuses[id] == .blocked {
                 statuses[id] = .blocked
+            } else if observed == .runningWithQuestion || statuses[id] == .runningWithQuestion {
+                statuses[id] = .runningWithQuestion
             } else if observed == .running || statuses[id] == .running {
                 statuses[id] = .running
             } else {
@@ -74,12 +77,13 @@ extension SessionManager {
     nonisolated static func applyingCodexQuestionStatus(_ status: CodexQuestionStatus?, to session: SessionData) -> SessionData {
         guard session.isCodex, session.lifecycle == .active, session.status != .waitingPermission, let status else { return session }
         var result = session
+        result.hasPendingAsyncQuestion = status == .runningWithQuestion
         switch status {
         case .blocked: result.status = .waitingAnswer
         case .ready where session.status == .working || session.status == .waitingInput || session.status == .waitingAnswer:
             result.status = .waitingInput
-        case .running where session.status == .waitingInput || session.status == .waitingAnswer:
-            result.status = .working
+        case .running, .runningWithQuestion:
+            if session.status == .waitingInput || session.status == .waitingAnswer { result.status = .working }
         default: break
         }
         return result

@@ -5,14 +5,23 @@ struct NotchStatusView: View {
     var themeId: String = ""
 
     var body: some View {
-        Group {
-            if counts.total > 0 {
-                StatusBar(counts: counts)
-            } else {
-                Capsule().fill(Color.white.opacity(0.52))
+        HStack(spacing: 4) {
+            Group {
+                if counts.total > 0 {
+                    StatusBar(counts: counts)
+                } else {
+                    Capsule().fill(Color.white.opacity(0.52))
+                }
+            }
+            .frame(width: 36, height: 4)
+            if let label = counts.questionLabel {
+                Text(label)
+                    .font(.system(size: 10, weight: .semibold))
+                    .monospacedDigit()
+                    .foregroundStyle(StatusColors.notchColor(for: .attention))
+                    .fixedSize()
             }
         }
-        .frame(width: 36, height: 4)
         .frame(height: 11)
         .id(themeId)
         .padding(.leading, 5)

@@ -4,6 +4,12 @@ Versions follow [Semantic Versioning](https://semver.org/spec/v2.0.0.html), with
 A version entry records the source changes assigned to that version; it does not imply a published binary or GitHub Release.
 Version numbers identify `graphitical/cctop` independently of upstream `st0012/cctop`.
 
+## 0.23.0 — 2026-11-05
+
+- Add question-mark badges to working Codex chats, the panel header, menubar, and notch while asynchronous questions remain unanswered.
+- Keep stopped questions Blocked, show Ready chats in the cool blue bar segment, and publish `Working ?` to Stream Deck.
+- Keep question observations out of persisted hook records so running sessions continue to reconnect without restarting.
+
 ## 0.22.0 — 2026-11-04
 
 This is the fork's first versioned baseline, not a published release.

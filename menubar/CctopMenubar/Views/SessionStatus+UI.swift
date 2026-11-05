@@ -64,6 +64,7 @@ extension SessionData {
     }
 
     var statusAccessibilityDescription: String {
+        if hasPendingAsyncQuestion { return "\(status.accessibilityDescription), question pending" }
         if usesGenericPermissionLabel { return "waiting for permission review" }
         return isReadyForNextTask ? "ready for your next task" : status.accessibilityDescription
     }

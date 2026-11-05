@@ -138,6 +138,10 @@ struct SessionData: Codable, Identifiable, Equatable {
     /// equality and re-renders.
     var lifecycle: SessionLifecycle = .active
 
+    /// Display-only question evidence; excluded from CodingKeys so hook files stay unchanged.
+    var hasPendingAsyncQuestion = false
+    var hasPendingQuestion: Bool { hasPendingAsyncQuestion || status == .waitingAnswer }
+
     /// Harness id Codex reports (CLI and Desktop both pass `--harness codex`).
     static let codexSource = "codex"
     static let ccSource = "cc"
@@ -407,6 +411,7 @@ extension SessionData {
     }
 
     var contextLine: String? {
+        if hasPendingAsyncQuestion { return "Still working · question pending" }
         switch status {
         case .idle: return nil
         case .compacting: return "Compacting context..."

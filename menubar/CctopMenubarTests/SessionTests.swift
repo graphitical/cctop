@@ -2346,11 +2346,11 @@ final class SessionTests: XCTestCase {
         return try XCTUnwrap(JSONSerialization.jsonObject(with: data) as? [String: Any])
     }
 
-    // 28 persisted fields + the transient `lifecycle`. If this fails, a stored property was
+    // 28 persisted fields + transient lifecycle and asynchronous question evidence. If this fails, a stored property was
     // added or removed: wire it through CodingKeys, init(from:), the memberwise init, and
     // makeFullyPopulatedSession() above, then update this count.
     func testStoredPropertyCountTripwire() {
-        XCTAssertEqual(Mirror(reflecting: makeFullyPopulatedSession()).children.count, 29)
+        XCTAssertEqual(Mirror(reflecting: makeFullyPopulatedSession()).children.count, 30)
     }
 
     // Catches asymmetry between CodingKeys, init(from:), and the synthesized encode: a field

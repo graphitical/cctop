@@ -9,13 +9,54 @@ final class CodexQuestionStatusTests: XCTestCase {
             return CodexQuestionStatus(runtime: runtime, hasPendingQuestion: pending)
         }
         XCTAssertEqual(try status("active", flags: ["waitingOnUserInput"]), .blocked)
-        XCTAssertEqual(try status("active", pending: true), .blocked)
+        XCTAssertEqual(try status("active", pending: true), .runningWithQuestion)
+        XCTAssertEqual(try status("idle", pending: true), .blocked)
         XCTAssertEqual(try status("idle"), .ready)
         XCTAssertEqual(try status("active"), .running)
         XCTAssertNil(try status("active", flags: ["waitingOnApproval"]))
         XCTAssertNil(try status("active", flags: ["futureFlag"]))
         XCTAssertNil(try status("notLoaded"))
         XCTAssertNil(try status("systemError"))
+        XCTAssertNil(try status("notLoaded", pending: true))
+        let runtime = try XCTUnwrap(CodexRuntimeStatus(json: ["type": "active", "activeFlags": []]))
+        XCTAssertEqual(CodexQuestionStatus(runtime: runtime, hasPendingQuestion: true, isWaitingForAnswer: true), .blocked)
+    }
+
+    @MainActor
+    func testWorkingQuestionIsAnIndependentDisplayFlag() throws {
+        let working = SessionData.mock(status: .working, source: "codex")
+        let pending = SessionManager.applyingCodexQuestionStatus(.runningWithQuestion, to: working)
+        XCTAssertEqual(pending.status, .working)
+        XCTAssertTrue(pending.hasPendingQuestion)
+        XCTAssertEqual(pending.contextLine, "Still working · question pending")
+        XCTAssertEqual(pending.statusAccessibilityDescription, "working, question pending")
+        XCTAssertTrue(pending.shouldPostAttentionNotification)
+        XCTAssertEqual(pending.notificationContent.subtitle, "Codex has a question and is still working")
+        let persisted = try JSONEncoder.sessionEncoder.encode(pending)
+        XCTAssertEqual(try JSONDecoder.sessionDecoder.decode(SessionData.self, from: persisted),
+                       try JSONDecoder.sessionDecoder.decode(SessionData.self, from: JSONEncoder.sessionEncoder.encode(working)))
+        let answered = SessionManager.applyingCodexQuestionStatus(.running, to: pending)
+        XCTAssertEqual(answered.status, .working)
+        XCTAssertFalse(answered.hasPendingQuestion)
+        XCTAssertFalse(answered.shouldPostAttentionNotification)
+        let blocked = SessionData.mock(id: "blocked", status: .waitingAnswer, source: "codex")
+        let ready = SessionData.mock(id: "ready", status: .waitingInput, source: "codex")
+        let sessions = userSessions(fromDataFixtures: [pending, blocked, ready])
+        let counts = StatusCounts(userSessions: sessions)
+        XCTAssertEqual(counts.total, 3)
+        XCTAssertEqual(counts.working, 1)
+        XCTAssertEqual(counts.questions, 2)
+        XCTAssertEqual(counts.blockedQuestions, 1)
+        XCTAssertEqual(counts.idle, 1)
+        XCTAssertEqual(counts.needsAction, 2)
+        XCTAssertEqual(counts.questionLabel, "? 2")
+        XCTAssertGreaterThan(MenubarIconRenderer.render(counts: counts).size.width, 36)
+        let snapshot = DisplayStateWriter.snapshot(userSessions: sessions, theme: .codex, appRunning: false, appIdentity: nil, now: Date())
+        let entry = try XCTUnwrap(snapshot.sessions.first { $0.statusLabel == "Working ?" })
+        XCTAssertEqual(entry.status, "working")
+        var dormant = pending
+        dormant.lifecycle = .dormant
+        XCTAssertEqual(StatusCounts(userSessions: userSessions(fromDataFixtures: [dormant])).questions, 0)
     }
 
     func testOverlayPreservesPermissionLifecycleAndOtherClients() {
@@ -70,7 +111,7 @@ final class CodexQuestionStatusTests: XCTestCase {
         let persisted = try Data(contentsOf: URL(fileURLWithPath: path))
         sources.readCodexQuestions = { ids in
             XCTAssertEqual(ids, [id])
-            return [id: .blocked]
+            return [id: .runningWithQuestion]
         }
         let manager = SessionManager(
             historyManager: HistoryManager(historyDir: sources.sessionsDir.appendingPathComponent("history")),
@@ -78,10 +119,12 @@ final class CodexQuestionStatusTests: XCTestCase {
         )
         let identity = try XCTUnwrap(manager.userSessions.first?.identity)
         let updated = expectation(description: "Runtime question reaches the display")
-        let observation = manager.$userSessions.first { $0.first?.status == .waitingAnswer }.sink { _ in updated.fulfill() }
+        let observation = manager.$userSessions.first { $0.first?.displayRecord.data.hasPendingAsyncQuestion == true }
+            .sink { _ in updated.fulfill() }
         await fulfillment(of: [updated], timeout: 3)
         withExtendedLifetime(observation) {}
         XCTAssertEqual(manager.userSessions.map(\.identity), [identity])
+        XCTAssertEqual(manager.userSessions.first?.status, .working)
         XCTAssertEqual(try Data(contentsOf: URL(fileURLWithPath: path)), persisted)
 
         manager.codexQuestionObservations[id] = CodexQuestionObservation(
@@ -89,5 +132,6 @@ final class CodexQuestionStatusTests: XCTestCase {
         )
         manager.loadSessions()
         XCTAssertEqual(manager.userSessions.first?.status, .working, "An observation cannot override newer hook activity")
+        XCTAssertFalse(manager.userSessions.first?.displayRecord.data.hasPendingQuestion ?? true)
     }
 }

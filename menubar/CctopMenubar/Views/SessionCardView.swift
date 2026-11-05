@@ -55,6 +55,7 @@ struct SessionCardView: View {
             }
 
             statusLabel
+            if session.hasPendingAsyncQuestion { QuestionBadge() }
 
         }
         .frame(height: 18)
@@ -223,12 +224,14 @@ struct SessionCardView: View {
     /// Text for the third row when the session is working/compacting — the command stripe.
     /// Reuses `SessionData.contextLine` formatting (Reading X.swift, Running: foo, etc.).
     private var workingCommandText: String? {
+        guard !session.hasPendingAsyncQuestion else { return nil }
         guard session.status == .working || session.status == .compacting else { return nil }
         return session.contextLine
     }
 
     /// Context note for waiting/permission/needs-attention states.
     private var attentionNoteText: String? {
+        if session.hasPendingAsyncQuestion { return session.contextLine }
         switch session.status {
         case .waitingPermission:
             return session.notificationMessage ?? "Permission needed"

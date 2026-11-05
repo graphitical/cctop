@@ -82,7 +82,10 @@ final class QASnapshotTests: XCTestCase {
     }
 
     func testCodexQuestionStatuses() throws {
+        var pending = SessionData.mock(id: "pending", project: "cctop", sessionName: "Add chat statuses", status: .working, source: "codex")
+        pending.hasPendingAsyncQuestion = true
         var sessions = [
+            pending,
             SessionData.mock(id: "question", project: "cctop", sessionName: "Choose a status label",
                              status: .waitingAnswer, source: "codex"),
             SessionData.mock(id: "ready", project: "api", sessionName: "Review the changes",
@@ -92,7 +95,7 @@ final class QASnapshotTests: XCTestCase {
             SessionData.mock(id: "working", project: "cctop", sessionName: "Run the focused tests",
                              status: .working, source: "codex")
         ]
-        sessions[2].codexPermissionReviewer = .user
+        sessions[3].codexPermissionReviewer = .user
         let selectedTheme = ThemeManager.shared.current
         defer { ThemeManager.shared.setTheme(selectedTheme) }
         for theme in AppTheme.allCases {
@@ -112,6 +115,12 @@ final class QASnapshotTests: XCTestCase {
                                           filename: "codex-question-status-\(theme.rawValue)-navigate-\(colorScheme).png")
             }
         }
+        let counts = StatusCounts(userSessions: userSessions(fromDataFixtures: sessions))
+        let bars = VStack(spacing: 16) {
+            Image(nsImage: MenubarIconRenderer.render(counts: counts))
+            NotchStatusView(counts: counts).frame(width: 100)
+        }.padding(16)
+        try renderPanelScreenshot(view: bars, colorScheme: .dark, directoryName: "cctop-qa", filename: "question-bars.png")
     }
 
     func testCodexPermissionReviewerLabels() throws {

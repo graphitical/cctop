@@ -5,7 +5,11 @@ import SwiftUI
 /// next to the camera notch on built-in displays. No-op on non-notch Macs.
 @MainActor
 class NotchStatusController {
-    private static let pillWidth: CGFloat = 52
+    private static func pillWidth(for counts: StatusCounts) -> CGFloat {
+        guard let label = counts.questionLabel else { return 52 }
+        let width = (label as NSString).size(withAttributes: [.font: NSFont.systemFont(ofSize: 10, weight: .semibold)]).width
+        return 52 + ceil(width) + 4
+    }
     private static let pillHeight: CGFloat = 20
     /// How far the pill overlaps the notch edge, anchoring it visually.
     private static let notchOverlap: CGFloat = 9
@@ -38,9 +42,10 @@ class NotchStatusController {
         guard screen.hasPhysicalNotch else { return }
 
         let notchSize = screen.notchSize
-        let xPos = screen.frame.midX - notchSize.width / 2 - Self.pillWidth + Self.notchOverlap
+        let width = Self.pillWidth(for: counts)
+        let xPos = screen.frame.midX - notchSize.width / 2 - width + Self.notchOverlap
         let yPos = screen.frame.maxY - Self.pillHeight
-        let frame = NSRect(x: xPos, y: yPos, width: Self.pillWidth, height: Self.pillHeight)
+        let frame = NSRect(x: xPos, y: yPos, width: width, height: Self.pillHeight)
 
         if let panel {
             if counts != lastCounts {
@@ -75,6 +80,11 @@ class NotchStatusController {
         lastCounts = counts
         guard let hostingView else { return }
         hostingView.rootView = NotchStatusView(counts: counts, themeId: themeId())
+        if let panel {
+            let width = Self.pillWidth(for: counts)
+            panel.setFrame(NSRect(x: panel.frame.maxX - width, y: panel.frame.minY,
+                                  width: width, height: panel.frame.height), display: true)
+        }
     }
 
     /// Remove the notch panel. Hide first, then release views.

@@ -15,26 +15,35 @@ struct StatusCounts: Equatable {
     let attention: Int
     let working: Int
     let idle: Int
+    let questions: Int
+    let blockedQuestions: Int
 
     static let zero = StatusCounts(permission: 0, attention: 0, working: 0, idle: 0)
 
-    init(permission: Int, attention: Int, working: Int, idle: Int) {
+    init(permission: Int, attention: Int, working: Int, idle: Int, questions: Int = 0, blockedQuestions: Int = 0) {
         self.permission = permission
         self.attention = attention
         self.working = working
         self.idle = idle
+        self.questions = questions
+        self.blockedQuestions = blockedQuestions
     }
 
     /// Create counts by aggregating user-session statuses.
     init(userSessions: [UserSession]) {
         var perm = 0, attn = 0, work = 0, idleCount = 0
+        var questions = 0, blockedQuestions = 0
         // Only presentation-active sessions drive the menubar badge. Dormant and idle
         // cards are retained for reachability, not live work, so they never inflate counts.
         for userSession in SessionDisplayPolicy.activeSessions(from: userSessions) {
+            let data = userSession.displayRecord.data
+            if data.hasPendingQuestion { questions += 1 }
+            if data.status == .waitingAnswer { blockedQuestions += 1 }
             switch userSession.status {
             case .idle: idleCount += 1
             case .working, .compacting: work += 1
             case .waitingPermission: perm += 1
+            case .waitingInput where data.isCodex: idleCount += 1
             case .waitingAnswer, .waitingInput, .needsAttention: attn += 1
             }
         }
@@ -42,10 +51,13 @@ struct StatusCounts: Equatable {
         self.attention = attn
         self.working = work
         self.idle = idleCount
+        self.questions = questions
+        self.blockedQuestions = blockedQuestions
     }
 
     var total: Int { permission + attention + working + idle }
-    var needsAction: Int { permission + attention }
+    var needsAction: Int { permission + attention + questions - blockedQuestions }
+    var questionLabel: String? { questions > 0 ? "? \(questions)" : nil }
 
     /// Proportional bar segments: (fraction of total, semantic kind).
     /// Used by both MenubarIconRenderer (AppKit) and NotchStatusView (SwiftUI).
@@ -128,6 +140,7 @@ struct StatusCounts: Equatable {
         }
         if working > 0 { parts.append("\(working) working") }
         if idle > 0 { parts.append("\(idle) idle") }
+        if questions > 0 { parts.append("\(questions) with unanswered questions") }
         return "cctop, " + parts.joined(separator: ", ")
     }
 }

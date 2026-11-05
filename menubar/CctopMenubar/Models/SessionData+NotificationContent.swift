@@ -10,7 +10,7 @@ extension SessionData {
     private static let notificationBodyLimit = 72
 
     var shouldPostAttentionNotification: Bool {
-        guard status.needsAttention else { return false }
+        guard status.needsAttention || hasPendingQuestion else { return false }
         if isCodex, status == .waitingPermission, codexPermissionReviewer == .autoReview { return false }
         guard usesCodexPromptFallbackPolicy, status == .waitingInput else { return true }
         guard Self.cleanOptionalNotificationBodyText(notificationMessage) == nil else { return true }
@@ -63,6 +63,7 @@ extension SessionData {
     }
 
     private func notificationSubtitle(sender: String) -> String {
+        if hasPendingAsyncQuestion { return "\(sender) has a question and is still working" }
         switch status {
         case .waitingPermission:
             return "\(sender) needs permission"
@@ -76,6 +77,7 @@ extension SessionData {
     }
 
     private var notificationBody: String {
+        if hasPendingAsyncQuestion { return "Answer the question in \(notificationSenderName)" }
         let detail: String?
         switch status {
         case .waitingPermission:
