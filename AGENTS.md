@@ -58,6 +58,16 @@ Follow the instructions and commands documented here directly.
 - Before final PR closeout, verify the title, body, changed files, current head, CI, and review-thread state.
 - Follow the developer's PR description guidance.
 
+## Task Completion and Cleanup
+
+- Cleanup is required before the final completion reply; do not wait for the developer to ask.
+- After code changes are merged and pushed, rebuild, reinstall, and verify the app and hook from the main checkout using its `.local/build-and-install.command` helper before removing task worktrees.
+- Remove every completed task-owned worktree and local branch after verifying that its changes are preserved on pushed `main`, including patch verification for squash merges.
+- Before removal, confirm that the worktree has no uncommitted or untracked user work and that no app, build, test, terminal, or agent process is using it.
+- Remove task-owned scratch scripts, logs, screenshots, investigation files, fixtures, and generated build outputs while preserving unrelated work and intentional project assets.
+- Finish by checking `git status`, the branch list, the worktree inventory, and any task-owned temporary files, and explicitly report anything that must remain and why.
+- Leave the verified installed app running independently of any removed worktree.
+
 ## Code Review Rules
 
 - **Consequential defects:** Report only reachable defects that cause material harm or materially wrong visible behavior.
