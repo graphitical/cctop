@@ -7,41 +7,18 @@ final class StatusCountsUserSessionInitTests: XCTestCase {
         XCTAssertEqual(counts.total, 0)
     }
 
-    func testIdle_countsAsIdle() {
-        let userSessions = userSessions(fromDataFixtures: [.mock(status: .idle)])
-        let counts = StatusCounts(userSessions: userSessions)
-        XCTAssertEqual(counts.idle, 1)
-        XCTAssertEqual(counts.working, 0)
-    }
-
-    func testFreshActiveIdle_countsAsIdle() {
+    func testIdle_isExcludedFromActiveCountsRegardlessOfAge() {
         let now = Date()
-        var session = SessionData.mock(status: .idle)
-        session.lifecycle = .active
-        session.lastActivity = now.addingTimeInterval(-SessionDisplayPolicy.staleIdleInterval + 60)
+        for age: TimeInterval in [0, 60, 3 * 86_400] {
+            var session = SessionData.mock(status: .idle)
+            session.lifecycle = .active
+            session.lastActivity = now.addingTimeInterval(-age)
 
-        let counts = StatusCounts(
-            userSessions: userSessions(fromDataFixtures: [session]),
-            now: now
-        )
+            let counts = StatusCounts(userSessions: userSessions(fromDataFixtures: [session]))
 
-        XCTAssertEqual(counts.idle, 1)
-        XCTAssertEqual(counts.total, 1)
-    }
-
-    func testStaleActiveIdle_isExcludedFromCounts() {
-        let now = Date()
-        var session = SessionData.mock(status: .idle)
-        session.lifecycle = .active
-        session.lastActivity = now.addingTimeInterval(-SessionDisplayPolicy.staleIdleInterval - 60)
-
-        let counts = StatusCounts(
-            userSessions: userSessions(fromDataFixtures: [session]),
-            now: now
-        )
-
-        XCTAssertEqual(counts.idle, 0)
-        XCTAssertEqual(counts.total, 0)
+            XCTAssertEqual(counts.idle, 0)
+            XCTAssertEqual(counts.total, 0)
+        }
     }
 
     func testDormantSession_isExcludedFromCounts() {
@@ -95,11 +72,11 @@ final class StatusCountsUserSessionInitTests: XCTestCase {
             SessionData.mock(id: "7", status: .needsAttention),
         ])
         let counts = StatusCounts(userSessions: userSessions)
-        XCTAssertEqual(counts.idle, 2)
+        XCTAssertEqual(counts.idle, 0)
         XCTAssertEqual(counts.working, 2)  // working + compacting
         XCTAssertEqual(counts.permission, 1)
         XCTAssertEqual(counts.attention, 2)  // waitingInput + needsAttention
-        XCTAssertEqual(counts.total, 7)
+        XCTAssertEqual(counts.total, 5)
         XCTAssertEqual(counts.needsAction, 3)  // permission + attention
     }
 

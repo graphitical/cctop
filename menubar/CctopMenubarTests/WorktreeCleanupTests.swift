@@ -1382,15 +1382,13 @@ final class WorktreeCleanupTests: XCTestCase {
     }
 
     func testPopupTabHelpTextDescribesCurrentBuckets() {
-        let staleIdleHours = Int(SessionDisplayPolicy.staleIdleInterval / 3_600)
-
         XCTAssertEqual(
             PopupTab.active.helpText,
-            "Current sessions; idle moves after \(staleIdleHours) hours."
+            "Working sessions and sessions ready for input or needing attention."
         )
         XCTAssertEqual(
             PopupTab.idle.helpText,
-            "Dormant sessions and idle sessions over \(staleIdleHours) hours."
+            "Idle and dormant sessions."
         )
         let recentHelpText = PopupTab.recent.helpText
         XCTAssertTrue(recentHelpText.contains("Finished work"))
@@ -1408,11 +1406,11 @@ final class WorktreeCleanupTests: XCTestCase {
     func testPopupTabEmptyStateDetailsTeachBuckets() {
         XCTAssertEqual(
             PopupTab.active.emptyStateDetail,
-            "Current and recently idle sessions appear here."
+            "Working sessions and sessions ready for input or needing attention appear here."
         )
         XCTAssertEqual(
             PopupTab.idle.emptyStateDetail,
-            "Dormant and long-idle sessions appear here."
+            "Idle and dormant sessions appear here."
         )
         let recentEmptyStateDetail = PopupTab.recent.emptyStateDetail
         XCTAssertTrue(recentEmptyStateDetail.contains("Finished work"))

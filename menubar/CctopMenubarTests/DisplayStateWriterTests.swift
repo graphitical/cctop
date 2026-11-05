@@ -54,25 +54,25 @@ final class DisplayStateWriterTests: XCTestCase {
             now: now
         )
 
-        let expected = SessionDisplayPolicy.activeSessions(from: userSessions, now: now)
+        let expected = SessionDisplayPolicy.activeSessions(from: userSessions)
         XCTAssertEqual(snapshot.sessions.count, expected.count)
         XCTAssertEqual(
             snapshot.sessions.map(\.cctopSessionId),
             expected.map { $0.identity.cctopSessionID ?? "" }
         )
-        XCTAssertEqual(snapshot.sessions.map(\.name), ["charlie", "alpha", "delta", "bravo"])
+        XCTAssertEqual(snapshot.sessions.map(\.name), ["charlie", "alpha", "bravo"])
     }
 
     func testSnapshotExcludesSessionsTheAppDoesNotDisplay() {
         let now = Date()
         var dormant = SessionData.mock(id: "dormant", status: .working)
         dormant.lifecycle = .dormant
-        var staleIdle = SessionData.mock(id: "stale", status: .idle)
-        staleIdle.lastActivity = now.addingTimeInterval(-SessionDisplayPolicy.staleIdleInterval - 60)
+        var idle = SessionData.mock(id: "idle", status: .idle)
+        idle.lastActivity = now
         let active = SessionData.mock(id: "active", status: .working)
 
         let snapshot = DisplayStateWriter.snapshot(
-            userSessions: userSessions(fromDataFixtures: [dormant, staleIdle, active]),
+            userSessions: userSessions(fromDataFixtures: [dormant, idle, active]),
             theme: .claude,
             appRunning: true,
             appIdentity: DisplayState.ProcessIdentity(pid: 123, startTime: 1_000),

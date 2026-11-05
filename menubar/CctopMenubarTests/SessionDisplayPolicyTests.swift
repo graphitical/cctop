@@ -2,37 +2,52 @@ import XCTest
 @testable import CctopMenubar
 
 final class SessionDisplayPolicyTests: XCTestCase {
-    func testActiveSessionsExcludesDormantAndStaleActiveIdle() {
+    func testIdleStatusMovesTabsImmediatelyAndWorkMovesItBack() {
+        let now = Date(timeIntervalSince1970: 100_000)
+        var session = activeIdle(id: "conversation", lastActivity: now)
+        var sessions = userSessions(fromDataFixtures: [session])
+
+        XCTAssertTrue(SessionDisplayPolicy.activeSessions(from: sessions).isEmpty)
+        XCTAssertEqual(SessionDisplayPolicy.idleSessions(from: sessions).map(\.identity), sessions.map(\.identity))
+
+        session.status = .working
+        sessions = userSessions(fromDataFixtures: [session])
+
+        XCTAssertEqual(SessionDisplayPolicy.activeSessions(from: sessions).map(\.identity), sessions.map(\.identity))
+        XCTAssertTrue(SessionDisplayPolicy.idleSessions(from: sessions).isEmpty)
+    }
+
+    func testActiveSessionsExcludesDormantAndIdleRegardlessOfAge() {
         let now = Date()
         let sessions = [
-            activeIdle(id: "fresh", lastActivity: now.addingTimeInterval(-SessionDisplayPolicy.staleIdleInterval + 60)),
-            activeIdle(id: "stale", lastActivity: now.addingTimeInterval(-SessionDisplayPolicy.staleIdleInterval - 60)),
+            activeIdle(id: "fresh", lastActivity: now),
+            activeIdle(id: "stale", lastActivity: now.addingTimeInterval(-3 * 86_400)),
             dormant(id: "dormant"),
-            activeWaiting(id: "waiting", lastActivity: now.addingTimeInterval(-SessionDisplayPolicy.staleIdleInterval - 60)),
+            activeWaiting(id: "waiting", lastActivity: now.addingTimeInterval(-3 * 86_400)),
         ]
         let userSessions = userSessions(fromDataFixtures: sessions)
 
         XCTAssertEqual(
-            SessionDisplayPolicy.activeSessions(from: userSessions, now: now).map(\.displayRecord.data.id),
-            ["fresh", "waiting"]
+            SessionDisplayPolicy.activeSessions(from: userSessions).map(\.displayRecord.data.id),
+            ["waiting"]
         )
     }
 
-    func testIdleSessionsIncludesDormantAndStaleActiveIdleOnly() {
+    func testIdleSessionsIncludesDormantAndIdleRegardlessOfAge() {
         let now = Date()
         let sessions = [
-            activeIdle(id: "fresh", lastActivity: now.addingTimeInterval(-SessionDisplayPolicy.staleIdleInterval + 60)),
-            activeIdle(id: "stale", lastActivity: now.addingTimeInterval(-SessionDisplayPolicy.staleIdleInterval - 60)),
+            activeIdle(id: "fresh", lastActivity: now),
+            activeIdle(id: "stale", lastActivity: now.addingTimeInterval(-3 * 86_400)),
             dormant(id: "dormant"),
-            activeWaiting(id: "waiting", lastActivity: now.addingTimeInterval(-SessionDisplayPolicy.staleIdleInterval - 60)),
+            activeWaiting(id: "waiting", lastActivity: now.addingTimeInterval(-3 * 86_400)),
         ]
         let userSessions = sessions.map {
             userSession(identity: SessionIdentityPolicy.logicalIdentity(for: $0), display: $0, records: [$0])
         }
 
         XCTAssertEqual(
-            SessionDisplayPolicy.idleSessions(from: userSessions, now: now).map(\.displayRecord.data.id),
-            ["stale", "dormant"]
+            SessionDisplayPolicy.idleSessions(from: userSessions).map(\.displayRecord.data.id),
+            ["fresh", "stale", "dormant"]
         )
     }
 
@@ -50,7 +65,7 @@ final class SessionDisplayPolicyTests: XCTestCase {
 
         XCTAssertEqual(result.map(\.displayRecord.data.id), ["z-newer", "a-older"])
         XCTAssertEqual(
-            SessionDisplayPolicy.idleSessions(from: result, now: now).map(\.identity),
+            SessionDisplayPolicy.idleSessions(from: result).map(\.identity),
             result.map(\.identity)
         )
     }
@@ -58,8 +73,8 @@ final class SessionDisplayPolicyTests: XCTestCase {
     func testSignatureTracksDisplayBuckets() {
         let now = Date()
         let sessions = [
-            activeIdle(id: "fresh", lastActivity: now.addingTimeInterval(-SessionDisplayPolicy.staleIdleInterval + 60)),
-            activeIdle(id: "stale", lastActivity: now.addingTimeInterval(-SessionDisplayPolicy.staleIdleInterval - 60)),
+            activeIdle(id: "fresh", lastActivity: now),
+            activeIdle(id: "stale", lastActivity: now.addingTimeInterval(-3 * 86_400)),
             dormant(id: "dormant"),
         ]
         let userSessions = sessions.map {
@@ -67,10 +82,10 @@ final class SessionDisplayPolicyTests: XCTestCase {
         }
 
         XCTAssertEqual(
-            SessionDisplayPolicy.signature(for: userSessions, now: now),
+            SessionDisplayPolicy.signature(for: userSessions),
             .init(
-                activeIDs: [userSessions[0].identity],
-                idleIDs: Array(userSessions[1...]).map(\.identity)
+                activeIDs: [],
+                idleIDs: userSessions.map(\.identity)
             )
         )
     }
@@ -143,14 +158,14 @@ final class SessionDisplayPolicyTests: XCTestCase {
         working.lastActivity = now.addingTimeInterval(-60)
         var asleep = dormant(id: "dormant")
         asleep.lastActivity = now.addingTimeInterval(-10)
-        let stale = activeIdle(id: "stale", lastActivity: now.addingTimeInterval(-SessionDisplayPolicy.staleIdleInterval - 1))
+        let stale = activeIdle(id: "stale", lastActivity: now.addingTimeInterval(-3 * 86_400))
 
         let result = SessionDisplayPolicy.reconcilingOrder(
             in: userSessions(fromDataFixtures: [stale, waiting, working, asleep]), preserving: []
         )
         XCTAssertEqual(result.map(\.displayRecord.data.id), ["dormant", "working", "waiting", "stale"])
-        XCTAssertEqual(SessionDisplayPolicy.activeSessions(from: result, now: now).map(\.displayRecord.data.id), ["working", "waiting"])
-        XCTAssertEqual(SessionDisplayPolicy.idleSessions(from: result, now: now).map(\.displayRecord.data.id), ["dormant", "stale"])
+        XCTAssertEqual(SessionDisplayPolicy.activeSessions(from: result).map(\.displayRecord.data.id), ["working", "waiting"])
+        XCTAssertEqual(SessionDisplayPolicy.idleSessions(from: result).map(\.displayRecord.data.id), ["dormant", "stale"])
     }
 
     func testReconciledOrderUsesStableConversationIdentityAcrossDesktopPIDChange() {

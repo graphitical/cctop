@@ -1819,11 +1819,47 @@ final class SessionManagerVisibilityTests: XCTestCase {
 
         XCTAssertEqual(manager.userSessions.map(\.displayRecord.data.sessionId), ["fresh-thread"])
         XCTAssertEqual(
-            SessionDisplayPolicy.activeSessions(from: manager.userSessions, now: now).map(\.displayRecord.data.sessionId),
+            SessionDisplayPolicy.activeSessions(from: manager.userSessions).map(\.displayRecord.data.sessionId),
             ["fresh-thread"]
         )
         XCTAssertTrue(FileManager.default.fileExists(atPath: sessionPath))
         XCTAssertTrue((try FileManager.default.contentsOfDirectory(atPath: historyDir)).isEmpty)
+    }
+
+    @MainActor
+    func testWaitingInputTimeoutMovesSessionToIdleTabAndWorkRestoresActiveTab() throws {
+        let root = NSTemporaryDirectory() + "cctop-idle-tab-timeout-\(UUID().uuidString)"
+        let sessionsDir = (root as NSString).appendingPathComponent("sessions")
+        let historyDir = (root as NSString).appendingPathComponent("history")
+        try FileManager.default.createDirectory(atPath: sessionsDir, withIntermediateDirectories: true)
+        try FileManager.default.createDirectory(atPath: historyDir, withIntermediateDirectories: true)
+        defer { try? FileManager.default.removeItem(atPath: root) }
+
+        var now = Date(timeIntervalSince1970: 1_900_000_000)
+        let sessionPath = (sessionsDir as NSString).appendingPathComponent("101.json")
+        var session = SessionData.mock(id: "conversation", status: .waitingInput, pid: 101, source: SessionData.opencodeSource)
+        session.lastActivity = now
+        try session.writeToFile(path: sessionPath)
+        let manager = makeManager(
+            sessionsDir: sessionsDir, historyDir: historyDir,
+            processAlive: { _ in true }, now: { now }
+        )
+        XCTAssertEqual(SessionDisplayPolicy.activeSessions(from: manager.userSessions).count, 1)
+        XCTAssertTrue(SessionDisplayPolicy.idleSessions(from: manager.userSessions).isEmpty)
+
+        now = now.addingTimeInterval(3_601)
+        manager.loadSessions()
+        XCTAssertEqual(manager.userSessions.first?.status, .idle)
+        XCTAssertTrue(SessionDisplayPolicy.activeSessions(from: manager.userSessions).isEmpty)
+        XCTAssertEqual(SessionDisplayPolicy.idleSessions(from: manager.userSessions).count, 1)
+        XCTAssertEqual(try SessionData.fromFile(path: sessionPath).status, .waitingInput)
+
+        session.status = .working
+        session.lastActivity = now
+        try session.writeToFile(path: sessionPath)
+        manager.loadSessions()
+        XCTAssertEqual(SessionDisplayPolicy.activeSessions(from: manager.userSessions).count, 1)
+        XCTAssertTrue(SessionDisplayPolicy.idleSessions(from: manager.userSessions).isEmpty)
     }
 
     @MainActor
@@ -1854,7 +1890,7 @@ final class SessionManagerVisibilityTests: XCTestCase {
             now: { now }
         )
         XCTAssertEqual(
-            SessionDisplayPolicy.activeSessions(from: manager.userSessions, now: now).map(\.displayRecord.data.id),
+            SessionDisplayPolicy.activeSessions(from: manager.userSessions).map(\.displayRecord.data.id),
             ["202", "101"]
         )
 
@@ -1866,7 +1902,7 @@ final class SessionManagerVisibilityTests: XCTestCase {
         try delta.writeToFile(path: deltaPath)
         manager.loadSessions()
         XCTAssertEqual(
-            SessionDisplayPolicy.activeSessions(from: manager.userSessions, now: now).map(\.displayRecord.data.id),
+            SessionDisplayPolicy.activeSessions(from: manager.userSessions).map(\.displayRecord.data.id),
             ["202", "404", "303", "101"]
         )
 
@@ -1881,8 +1917,12 @@ final class SessionManagerVisibilityTests: XCTestCase {
         try beta.writeToFile(path: betaPath)
         manager.loadSessions()
 
-        let activeAfterUpdates = SessionDisplayPolicy.activeSessions(from: manager.userSessions, now: now)
-        XCTAssertEqual(activeAfterUpdates.map(\.displayRecord.data.id), ["101", "404", "303", "202"])
+        let activeAfterUpdates = SessionDisplayPolicy.activeSessions(from: manager.userSessions)
+        XCTAssertEqual(activeAfterUpdates.map(\.displayRecord.data.id), ["101", "404", "303"])
+        XCTAssertEqual(
+            SessionDisplayPolicy.idleSessions(from: manager.userSessions).map(\.displayRecord.data.id),
+            ["202"]
+        )
         let snapshot = DisplayStateWriter.snapshot(
             userSessions: manager.userSessions,
             theme: .claude,
@@ -1901,15 +1941,15 @@ final class SessionManagerVisibilityTests: XCTestCase {
         try alpha.writeToFile(path: alphaPath)
         manager.loadSessions()
         XCTAssertEqual(
-            SessionDisplayPolicy.activeSessions(from: manager.userSessions, now: now).map(\.displayRecord.data.id),
-            ["404", "303", "202"]
+            SessionDisplayPolicy.activeSessions(from: manager.userSessions).map(\.displayRecord.data.id),
+            ["404", "303"]
         )
 
         beta.endedAt = now
         try beta.writeToFile(path: betaPath)
         manager.loadSessions()
         XCTAssertEqual(
-            SessionDisplayPolicy.activeSessions(from: manager.userSessions, now: now).map(\.displayRecord.data.id),
+            SessionDisplayPolicy.activeSessions(from: manager.userSessions).map(\.displayRecord.data.id),
             ["404", "303"]
         )
     }

@@ -2407,7 +2407,7 @@ final class SessionTests: XCTestCase {
         XCTAssertNil(FocusTargetResolver.currentUserSession(for: identity, in: []))
     }
 
-    func testRepeatedCctopSessionIDFormsOneDisplayStateUserSession() {
+    func testRepeatedCctopSessionIDUsesSelectedStatusForDisplayStateMembership() {
         let now = Date()
         let cctopSessionID = "11111111-2222-4333-8444-555555555555"
         var working = SessionData.mock(
@@ -2421,17 +2421,26 @@ final class SessionTests: XCTestCase {
         )
         idle.lastActivity = now.addingTimeInterval(-5)
 
-        let userSessions = userSessions(fromDataFixtures: [idle, working])
+        let groupedSessions = userSessions(fromDataFixtures: [idle, working])
         let snapshot = DisplayStateWriter.snapshot(
-            userSessions: userSessions,
+            userSessions: groupedSessions,
             theme: .claude,
             appRunning: true,
             appIdentity: nil,
             now: now
         )
-        XCTAssertEqual(userSessions.count, 1)
-        XCTAssertEqual(snapshot.sessions.count, 1)
-        XCTAssertEqual(snapshot.sessions.map(\.cctopSessionId), [cctopSessionID])
+        XCTAssertEqual(groupedSessions.count, 1)
+        XCTAssertEqual(SessionDisplayPolicy.idleSessions(from: groupedSessions).count, 1)
+        XCTAssertTrue(snapshot.sessions.isEmpty)
+
+        idle.status = .working
+        let resumedSessions = userSessions(fromDataFixtures: [idle, working])
+        let resumedSnapshot = DisplayStateWriter.snapshot(
+            userSessions: resumedSessions, theme: .claude,
+            appRunning: true, appIdentity: nil, now: now
+        )
+        XCTAssertEqual(resumedSessions.count, 1)
+        XCTAssertEqual(resumedSnapshot.sessions.map(\.cctopSessionId), [cctopSessionID])
     }
 
     // MARK: - Cctop session identity

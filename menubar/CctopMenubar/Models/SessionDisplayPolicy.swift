@@ -10,14 +10,18 @@ enum SessionDisplayPolicy {
         static let empty = Signature(activeIDs: [], idleIDs: [])
     }
 
-    static let staleIdleInterval: TimeInterval = 172_800 // 48 hours
-
-    static func activeSessions(from userSessions: [UserSession], now: Date = Date()) -> [UserSession] {
-        userSessions.filter { isActive($0.displayRecord.data, now: now) }
+    static func activeSessions(from userSessions: [UserSession]) -> [UserSession] {
+        userSessions.filter {
+            let session = $0.displayRecord.data
+            return session.lifecycle == .active && session.status != .idle
+        }
     }
 
-    static func idleSessions(from userSessions: [UserSession], now: Date = Date()) -> [UserSession] {
-        userSessions.filter { isIdle($0.displayRecord.data, now: now) }
+    static func idleSessions(from userSessions: [UserSession]) -> [UserSession] {
+        userSessions.filter {
+            let session = $0.displayRecord.data
+            return session.lifecycle == .dormant || (session.lifecycle == .active && session.status == .idle)
+        }
     }
 
     /// Orders every status by most recent activity. Equal timestamps keep their prior
@@ -47,10 +51,10 @@ enum SessionDisplayPolicy {
         }.map(\.element)
     }
 
-    static func signature(for userSessions: [UserSession], now: Date = Date()) -> Signature {
+    static func signature(for userSessions: [UserSession]) -> Signature {
         Signature(
-            activeIDs: activeSessions(from: userSessions, now: now).map(\.identity),
-            idleIDs: idleSessions(from: userSessions, now: now).map(\.identity)
+            activeIDs: activeSessions(from: userSessions).map(\.identity),
+            idleIDs: idleSessions(from: userSessions).map(\.identity)
         )
     }
 
@@ -68,18 +72,5 @@ enum SessionDisplayPolicy {
         }
         guard matches.count == 1 else { return nil }
         return matches[0]
-    }
-
-    private static func isStaleActiveIdle(_ session: SessionData, now: Date) -> Bool {
-        guard session.lifecycle == .active, session.status == .idle else { return false }
-        return now.timeIntervalSince(session.lastActivity) > staleIdleInterval
-    }
-
-    private static func isIdle(_ session: SessionData, now: Date) -> Bool {
-        session.lifecycle == .dormant || isStaleActiveIdle(session, now: now)
-    }
-
-    private static func isActive(_ session: SessionData, now: Date) -> Bool {
-        session.lifecycle == .active && !isStaleActiveIdle(session, now: now)
     }
 }

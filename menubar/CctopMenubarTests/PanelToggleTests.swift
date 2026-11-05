@@ -41,10 +41,10 @@ final class PanelToggleTests: XCTestCase {
         XCTAssertNil(AppDelegate.focusSessionID(from: try XCTUnwrap(URL(string: "cctop://focus?sid="))))
     }
 
-    func testNotificationActivationResolvesPermanentIDToCurrentCanonicalRecord() {
+    func testNotificationActivationResolvesCanonicalRecordAfterItMovesToIdleTab() {
         let cctopSessionID = "11111111-1111-4111-8111-111111111111"
         var current = SessionData.mock(
-            id: "current-record", cctopSessionId: cctopSessionID,
+            id: "current-record", cctopSessionId: cctopSessionID, status: .idle,
             pid: 22_222, source: SessionData.opencodeSource
         )
         current.lifecycle = .active

@@ -128,7 +128,7 @@ class SessionManager: ObservableObject {
             in: loadedUserSessions,
             preserving: oldUserSessions
         )
-        let displaySignature = SessionDisplayPolicy.signature(for: newUserSessions, now: now)
+        let displaySignature = SessionDisplayPolicy.signature(for: newUserSessions)
         updateSessionProjection(
             newUserSessions,
             displaySignature: displaySignature,

@@ -146,6 +146,26 @@ final class QASnapshotTests: XCTestCase {
         try renderSnapshot(sessions: SessionData.qaAllIdle, name: "08-all-idle")
     }
 
+    func testFreshIdleSessionAppearsInIdleTab() throws {
+        let sessions = userSessions(fromDataFixtures: [
+            .mock(id: "idle", project: "cctop", sessionName: "Review recent changes", status: .idle),
+            .mock(id: "working", project: "cctop", sessionName: "Run the checks", status: .working)
+        ])
+        for tab in [PopupTab.active, .idle] {
+            for colorScheme in [ColorScheme.light, .dark] {
+                let view = PopupView(
+                    userSessions: sessions,
+                    updater: DisabledUpdater(), pluginManager: inertPluginManager(),
+                    initialTab: tab
+                )
+                try renderPanelScreenshot(
+                    view: view, colorScheme: colorScheme, directoryName: "cctop-qa",
+                    filename: "idle-status-\(tab.label.lowercased())-\(colorScheme).png"
+                )
+            }
+        }
+    }
+
     // MARK: - Edge cases
 
     func testLongNames() throws {

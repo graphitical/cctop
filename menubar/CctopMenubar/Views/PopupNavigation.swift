@@ -13,12 +13,11 @@ enum PopupTab: CaseIterable, Hashable {
     }
 
     var helpText: String {
-        let staleIdleDuration = Self.staleIdleDurationText
         switch self {
         case .active:
-            return "Current sessions; idle moves after \(staleIdleDuration)."
+            return "Working sessions and sessions ready for input or needing attention."
         case .idle:
-            return "Dormant sessions and idle sessions over \(staleIdleDuration)."
+            return "Idle and dormant sessions."
         case .recent:
             return "Finished work and archived desktop sessions. Rows open the project or app when possible."
         case .cleanup:
@@ -29,9 +28,9 @@ enum PopupTab: CaseIterable, Hashable {
     var emptyStateDetail: String {
         switch self {
         case .active:
-            return "Current and recently idle sessions appear here."
+            return "Working sessions and sessions ready for input or needing attention appear here."
         case .idle:
-            return "Dormant and long-idle sessions appear here."
+            return "Idle and dormant sessions appear here."
         case .recent:
             return "Finished work and archived desktop sessions appear here."
         case .cleanup:
@@ -59,11 +58,6 @@ enum PopupTab: CaseIterable, Hashable {
         default:
             return current
         }
-    }
-
-    private static var staleIdleDurationText: String {
-        let hours = Int(SessionDisplayPolicy.staleIdleInterval / 3_600)
-        return "\(hours) hours"
     }
 }
 

@@ -117,7 +117,7 @@ final class DisplayStateWriter {
         appIdentity: DisplayState.ProcessIdentity?,
         now: Date
     ) -> DisplayState {
-        let ordered = SessionDisplayPolicy.activeSessions(from: userSessions, now: now)
+        let ordered = SessionDisplayPolicy.activeSessions(from: userSessions)
         return DisplayState(
             version: schemaVersion,
             generatedAt: timestampFormatter.string(from: now),

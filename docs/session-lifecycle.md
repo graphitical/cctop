@@ -22,6 +22,12 @@ This pipeline uses the internal model from
 does not change lifecycle or persistence. Ordered `UserSession` values own the
 canonical visible identity and row order.
 
+The panel's Active tab contains connected sessions that are working, ready for input, or waiting for attention.
+As soon as a session's displayed status becomes Idle, it moves to the Idle tab without an age delay.
+Dormant sessions also appear in the Idle tab.
+Fresh work or a status that needs attention returns a connected session to Active.
+These tab rules do not change lifecycle retention or archive behavior.
+
 ```mermaid
 flowchart TD
     A["Session JSON files"] --> B["Decode as SessionData"]

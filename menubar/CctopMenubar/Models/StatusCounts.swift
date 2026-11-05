@@ -26,11 +26,11 @@ struct StatusCounts: Equatable {
     }
 
     /// Create counts by aggregating user-session statuses.
-    init(userSessions: [UserSession], now: Date = Date()) {
+    init(userSessions: [UserSession]) {
         var perm = 0, attn = 0, work = 0, idleCount = 0
-        // Only presentation-active sessions drive the menubar badge. Dormant and stale-idle
+        // Only presentation-active sessions drive the menubar badge. Dormant and idle
         // cards are retained for reachability, not live work, so they never inflate counts.
-        for userSession in SessionDisplayPolicy.activeSessions(from: userSessions, now: now) {
+        for userSession in SessionDisplayPolicy.activeSessions(from: userSessions) {
             switch userSession.status {
             case .idle: idleCount += 1
             case .working, .compacting: work += 1
