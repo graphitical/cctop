@@ -4,6 +4,11 @@ Versions follow [Semantic Versioning](https://semver.org/spec/v2.0.0.html), with
 A version entry records the source changes assigned to that version; it does not imply a published binary or GitHub Release.
 Version numbers identify `graphitical/cctop` independently of upstream `st0012/cctop`.
 
+## 0.24.6 — 2026-11-05
+
+- Keep the panel content aligned while dragging its edge, and remember the resized height even when AppKit delivers an internal event instead of the initiating mouse event.
+- Keep automatic window animations separate from manual resizing so they do not overwrite the preferred height.
+
 ## 0.24.5 — 2026-11-05
 
 - Recover the live Codex pane in Ghostty when daemon-backed chats have no recorded TTY, so navigation does not select an editor pane sharing the project directory.

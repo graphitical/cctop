@@ -107,8 +107,10 @@ extension AppDelegate {
         return max(1, top - visibleFrame.minY - PanelPositioning.margin)
     }
 
-    private func setPanelFrame(_ frame: NSRect, animate: Bool) {
+    func setPanelFrame(_ frame: NSRect, animate: Bool) {
         guard !panel.frame.isNearlyEqual(to: frame) else { return }
+        isSettingPanelFrame = true
+        defer { isSettingPanelFrame = false }
         if animate {
             NSAnimationContext.runAnimationGroup { context in
                 context.duration = 0.2
@@ -150,8 +152,9 @@ extension AppDelegate: FloatingPanelDelegate {
 // MARK: - Native vertical resizing
 extension AppDelegate: NSWindowDelegate {
     func windowWillStartLiveResize(_ notification: Notification) {
-        // AppKit also sends these callbacks for animated, programmatic frame changes.
-        isUserResizingPanel = panel.isUserResizeEvent(NSApp.currentEvent)
+        // Animated frame requests send this notification synchronously, even though their resize events arrive later.
+        // A native edge drag may start with an AppKit event rather than the initiating mouse event.
+        isUserResizingPanel = !isSettingPanelFrame
     }
 
     func windowWillResize(_ sender: NSWindow, to frameSize: NSSize) -> NSSize {

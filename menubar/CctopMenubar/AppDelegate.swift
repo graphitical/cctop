@@ -26,6 +26,7 @@ class AppDelegate: NSObject, NSApplicationDelegate, UNUserNotificationCenterDele
     var notchVisibilityWork: DispatchWorkItem?
     var suppressResize = false
     var isUserResizingPanel = false
+    var isSettingPanelFrame = false
     private var lastRenderedCounts: StatusCounts?
     var hasNotch = false
     var focusLocation: NSPoint?
